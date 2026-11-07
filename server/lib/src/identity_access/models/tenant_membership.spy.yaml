@@ -1,0 +1,12 @@
+# app.tenant_memberships (db/schema.sql §7). O usuário lê os próprios vínculos
+# de todos os tenants antes de escolher o tenant (política own_memberships_read).
+class: TenantMembership
+table: tenant_memberships
+managedMigration: false
+fields:
+  id: UuidValue, defaultModel=random_v7
+  tenantId: UuidValue, column=tenant_id
+  userId: UuidValue, column=user_id
+  status: MembershipStatus
+  lastAccessAt: DateTime?, column=last_access_at
+  version: int

@@ -1,0 +1,17 @@
+name: plataforma_os_core
+description: >-
+  Regras compartilhadas entre servidor, apps e backoffice (Dart puro): máquinas
+  de estado da OS e da visita, dinheiro em centavos, quantidades em milésimos,
+  short code e token do QR, validação de UUID v7.
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  meta: ^1.16.0
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.26.0

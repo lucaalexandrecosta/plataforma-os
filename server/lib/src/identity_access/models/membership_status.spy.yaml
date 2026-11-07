@@ -1,0 +1,7 @@
+enum: MembershipStatus
+serialized: byName
+values:
+  - invited
+  - active
+  - suspended
+  - removed

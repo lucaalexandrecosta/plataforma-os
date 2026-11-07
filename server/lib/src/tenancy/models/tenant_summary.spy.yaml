@@ -1,0 +1,7 @@
+# DTO: tenant como os apps o veem (sem dados de cobrança nem documento).
+class: TenantSummary
+fields:
+  id: UuidValue
+  slug: String
+  displayName: String
+  status: TenantStatus

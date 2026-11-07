@@ -1,0 +1,8 @@
+# Resultado de auth.exchangeIdpToken (docs/08 §2.2).
+class: TenantToken
+fields:
+  accessToken: String
+  tokenType: String
+  expiresIn: int
+  tenant: TenantSummary
+  roles: List<String>

@@ -1,0 +1,8 @@
+# CHECK de app.tenants.status. Valores iguais aos do banco (byName).
+enum: TenantStatus
+serialized: byName
+values:
+  - trial
+  - active
+  - suspended
+  - cancelled

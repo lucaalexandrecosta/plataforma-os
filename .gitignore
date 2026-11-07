@@ -1,0 +1,25 @@
+# Dart / Flutter
+.dart_tool/
+.packages
+build/
+coverage/
+*.iml
+.idea/
+.flutter-plugins
+.flutter-plugins-dependencies
+
+# Serverpod: senhas locais nunca vão para o repositório (docs/13 §5, segredos)
+server/config/passwords.yaml
+
+# Node (validação do schema com PGlite)
+node_modules/
+.pglite/
+
+# Ambiente local
+.env
+*.local.yaml
+infra/local/.data/
+
+# Sistema
+.DS_Store
+Thumbs.db

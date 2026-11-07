@@ -1,0 +1,14 @@
+# Exceção serializável única dos endpoints (docs/08 §2.8). O cliente gerado
+# a relança tipada; os apps decidem pelo `code`, nunca pelo texto.
+exception: ApiException
+fields:
+  # Código de negócio estável (catálogo em docs/08 §2.8), ex.: FORBIDDEN.
+  code: String
+  category: ErrorCategory
+  # Texto para pessoas, em pt-BR.
+  detail: String
+  traceId: String
+  fieldErrors: List<FieldError>?
+  currentVersion: int?
+  retryAfterSeconds: int?
+  meta: Map<String, String>?

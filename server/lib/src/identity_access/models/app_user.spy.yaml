@@ -1,0 +1,12 @@
+# app.users (global, RLS própria). "User" conflita com nomes comuns; AppUser.
+class: AppUser
+table: users
+managedMigration: false
+fields:
+  id: UuidValue, defaultModel=random_v7
+  userType: String, column=user_type
+  fullName: String, column=full_name
+  email: String?
+  status: String
+  locale: String
+  version: int

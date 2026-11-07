@@ -1,0 +1,9 @@
+# app.tenant_membership_roles: papéis canônicos da equipe no tenant.
+class: TenantMembershipRole
+table: tenant_membership_roles
+managedMigration: false
+fields:
+  id: UuidValue, defaultModel=random_v7
+  tenantId: UuidValue, column=tenant_id
+  membershipId: UuidValue, column=membership_id
+  roleCode: String, column=role_code

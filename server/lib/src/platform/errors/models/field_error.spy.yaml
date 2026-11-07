@@ -1,0 +1,6 @@
+# Erro de um campo, com caminho (ex.: items/0/quantity).
+class: FieldError
+fields:
+  path: String
+  code: String
+  message: String

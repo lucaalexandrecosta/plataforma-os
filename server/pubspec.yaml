@@ -1,0 +1,25 @@
+name: plataforma_os_server
+description: >-
+  Servidor da plataforma-os (Serverpod 4.1). Um executável, dois papéis:
+  api (--role serverless) e worker (--role monolith). docs/02 §3.1.
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  # Serverpod fixado: a API da camada de banco pode mudar numa minor
+  # (docs/12 §4.3). Atualização só planejada, com a suíte de isolamento.
+  serverpod: 4.1.1
+  dart_jsonwebtoken: ^3.4.1
+  http: ^1.5.0
+  plataforma_os_core: any
+
+dev_dependencies:
+  lints: ^6.0.0
+  plataforma_os_client: any
+  serverpod_client: 4.1.1
+  serverpod_test: 4.1.1
+  test: ^1.26.0
+  yaml: ^3.1.0

@@ -1,0 +1,5 @@
+auth:
+  - exchangeIdpToken:
+me:
+  - get:
+  - tenants:

@@ -1,0 +1,42 @@
+# Raiz do Dart pub workspace (docs/02 §6.1). Um único pubspec.lock para o
+# repositório; pacotes internos nunca são publicados.
+#
+# Os apps Flutter (apps/technician_app, apps/customer_app, apps/backoffice_web)
+# entram na lista "workspace" quando forem criados (etapas 4 a 6 do guia,
+# docs/13 §4). packages/ui_kit e packages/sync_engine idem.
+name: plataforma_os_workspace
+publish_to: none
+
+environment:
+  sdk: ^3.12.0
+
+workspace:
+  - packages/core
+  - server
+  - server_client
+
+dev_dependencies:
+  lints: ^6.0.0
+  melos: ^7.0.0
+
+# melos só para scripts (docs/02 §6.1). Uso: dart run melos run <script>
+melos:
+  scripts:
+    analyze:
+      description: dart analyze em todos os pacotes (avisos contam como erro).
+      run: dart analyze --fatal-infos .
+    format:check:
+      description: Confere a formatação.
+      run: dart format --output=none --set-exit-if-changed .
+    test:core:
+      description: Testes de packages/core (Dart puro).
+      run: dart test packages/core
+    generate:
+      description: Gera o código do Serverpod (modelos, endpoints e cliente).
+      run: cd server && serverpod generate
+    db:validate:
+      description: Executa db/schema.sql no PGlite e roda os testes funcionais.
+      run: node tool/db/validate_all.mjs
+    db:migration:build:
+      description: Regera a migração inicial do dbmate a partir de db/schema.sql.
+      run: node tool/db/build_initial_migration.mjs

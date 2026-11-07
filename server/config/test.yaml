@@ -1,0 +1,39 @@
+# Testes de integração: banco "plataforma_os_test" no PostgreSQL do compose
+# (porta 5433), recriado com a migração inicial + seed antes da suíte.
+# No CI, as variáveis SERVERPOD_DATABASE_* sobrescrevem host e porta.
+apiServer:
+  port: 9080
+  publicHost: localhost
+  publicPort: 9080
+  publicScheme: http
+
+insightsServer:
+  port: 9081
+  publicHost: localhost
+  publicPort: 9081
+  publicScheme: http
+
+webServer:
+  port: 9082
+  publicHost: localhost
+  publicPort: 9082
+  publicScheme: http
+
+database:
+  host: localhost
+  port: 5433
+  name: plataforma_os_test
+  user: app_api
+  requireSsl: false
+  searchPaths: app, public
+
+redis:
+  enabled: false
+  host: localhost
+  port: 6379
+
+maxRequestSize: 1048576
+
+sessionLogs:
+  persistentEnabled: false
+  consoleEnabled: true

@@ -1,0 +1,15 @@
+# app.tenants (global, RLS própria — db/schema.sql §6 e §22.3).
+# Tabela SQL-first: o Serverpod não gera DDL (managedMigration: false).
+# Só as colunas que a aplicação usa estão mapeadas; o CI confere modelo x banco.
+class: Tenant
+table: tenants
+managedMigration: false
+fields:
+  id: UuidValue, defaultModel=random_v7
+  slug: String
+  legalName: String, column=legal_name
+  displayName: String, column=display_name
+  documentNumber: String?, column=document_number
+  status: TenantStatus
+  planId: UuidValue, column=plan_id
+  version: int

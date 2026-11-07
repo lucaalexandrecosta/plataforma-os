@@ -1,0 +1,109 @@
+# CI do monorepo (docs/13 §3.2): validação do banco desde o primeiro PR,
+# análise, testes, conferência do código gerado pelo Serverpod e o teste de
+# isolamento de ponta a ponta (spike S1) contra PostgreSQL real.
+name: ci
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DART_VERSION: "3.13.7"
+  SERVERPOD_CLI_VERSION: "4.1.1"
+  DBMATE_VERSION: "2.28.0"
+
+jobs:
+  db:
+    name: banco (schema, migração e seed no PGlite)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - run: node tool/db/validate_all.mjs
+
+  dart:
+    name: dart (análise, formatação, código gerado e testes unitários)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ env.DART_VERSION }}
+      - run: dart pub get
+      - name: Código gerado do Serverpod confere com os modelos
+        env:
+          CI: "true"
+        run: |
+          dart pub global activate serverpod_cli ${{ env.SERVERPOD_CLI_VERSION }}
+          (cd server && serverpod generate)
+          git diff --exit-code -- server/lib/src/generated server_client/lib server/test/integration/test_tools \
+            || (echo "::error::Rode 'serverpod generate' e versione o código gerado." && exit 1)
+      - run: dart format --output=none --set-exit-if-changed packages server/lib/server.dart server/bin server/test/unit server/test/e2e server/lib/src/platform server/lib/src/tenancy server/lib/src/identity_access
+      - run: dart analyze --fatal-infos packages server server_client
+      - run: dart test packages/core
+      - run: dart test test/unit
+        working-directory: server
+
+  e2e:
+    name: isolamento de ponta a ponta (Serverpod + RLS)
+    runs-on: ubuntu-24.04
+    needs: [db, dart]
+    services:
+      postgres:
+        image: postgres:18.1
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: plataforma_os_test
+        ports: ["5433:5432"]
+        options: >-
+          --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 3s --health-retries 20
+    env:
+      PGPASSWORD: postgres
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dart-lang/setup-dart@v1
+        with:
+          sdk: ${{ env.DART_VERSION }}
+      - run: dart pub get
+      - name: Keycloak com o realm de dev (login pelo IdP nos testes e2e)
+        # Não dá para usar "services": o container precisa de comando (start-dev).
+        run: |
+          docker run -d --name keycloak -p 8180:8180 \
+            -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
+            -v "$PWD/infra/local/keycloak/realm-staff.json:/opt/keycloak/data/import/realm-staff.json:ro" \
+            quay.io/keycloak/keycloak:26.4 start-dev --import-realm --http-port=8180
+      - name: Papéis de login, migração inicial (dbmate) e seed
+        run: |
+          sudo apt-get install -y postgresql-client >/dev/null
+          curl -fsSL -o /usr/local/bin/dbmate https://github.com/amacneil/dbmate/releases/download/v${DBMATE_VERSION}/dbmate-linux-amd64
+          chmod +x /usr/local/bin/dbmate
+          PSQL="psql -v ON_ERROR_STOP=1 -h localhost -p 5433 -U postgres -d plataforma_os_test"
+          $PSQL -f infra/local/postgres/10-login-roles.sql
+          # Tabela de controle qualificada: o schema.sql troca o search_path para "app"
+          # no meio da migração e, sem o schema explícito, o dbmate não registra a versão.
+          DBMATE="dbmate --url postgres://postgres:postgres@localhost:5433/plataforma_os_test?sslmode=disable
+            --migrations-dir db/migrations --migrations-table public.schema_migrations --no-dump-schema"
+          $DBMATE up
+          $DBMATE status --exit-code   # falha se alguma migração ficou sem registro
+          $PSQL -f db/seeds/dev_seed.sql
+      - name: Segredos de teste (chave ES256 efêmera)
+        run: node tool/dev/generate_dev_secrets.mjs
+      - name: Migrações do Serverpod (tabelas serverpod_* em public)
+        env:
+          PSQL: psql -h localhost -p 5433 -U postgres -d plataforma_os_test
+        run: bash tool/db/apply_pod_migrations.sh test
+      - name: Servidor (papel monolith) e teste e2e
+        working-directory: server
+        run: |
+          dart bin/main.dart --mode test --role monolith > server.log 2>&1 &
+          for i in $(seq 1 60); do curl -fs http://localhost:9080/ >/dev/null 2>&1 && break; sleep 1; done
+          for i in $(seq 1 90); do curl -fs http://localhost:8180/realms/staff/.well-known/openid-configuration >/dev/null 2>&1 && break; sleep 2; done
+          dart test test/e2e || (cat server.log && docker logs keycloak | tail -50 && exit 1)

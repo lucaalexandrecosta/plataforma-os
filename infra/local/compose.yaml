@@ -1,0 +1,85 @@
+# Ambiente local (docs/02 §6.1, docs/13 §3.2): PostgreSQL 18, Valkey,
+# Keycloak, S3 (RustFS) e Mailpit. Uso: ver infra/local/README.md.
+name: plataforma-os
+
+services:
+  postgres:
+    image: postgres:18.1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: plataforma_os
+      TZ: UTC
+    ports:
+      - "5434:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql
+      # Papéis de login (app_api, app_worker, app_migrator, app_pod_migrator).
+      - ./postgres/10-login-roles.sql:/docker-entrypoint-initdb.d/10-login-roles.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d plataforma_os"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  # Banco dos testes de integração e e2e (recriado pela suíte), separado do de dev.
+  postgres-test:
+    image: postgres:18.1
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: plataforma_os_test
+      TZ: UTC
+    ports:
+      - "5433:5432"
+    volumes:
+      - ./postgres/10-login-roles.sql:/docker-entrypoint-initdb.d/10-login-roles.sql:ro
+    tmpfs:
+      - /var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d plataforma_os_test"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+
+  valkey:
+    image: valkey/valkey:8.1
+    ports:
+      - "6379:6379"
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.4
+    command: ["start-dev", "--import-realm", "--http-port=8180"]
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: admin
+      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
+    ports:
+      - "8180:8180"
+    volumes:
+      - ./keycloak/realm-staff.json:/opt/keycloak/data/import/realm-staff.json:ro
+
+  # Object storage S3-compatível (docs/09 §1). A MinIO deixou de publicar imagens
+  # da edição comunitária; RustFS (Apache 2.0) cobre o mesmo papel no ambiente local.
+  s3:
+    image: rustfs/rustfs:1.0.3
+    environment:
+      RUSTFS_ACCESS_KEY: s3-dev
+      RUSTFS_SECRET_KEY: s3-dev-password
+      RUSTFS_ADDRESS: ":9000"
+      RUSTFS_CONSOLE_ENABLE: "true"
+      RUSTFS_CONSOLE_ADDRESS: ":9001"
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    volumes:
+      - s3data:/data
+
+  mailpit:
+    image: axllent/mailpit:v1.27
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+volumes:
+  pgdata:
+  s3data:

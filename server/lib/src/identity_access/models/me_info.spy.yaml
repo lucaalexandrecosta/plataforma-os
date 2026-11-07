@@ -1,0 +1,11 @@
+# Resultado de me.get (docs/08 §3.2). Permissões efetivas calculadas pelo banco;
+# a UI só esconde o que não pode — o servidor sempre reavalia.
+class: MeInfo
+fields:
+  userId: UuidValue
+  fullName: String
+  email: String?
+  locale: String
+  tenant: TenantSummary
+  roles: List<String>
+  permissions: List<String>

@@ -1,0 +1,12 @@
+name: plataforma_os_client
+description: >-
+  Cliente Dart gerado pelo Serverpod (modelos + endpoints), usado pelos apps
+  Flutter e pelo backoffice. Não editar lib/src/protocol à mão.
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  serverpod_client: 4.1.1

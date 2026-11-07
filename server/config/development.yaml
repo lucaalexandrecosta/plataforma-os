@@ -1,0 +1,42 @@
+# Desenvolvimento local (infra/local/compose.yaml). Sem segredos aqui: senhas
+# e chaves ficam em config/passwords.yaml (fora do Git), gerado por
+# `node tool/dev/generate_dev_secrets.mjs`.
+apiServer:
+  port: 8080
+  publicHost: localhost
+  publicPort: 8080
+  publicScheme: http
+
+insightsServer:
+  port: 8081
+  publicHost: localhost
+  publicPort: 8081
+  publicScheme: http
+
+webServer:
+  port: 8082
+  publicHost: localhost
+  publicPort: 8082
+  publicScheme: http
+
+# Papel de runtime app_api (membro de app_runtime, sujeito a RLS). As tabelas
+# de negócio ficam em "app" e as do Serverpod em "public" (docs/12 §4.2).
+database:
+  host: localhost
+  port: 5434
+  name: plataforma_os
+  user: app_api
+  requireSsl: false
+  searchPaths: app, public
+
+redis:
+  enabled: false
+  host: localhost
+  port: 6379
+
+maxRequestSize: 1048576
+
+sessionLogs:
+  # Sem log de sessões no banco (dados pessoais e peso no PostgreSQL, docs/02 §5.10).
+  persistentEnabled: false
+  consoleEnabled: true

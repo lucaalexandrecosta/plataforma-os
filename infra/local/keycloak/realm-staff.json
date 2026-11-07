@@ -1,0 +1,81 @@
+{
+  "realm": "staff",
+  "displayName": "plataforma-os — equipe (desenvolvimento)",
+  "enabled": true,
+  "sslRequired": "none",
+  "registrationAllowed": false,
+  "loginWithEmailAllowed": true,
+  "duplicateEmailsAllowed": false,
+  "accessTokenLifespan": 300,
+  "ssoSessionIdleTimeout": 7200,
+  "ssoSessionMaxLifespan": 36000,
+  "offlineSessionIdleTimeout": 2592000,
+  "offlineSessionMaxLifespanEnabled": true,
+  "offlineSessionMaxLifespan": 7776000,
+  "clients": [
+    {
+      "clientId": "backoffice-web",
+      "name": "Backoffice (Flutter Web)",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "implicitFlowEnabled": false,
+      "redirectUris": ["http://localhost:8090/auth/callback", "http://frio-sul.localhost:8090/auth/callback", "http://forno-norte.localhost:8090/auth/callback"],
+      "webOrigins": ["http://localhost:8090", "http://frio-sul.localhost:8090", "http://forno-norte.localhost:8090"],
+      "attributes": { "pkce.code.challenge.method": "S256", "post.logout.redirect.uris": "http://localhost:8090/*" }
+    },
+    {
+      "clientId": "technician-app",
+      "name": "App do técnico (Flutter)",
+      "publicClient": true,
+      "standardFlowEnabled": true,
+      "directAccessGrantsEnabled": true,
+      "redirectUris": ["br.plataformaos.technician:/oauth2redirect"],
+      "attributes": { "pkce.code.challenge.method": "S256" },
+      "defaultClientScopes": ["basic", "acr", "profile", "email", "roles", "web-origins"],
+      "optionalClientScopes": ["offline_access"]
+    }
+  ],
+  "users": [
+    {
+      "id": "7d0a0001-0000-4000-8000-000000000001",
+      "username": "ana.admin@frio-sul.test",
+      "email": "ana.admin@frio-sul.test",
+      "emailVerified": true,
+      "firstName": "Ana",
+      "lastName": "Admin",
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "dev", "temporary": false }]
+    },
+    {
+      "id": "7d0a0001-0000-4000-8000-000000000002",
+      "username": "bruno.despacho@frio-sul.test",
+      "email": "bruno.despacho@frio-sul.test",
+      "emailVerified": true,
+      "firstName": "Bruno",
+      "lastName": "Despacho",
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "dev", "temporary": false }]
+    },
+    {
+      "id": "7d0a0001-0000-4000-8000-000000000003",
+      "username": "carla.admin@forno-norte.test",
+      "email": "carla.admin@forno-norte.test",
+      "emailVerified": true,
+      "firstName": "Carla",
+      "lastName": "Admin",
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "dev", "temporary": false }]
+    },
+    {
+      "id": "7d0a0001-0000-4000-8000-000000000004",
+      "username": "davi.consultor@dev.test",
+      "email": "davi.consultor@dev.test",
+      "emailVerified": true,
+      "firstName": "Davi",
+      "lastName": "Consultor",
+      "enabled": true,
+      "credentials": [{ "type": "password", "value": "dev", "temporary": false }]
+    }
+  ]
+}

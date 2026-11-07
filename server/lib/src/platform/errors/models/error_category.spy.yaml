@@ -1,0 +1,15 @@
+# Categoria do erro; nas rotas REST define o HTTP (docs/08 §2.8).
+enum: ErrorCategory
+serialized: byName
+values:
+  - validation
+  - unauthenticated
+  - forbidden
+  - notFound
+  - conflict
+  - versionMismatch
+  - payloadTooLarge
+  - businessRule
+  - upgradeRequired
+  - rateLimited
+  - unavailable
