@@ -49,7 +49,7 @@ A definição oficial das tabelas está no [Modelo de domínio](03-modelo-de-dom
 | `attachments` — v0.2 (MVP) | Dono `asset` ou `product` (já previstos) e categoria de documento: `comodato_contract`, `invoice`, `manual`, `movement_term`, `photo`, `other` |
 | `tenant_settings` — v0.2 (MVP) | `require_qr_check_in`, `require_movement_approval` |
 | `work_order_visits` — v0.2 | `check_in_method`, `check_in_off_site` (já existentes) passam a pesar na conferência e no custo do prestador (seção 7.10) |
-| `asset_meters`, `meter_readings` — F2 | Medidores do ativo (`hour_meter`, `energy_kwh`, `temperature`, `cycles`) e leituras (origem `manual`, `iot`, `import`) |
+| `asset_meters`, `meter_readings` — F2 | Medidores do ativo (`hour_meter`, `energy_kwh`, `temperature`, `cycles`) e leituras (origem `manual`, `iot`, `file_import`) |
 | `iot_devices` — F3 | Dispositivo de telemetria vinculado ao ativo, com credencial própria no cofre |
 
 ---
@@ -256,7 +256,7 @@ Na Superpan, o patrimônio nasce no ERP: a NF de entrada gera o bem no módulo d
 ### 2.12 Medidores — F2
 
 - **Cadastro:** `asset_meters` no detalhe do ativo: tipo (`hour_meter`, `energy_kwh`, `temperature`, `cycles`), unidade, leitura inicial e data, e leitura e data mais recentes (desnormalizadas para listagem). O modelo pode sugerir medidores padrão, criados no cadastro do ativo.
-- **Leituras** (`meter_readings`): origem `manual` (técnico ou backoffice), `import` (planilha) e `iot` (F3). O técnico lê o medidor como item de checklist do tipo `meter_reading`, gravado pela mutação `meter_reading.record`. Cada leitura emite `meter_reading.recorded`.
+- **Leituras** (`meter_readings`): origem `manual` (técnico ou backoffice), `file_import` (planilha) e `iot` (F3). O técnico lê o medidor como item de checklist do tipo `meter_reading`, gravado pela mutação `meter_reading.record`. Cada leitura emite `meter_reading.recorded`.
 - **Validação:** medidores acumulativos (`hour_meter`, `energy_kwh`, `cycles`) não podem voltar. Leitura menor que a anterior exige justificativa ("medidor trocado" ou "zerado") e marca um reinício da série. `temperature` não é acumulativa e só tem faixa válida.
 - **Usos:** planos de manutenção por medidor (o gatilho `meter` reage a cada leitura), MTBF por horas de uso, gráfico de leituras no detalhe do ativo.
 - Leituras não aparecem na página pública do QR nem para o cliente na F2.

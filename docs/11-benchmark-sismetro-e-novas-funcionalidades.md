@@ -110,7 +110,7 @@ Propósito: registrar o que a demonstração do Sismetro (gestão de manutençã
 
 - **Planos:** `maintenance_plans` (tipo de OS, checklist, gatilho `interval_days`, `monthly_day` ou `meter`, intervalo, antecedência, tolerância, aplicação por modelo de produto ou por ativo) e `maintenance_plan_assets` (plano × ativo, próxima data ou leitura prevista, última OS gerada).
 - **Geração automática:** job diário, mais reação a cada nova leitura de medidor, cria OS com `origin = preventive_plan` e `work_orders.maintenance_plan_asset_id`, agrupando por cliente/unidade para uma visita atender vários ativos. A previsão aparece na agenda. Evento `maintenance_plan.work_order_generated`.
-- **Medidores:** `asset_meters` (`hour_meter`, `energy_kwh`, `temperature`, `cycles`) e `meter_readings` (origem `manual`, `iot` ou `import`). O técnico lê o horímetro como item de checklist do tipo `meter_reading`, gravado pela mutação `meter_reading.record`. Evento `meter_reading.recorded`.
+- **Medidores:** `asset_meters` (`hour_meter`, `energy_kwh`, `temperature`, `cycles`) e `meter_readings` (origem `manual`, `iot` ou `file_import`). O técnico lê o horímetro como item de checklist do tipo `meter_reading`, gravado pela mutação `meter_reading.record`. Evento `meter_reading.recorded`.
 
 ### 4.8 Bens do ERP e etiqueta após a integração — F2
 
@@ -221,7 +221,7 @@ Ativos com `source = erp` (bens do módulo de patrimônio da Senior), com as mes
 
 **Colunas novas:**
 - `technicians`: `kind` (`employee`, `contractor`), `service_provider_id`, `branch_id`
-- `customers`: `kind` (`external`, `internal`), `primary_sales_rep_id`
+- `customers`: `kind` (`standard`, `internal`), `primary_sales_rep_id`
 - `assets`: `branch_id`, `parent_asset_id`, `acquisition_date`, `acquisition_cost`, `supplier_name`, `acquisition_document`, `source`, `external_system`, `external_id`, `external_payload`, `external_hash`, `last_synced_at`, `missing_since`
 - `asset_assignments`: `approval_status`, `approved_by`, `approved_at`, `term_attachment_id`
 - `work_orders`: `branch_id`, `resolution_mode` (`field`, `remote`, `workshop`), `acknowledged_at`, `acknowledged_by`, `escalation_level`, `escalation_policy_id`, `service_provider_id`, `maintenance_plan_asset_id`

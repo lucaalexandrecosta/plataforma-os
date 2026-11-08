@@ -13,7 +13,7 @@
 
 1. **`maintenance_plans`** com gatilho `interval_days`, `monthly_day` ou `meter`, mais tipo de OS, checklist, antecedência e tolerância. O plano se aplica a um modelo de produto (todos os ativos daquele modelo) ou a ativos específicos, por meio de `maintenance_plan_assets`, que guarda a próxima data ou leitura prevista e a última OS gerada.
 2. **Geração automática idempotente:** um job diário, mais a reação a cada nova leitura, cria OS com `origin = preventive_plan`, agrupando por cliente/unidade para uma visita atender vários ativos. A previsão aparece na agenda.
-3. **Medidores independentes da fonte:** `asset_meters` (`hour_meter`, `energy_kwh`, `temperature`, `cycles`) e `meter_readings` com origem `manual` (item de checklist `meter_reading`, mutação `meter_reading.record`), `iot` ou `import`, idempotentes por medidor, horário e origem.
+3. **Medidores independentes da fonte:** `asset_meters` (`hour_meter`, `energy_kwh`, `temperature`, `cycles`) e `meter_readings` com origem `manual` (item de checklist `meter_reading`, mutação `meter_reading.record`), `iot` ou `file_import`, idempotentes por medidor, horário e origem.
 
 ## Consequências
 

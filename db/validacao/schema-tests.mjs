@@ -653,7 +653,7 @@ export async function run({ db, q, t }) {
     const r = await q(`insert into app.meter_readings (tenant_id, asset_meter_id, value, read_at, source) values ($1, $2, 1234.5, $3, 'manual')
                        on conflict (tenant_id, asset_meter_id, read_at, source) do nothing returning id`, [f.tenant, m.id, ts])
     assert(r.length === 0, 'reenvio com ON CONFLICT DO NOTHING não duplica')
-    await q(`insert into app.meter_readings (tenant_id, asset_meter_id, value, read_at, source) values ($1, $2, 1234.5, $3, 'import')`, [f.tenant, m.id, ts])
+    await q(`insert into app.meter_readings (tenant_id, asset_meter_id, value, read_at, source) values ($1, $2, 1234.5, $3, 'file_import')`, [f.tenant, m.id, ts])
     await fails(() => q(`insert into app.meter_readings (tenant_id, asset_meter_id, value, read_at, source) values ($1, $2, 1, now(), 'iot')`, [f.tenant, m.id]),
       /check constraint/, 'iot sem dispositivo')
     const n = await one(`select count(*)::int as n from app.meter_readings where asset_meter_id = $1`, [m.id])

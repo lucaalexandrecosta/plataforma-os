@@ -1,5 +1,6 @@
 // Roda toda a validação do banco localmente e no CI, sem Docker:
-//   1. migração inicial confere com db/schema.sql;
+//   1. migração inicial confere com db/schema.sql, e os valores de CHECK e
+//      nomes de coluna cabem nos modelos do Serverpod;
 //   2. schema.sql + checagens estruturais + testes funcionais (db/validacao);
 //   3. migração inicial + seed de desenvolvimento + isolamento com os dados do seed.
 // Instala o PGlite em ./.pglite na primeira execução.
@@ -33,6 +34,7 @@ const step = (title, args, okPattern) => {
 }
 
 step('migração inicial x schema.sql', ['tool/db/build_initial_migration.mjs', '--check'])
+step('valores de CHECK e colunas x modelos do Serverpod', ['tool/db/check_enum_values.mjs', 'db/schema.sql'])
 step('schema.sql: estrutura + testes funcionais',
   ['db/validacao/validate-schema.mjs', pglite, 'db/schema.sql', 'db/validacao/schema-tests.mjs'],
   /\[RLS\][^\n]*: 0\n[\s\S]*\[FK\][^\n]*: 0 [\s\S]*\[TESTES FUNCIONAIS\] \d+ passaram, 0 falharam/)

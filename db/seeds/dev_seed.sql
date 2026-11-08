@@ -65,7 +65,7 @@ ON CONFLICT (tenant_id, membership_id, role_code) DO NOTHING;
 
 INSERT INTO app.customers (id, tenant_id, code, name, trade_name, document_type, document_number, phone) VALUES
   ('0197f000-0001-7300-8000-000000000001', '0197f000-0001-7000-8000-000000000001', 'C001', 'Padaria Pão Quente Ltda', 'Pão Quente', 'cnpj', '12345678000195', '+5551999990001'),
-  ('0197f000-0001-7300-8000-000000000002', '0197f000-0001-7000-8000-000000000001', 'C002', 'Mercado Bom Preço Ltda',  'Bom Preço',  'cnpj', '98765432000110', '+5551999990002')
+  ('0197f000-0001-7300-8000-000000000002', '0197f000-0001-7000-8000-000000000001', 'C002', 'Mercado Bom Preço Ltda',  'Bom Preço',  'cnpj', '98765432000198', '+5551999990002')
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO app.customer_sites (id, tenant_id, customer_id, name) VALUES

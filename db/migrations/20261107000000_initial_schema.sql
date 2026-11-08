@@ -1,7 +1,7 @@
 -- migrate:up transaction:false
 -- =============================================================================
 -- Migração inicial — GERADA por tool/db/build_initial_migration.mjs. Não editar.
--- Origem: db/schema.sql (sha256 03d6413bb15ab7932deed505c6ce5038406ff730e079939d7340d223a9947308)
+-- Origem: db/schema.sql (sha256 3bfeeddae77181156b978cbbcaceceec7f201b5fccbf3edfcca394a5181138a8)
 -- Precisa de um papel administrativo (superusuário em dev/CI; o admin do RDS
 -- em homologação e produção), porque cria papéis-grupo e extensões.
 -- =============================================================================
@@ -809,7 +809,7 @@ CREATE TABLE app.customers (
   email              text,
   phone              text,
   notes              text,
-  kind               text NOT NULL DEFAULT 'external' CHECK (kind IN ('external', 'internal')),
+  kind               text NOT NULL DEFAULT 'standard' CHECK (kind IN ('standard', 'internal')),
   primary_sales_rep_id uuid,
   skip_triage        boolean NOT NULL DEFAULT false,
   is_active          boolean NOT NULL DEFAULT true,
@@ -833,7 +833,7 @@ CREATE TABLE app.customers (
   CHECK ((external_system IS NULL) = (external_id IS NULL)),
   CHECK (source = 'local' OR external_id IS NOT NULL),
   CHECK (document_type = 'none' OR document_number IS NOT NULL),
-  CHECK (kind = 'external' OR source = 'local')
+  CHECK (kind = 'standard' OR source = 'local')
 );
 CREATE INDEX customers_sales_rep_idx ON app.customers (tenant_id, primary_sales_rep_id) WHERE primary_sales_rep_id IS NOT NULL;
 CREATE UNIQUE INDEX customers_external_key ON app.customers (tenant_id, external_system, external_id) WHERE external_id IS NOT NULL;
@@ -843,7 +843,7 @@ CREATE INDEX customers_name_trgm_idx ON app.customers USING gin (name gin_trgm_o
 CREATE INDEX customers_row_version_idx ON app.customers (tenant_id, row_version);
 COMMENT ON TABLE app.customers IS 'Cliente do tenant. MVP: local/importação; fase 2: mestre do ERP (campos mestres somente leitura quando source = erp). Documento não é único: o ERP pode ter duplicidades (vira integration_issue possible_duplicate).';
 COMMENT ON COLUMN app.customers.external_hash IS 'SHA-256 do registro normalizado do ERP, para detectar mudança em varredura completa (docs/07).';
-COMMENT ON COLUMN app.customers.kind IS 'v0.2 (F3). external: cliente de verdade; internal: setor ou oficina do próprio tenant (manutenção interna com o mesmo modelo). Cliente interno é sempre local (CHECK).';
+COMMENT ON COLUMN app.customers.kind IS 'v0.2 (F3). standard: cliente de verdade; internal: setor ou oficina do próprio tenant (manutenção interna com o mesmo modelo). Cliente interno é sempre local (CHECK).';
 COMMENT ON COLUMN app.customers.primary_sales_rep_id IS 'v0.2 (MVP). Vendedor responsável (carteira). Extensão local mesmo com source = erp (F2: pode vir do representante do ERP pela integração).';
 COMMENT ON COLUMN app.customers.skip_triage IS 'v0.2 (MVP). No modo de triagem direct, chamados deste cliente vão direto ao técnico ou prestador da região, sem fila de triagem. Extensão local.';
 
@@ -922,7 +922,7 @@ CREATE TABLE app.customer_contacts (
   job_title         text,
   contact_role      text NOT NULL DEFAULT 'customer_contact' CHECK (contact_role IN ('customer_contact', 'customer_admin')),
   status            text NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'pending_approval', 'blocked')),
-  origin            text NOT NULL DEFAULT 'backoffice' CHECK (origin IN ('backoffice', 'import', 'erp', 'qr_self_service')),
+  origin            text NOT NULL DEFAULT 'backoffice' CHECK (origin IN ('backoffice', 'file_import', 'erp', 'qr_self_service')),
   can_open_requests boolean NOT NULL DEFAULT true,
   preferred_channel text CHECK (preferred_channel IN ('whatsapp', 'sms', 'email')),
   whatsapp_opt_in_at timestamptz,
@@ -1037,7 +1037,7 @@ CREATE TABLE app.products (
   name                         text NOT NULL,
   description                  text,
   product_family_id            uuid,
-  product_kind                 text NOT NULL DEFAULT 'equipment' CHECK (product_kind IN ('equipment', 'part', 'consumable', 'other')),
+  product_kind                 text NOT NULL DEFAULT 'equipment' CHECK (product_kind IN ('equipment', 'spare_part', 'consumable', 'other')),
   unit_code                    text NOT NULL DEFAULT 'UN',
   gtin                         text,
   is_serialized                boolean NOT NULL DEFAULT false,
@@ -1345,7 +1345,7 @@ CREATE TABLE app.work_shift_periods (
   tenant_id        uuid NOT NULL REFERENCES app.tenants (id),
   work_shift_id    uuid NOT NULL,
   weekday          smallint NOT NULL CHECK (weekday BETWEEN 1 AND 7),
-  period_type      text NOT NULL DEFAULT 'work' CHECK (period_type IN ('work', 'break')),
+  period_type      text NOT NULL DEFAULT 'work' CHECK (period_type IN ('work', 'rest_break')),
   start_time       time NOT NULL,
   end_time         time NOT NULL,
   crosses_midnight boolean GENERATED ALWAYS AS (end_time <= start_time) STORED,
@@ -1728,7 +1728,7 @@ CREATE TABLE app.asset_assignments (
   ownership_type         text NOT NULL CHECK (ownership_type IN ('tenant_loan', 'tenant_rental', 'customer_owned')),
   started_at             timestamptz NOT NULL,
   ended_at               timestamptz,
-  start_reason           text NOT NULL CHECK (start_reason IN ('delivery', 'installation', 'transfer', 'import', 'correction')),
+  start_reason           text NOT NULL CHECK (start_reason IN ('delivery', 'installation', 'transfer', 'file_import', 'correction')),
   end_reason             text CHECK (end_reason IN ('transfer', 'withdrawal', 'return_to_stock', 'retirement', 'customer_purchase', 'correction')),
   source_document_type   text CHECK (source_document_type IN ('shipment_invoice', 'loan_contract', 'rental_contract', 'sale_invoice', 'work_order', 'other')),
   source_document_number text,
@@ -1805,7 +1805,7 @@ CREATE TABLE app.qr_tags (
   last_bound_asset_id uuid,
   bound_at            timestamptz,
   bound_by            uuid,
-  bound_via           text CHECK (bound_via IN ('backoffice', 'technician_app', 'import')),
+  bound_via           text CHECK (bound_via IN ('backoffice', 'technician_app', 'file_import')),
   bound_work_order_id uuid,
   printed_at          timestamptz,
   print_count         integer NOT NULL DEFAULT 0 CHECK (print_count >= 0),
@@ -2034,10 +2034,10 @@ CREATE TABLE app.work_orders (
   status_changed_at           timestamptz NOT NULL DEFAULT now(),
   hold_reason                 text CHECK (hold_reason IN ('awaiting_part', 'awaiting_customer', 'needs_return', 'awaiting_approval', 'other')),
   priority                    text NOT NULL DEFAULT 'normal' CHECK (priority IN ('low', 'normal', 'high', 'urgent')),
-  origin                      text NOT NULL CHECK (origin IN ('backoffice', 'customer_app', 'technician_app', 'api', 'import', 'preventive_plan',
+  origin                      text NOT NULL CHECK (origin IN ('backoffice', 'customer_app', 'technician_app', 'api', 'file_import', 'preventive_plan',
                                                               'sales_rep', 'telemetry')),
   entry_method                text NOT NULL DEFAULT 'backoffice'
-                              CHECK (entry_method IN ('qr_token', 'short_code', 'asset_list', 'backoffice', 'technician_app', 'api', 'import', 'preventive_plan',
+                              CHECK (entry_method IN ('qr_token', 'short_code', 'asset_list', 'backoffice', 'technician_app', 'api', 'file_import', 'preventive_plan',
                                                       'sales_rep', 'telemetry')),
   branch_id                   uuid,
   resolution_mode             text NOT NULL DEFAULT 'field' CHECK (resolution_mode IN ('field', 'remote', 'workshop')),
@@ -2833,7 +2833,7 @@ CREATE TABLE app.meter_readings (
   value          double precision NOT NULL,
   read_at        timestamptz NOT NULL,
   received_at    timestamptz NOT NULL DEFAULT now(),
-  source         text NOT NULL CHECK (source IN ('manual', 'iot', 'import')),
+  source         text NOT NULL CHECK (source IN ('manual', 'iot', 'file_import')),
   work_order_id  uuid,
   visit_id       uuid,
   technician_id  uuid,
