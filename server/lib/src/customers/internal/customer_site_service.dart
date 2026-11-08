@@ -168,7 +168,7 @@ abstract final class CustomerSiteService {
         tx,
         current,
         expectedVersion,
-        (t) => [for (final e in changed.entries) _column(t, e.key, e.value)],
+        (t) => [for (final e in changed.entries) columnValue(t, e.key, e.value)],
       );
       await _event(
         session,
@@ -252,23 +252,24 @@ abstract final class CustomerSiteService {
     return rows.single;
   }
 
-  static ColumnValue<dynamic, dynamic> _column(CustomerSiteUpdateTable t, String field, Object? v) => switch (field) {
-    'code' => t.code(v as String?),
-    'name' => t.name(v! as String),
-    'street' => t.street(v as String?),
-    'streetNumber' => t.streetNumber(v as String?),
-    'complement' => t.complement(v as String?),
-    'district' => t.district(v as String?),
-    'city' => t.city(v as String?),
-    'state' => t.state(v as String?),
-    'postalCode' => t.postalCode(v as String?),
-    'countryCode' => t.countryCode(v! as String),
-    'latitude' => t.latitude(v as double?),
-    'longitude' => t.longitude(v as double?),
-    'phone' => t.phone(v as String?),
-    'accessNotes' => t.accessNotes(v as String?),
-    _ => throw ArgumentError.value(field, 'field'),
-  };
+  static ColumnValue<dynamic, dynamic> columnValue(CustomerSiteUpdateTable t, String field, Object? v) =>
+      switch (field) {
+        'code' => t.code(v as String?),
+        'name' => t.name(v! as String),
+        'street' => t.street(v as String?),
+        'streetNumber' => t.streetNumber(v as String?),
+        'complement' => t.complement(v as String?),
+        'district' => t.district(v as String?),
+        'city' => t.city(v as String?),
+        'state' => t.state(v as String?),
+        'postalCode' => t.postalCode(v as String?),
+        'countryCode' => t.countryCode(v! as String),
+        'latitude' => t.latitude(v as double?),
+        'longitude' => t.longitude(v as double?),
+        'phone' => t.phone(v as String?),
+        'accessNotes' => t.accessNotes(v as String?),
+        _ => throw ArgumentError.value(field, 'field'),
+      };
 
   static Future<void> _event(
     Session session,

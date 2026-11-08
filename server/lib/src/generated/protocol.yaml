@@ -27,3 +27,12 @@ auth:
 me:
   - get:
   - tenants:
+imports:
+  - available:
+  - template:
+  - preview:
+  - confirm:
+  - cancel:
+  - list:
+  - get:
+  - errorReport:

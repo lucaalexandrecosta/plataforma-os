@@ -1,0 +1,9 @@
+class: ImportTemplate
+fields:
+  entityType: ImportEntityType
+  title: String
+  description: String
+  columns: List<ImportColumnInfo>
+  fileName: String
+  # CSV com BOM e separador ";" (abre direto no Excel em pt-BR).
+  csv: ByteData

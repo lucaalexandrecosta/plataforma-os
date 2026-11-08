@@ -185,7 +185,7 @@ abstract final class CustomerContactService {
         tx,
         current,
         expectedVersion,
-        (t) => [for (final e in changed.entries) _column(t, e.key, e.value)],
+        (t) => [for (final e in changed.entries) columnValue(t, e.key, e.value)],
       );
       await _event(
         session,
@@ -361,7 +361,7 @@ abstract final class CustomerContactService {
     return rows.single;
   }
 
-  static ColumnValue<dynamic, dynamic> _column(CustomerContactUpdateTable t, String field, Object? v) =>
+  static ColumnValue<dynamic, dynamic> columnValue(CustomerContactUpdateTable t, String field, Object? v) =>
       switch (field) {
         'customerSiteId' => t.customerSiteId(v as UuidValue?),
         'name' => t.name(v! as String),

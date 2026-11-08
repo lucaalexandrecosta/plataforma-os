@@ -1,0 +1,7 @@
+enum: SyncRunMode
+serialized: byName
+values:
+  - full
+  - incremental
+  - single
+  - file_import

@@ -479,6 +479,8 @@ Com `require_movement_approval` ligado, `assets.assign`, `assets.transfer` e `as
 | `imports.validate` | Mapeamento de colunas + simulação (`AsyncJobRef`; resultado em `imports.get`) | TA, DI |
 | `imports.confirm` · `imports.cancel` | Aplica (`AsyncJobRef`) / cancela | TA, DI |
 | `imports.list` · `imports.get` · `imports.reportUrl` | Histórico, situação, relatório de erros | TA, DI |
+
+> **Implementado no MVP (07/11/2026):** `imports.available`, `imports.template(entityType)` (CSV com BOM e `;`, mais a ajuda das colunas), `imports.preview(entityType, fileName, content)` (o arquivo vai no pedido, até 700 KB, CSV ou XLSX; grava em `sync_runs` e no armazenamento `private`; devolve a simulação), `imports.confirm(runId, expectedVersion)` (replaneja e aplica numa transação; síncrono), `imports.cancel`, `imports.list`, `imports.get` e `imports.errorReport(runId)` (CSV das linhas com erro). Tipos: `customers`, `customer_sites`, `customer_contacts`. O upload direto ao S3 e o processamento em job do worker entram para planilhas maiores. **Papéis:** vale a permissão `imports.run` do schema, que hoje está em tenant_admin e backoffice_agent (não em dispatcher, como dizia esta tabela); decidir qual dos dois é o certo.
 | `integrationConnections.list` · `.create` | Conexões ERP | listar TA, DI, MG; criar TA |
 | `integrationConnections.get` · `.update` | Configuração (sem segredo) | idem |
 | `integrationConnections.setCredentials` | Grava credencial no cofre (só escrita; o resultado não traz o segredo) | TA |

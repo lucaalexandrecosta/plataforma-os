@@ -41,6 +41,13 @@ class HomePage extends ConsumerWidget {
                 subtitle: 'Cadastrar um cliente',
                 onTap: () => context.go('/clientes/novo'),
               ),
+            if (auth.can('imports.run'))
+              _Shortcut(
+                icon: Icons.upload_file_outlined,
+                title: 'Importar planilha',
+                subtitle: 'Clientes, unidades e contatos em lote',
+                onTap: () => context.go('/importacoes'),
+              ),
             const _Shortcut(
               icon: Icons.assignment_outlined,
               title: 'Ordens de serviço',

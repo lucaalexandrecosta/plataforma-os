@@ -1,0 +1,8 @@
+enum: SyncRunTrigger
+serialized: byName
+values:
+  - schedule
+  - manual
+  - webhook
+  - lookup
+  - file_upload

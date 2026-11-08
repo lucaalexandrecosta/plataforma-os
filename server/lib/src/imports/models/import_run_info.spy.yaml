@@ -1,0 +1,12 @@
+class: ImportRunInfo
+fields:
+  id: UuidValue
+  entityType: ImportEntityType
+  status: SyncRunStatus
+  fileName: String?
+  stats: ImportStats
+  hasErrorReport: bool
+  errorMessage: String?
+  createdAt: DateTime
+  finishedAt: DateTime?
+  version: int

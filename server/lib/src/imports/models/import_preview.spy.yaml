@@ -1,0 +1,9 @@
+# Resultado de imports.preview: colunas reconhecidas, o que vai acontecer e os
+# primeiros erros por linha (o relatório completo sai em imports.errorReport).
+class: ImportPreview
+fields:
+  run: ImportRunInfo
+  recognizedColumns: List<String>
+  unknownColumns: List<String>
+  missingColumns: List<String>
+  errors: List<ImportRowError>

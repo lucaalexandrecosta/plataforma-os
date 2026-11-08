@@ -11,6 +11,7 @@
 // ignore_for_file: dead_code, unnecessary_type_check
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:plataforma_os_server/src/generated/imports/models/import_entity_type.dart' as _ir6nxo5z;
 import 'package:plataforma_os_server/src/generated/tenancy/models/tenant_summary.dart' as _inphvrgt;
 import 'package:serverpod/protocol.dart' as _isp;
 import 'package:serverpod/serverpod.dart' as _is;
@@ -45,6 +46,18 @@ import 'identity_access/models/membership_status.dart' as _i2vwv4gx;
 import 'identity_access/models/tenant_membership.dart' as _i1iyeyn1;
 import 'identity_access/models/tenant_membership_role.dart' as _iutn78jy;
 import 'identity_access/models/tenant_token.dart' as _izyppcov;
+import 'imports/models/import_column_info.dart' as _icg69u6o;
+import 'imports/models/import_entity_type.dart' as _iwgsqujn;
+import 'imports/models/import_preview.dart' as _iif57p8v;
+import 'imports/models/import_row_error.dart' as _ir725yxh;
+import 'imports/models/import_run.dart' as _ifdy2oae;
+import 'imports/models/import_run_info.dart' as _i03h52ft;
+import 'imports/models/import_run_page.dart' as _ibothc5b;
+import 'imports/models/import_stats.dart' as _izpdvybk;
+import 'imports/models/import_template.dart' as _i7o6x8tv;
+import 'imports/models/sync_run_mode.dart' as _itk81loi;
+import 'imports/models/sync_run_status.dart' as _ilybb2c3;
+import 'imports/models/sync_run_trigger.dart' as _ivfbxo2c;
 import 'platform/errors/models/api_exception.dart' as _i147o0qx;
 import 'platform/errors/models/error_category.dart' as _i0p9y4c3;
 import 'platform/errors/models/field_error.dart' as _i3z3bgdl;
@@ -84,6 +97,18 @@ export 'identity_access/models/membership_status.dart';
 export 'identity_access/models/tenant_membership.dart';
 export 'identity_access/models/tenant_membership_role.dart';
 export 'identity_access/models/tenant_token.dart';
+export 'imports/models/import_column_info.dart';
+export 'imports/models/import_entity_type.dart';
+export 'imports/models/import_preview.dart';
+export 'imports/models/import_row_error.dart';
+export 'imports/models/import_run.dart';
+export 'imports/models/import_run_info.dart';
+export 'imports/models/import_run_page.dart';
+export 'imports/models/import_stats.dart';
+export 'imports/models/import_template.dart';
+export 'imports/models/sync_run_mode.dart';
+export 'imports/models/sync_run_status.dart';
+export 'imports/models/sync_run_trigger.dart';
 export 'platform/errors/models/api_exception.dart';
 export 'platform/errors/models/error_category.dart';
 export 'platform/errors/models/field_error.dart';
@@ -135,6 +160,18 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<_i1iyeyn1.TenantMembership>,
       _is.getType<_iutn78jy.TenantMembershipRole>,
       _is.getType<_izyppcov.TenantToken>,
+      _is.getType<_icg69u6o.ImportColumnInfo>,
+      _is.getType<_iwgsqujn.ImportEntityType>,
+      _is.getType<_iif57p8v.ImportPreview>,
+      _is.getType<_ir725yxh.ImportRowError>,
+      _is.getType<_ifdy2oae.ImportRun>,
+      _is.getType<_i03h52ft.ImportRunInfo>,
+      _is.getType<_ibothc5b.ImportRunPage>,
+      _is.getType<_izpdvybk.ImportStats>,
+      _is.getType<_i7o6x8tv.ImportTemplate>,
+      _is.getType<_itk81loi.SyncRunMode>,
+      _is.getType<_ilybb2c3.SyncRunStatus>,
+      _is.getType<_ivfbxo2c.SyncRunTrigger>,
       _is.getType<_i147o0qx.ApiException>,
       _is.getType<_i0p9y4c3.ErrorCategory>,
       _is.getType<_i3z3bgdl.FieldError>,
@@ -174,6 +211,18 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<_i1iyeyn1.TenantMembership?>,
       _is.getType<_iutn78jy.TenantMembershipRole?>,
       _is.getType<_izyppcov.TenantToken?>,
+      _is.getType<_icg69u6o.ImportColumnInfo?>,
+      _is.getType<_iwgsqujn.ImportEntityType?>,
+      _is.getType<_iif57p8v.ImportPreview?>,
+      _is.getType<_ir725yxh.ImportRowError?>,
+      _is.getType<_ifdy2oae.ImportRun?>,
+      _is.getType<_i03h52ft.ImportRunInfo?>,
+      _is.getType<_ibothc5b.ImportRunPage?>,
+      _is.getType<_izpdvybk.ImportStats?>,
+      _is.getType<_i7o6x8tv.ImportTemplate?>,
+      _is.getType<_itk81loi.SyncRunMode?>,
+      _is.getType<_ilybb2c3.SyncRunStatus?>,
+      _is.getType<_ivfbxo2c.SyncRunTrigger?>,
       _is.getType<_i147o0qx.ApiException?>,
       _is.getType<_i0p9y4c3.ErrorCategory?>,
       _is.getType<_i3z3bgdl.FieldError?>,
@@ -192,11 +241,15 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<List<_iyqdtrh1.CustomerSiteField>>,
       _is.getType<List<_iyqdtrh1.CustomerSiteField>?>,
       _is.getType<List<String>>,
+      _is.getType<List<_ir725yxh.ImportRowError>>,
+      _is.getType<List<_i03h52ft.ImportRunInfo>>,
+      _is.getType<List<_icg69u6o.ImportColumnInfo>>,
       _is.getType<List<_i3z3bgdl.FieldError>>,
       _is.getType<List<_i3z3bgdl.FieldError>?>,
       _is.getType<Map<String, String>>,
       _is.getType<Map<String, String>?>,
       _is.getType<List<_inphvrgt.TenantSummary>>,
+      _is.getType<List<_ir6nxo5z.ImportEntityType>>,
     ],
     modules: const [_isp.Protocol.new],
     classNames: const [
@@ -231,6 +284,18 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       'TenantMembership',
       'TenantMembershipRole',
       'TenantToken',
+      'ImportColumnInfo',
+      'ImportEntityType',
+      'ImportPreview',
+      'ImportRowError',
+      'ImportRun',
+      'ImportRunInfo',
+      'ImportRunPage',
+      'ImportStats',
+      'ImportTemplate',
+      'SyncRunMode',
+      'SyncRunStatus',
+      'SyncRunTrigger',
       'ApiException',
       'ErrorCategory',
       'FieldError',
@@ -724,6 +789,126 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       managed: false,
     ),
     _isp.TableDefinition(
+      name: 'sync_runs',
+      dartName: 'ImportRun',
+      schema: 'public',
+      module: 'plataforma_os',
+      columns: [
+        _isp.ColumnDefinition(
+          name: 'id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+          columnDefault: 'random_v7',
+        ),
+        _isp.ColumnDefinition(
+          name: 'tenant_id',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: false,
+          dartType: 'UuidValue',
+        ),
+        _isp.ColumnDefinition(
+          name: 'entity_type',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:ImportEntityType',
+        ),
+        _isp.ColumnDefinition(
+          name: 'mode',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:SyncRunMode',
+        ),
+        _isp.ColumnDefinition(
+          name: 'trigger',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:SyncRunTrigger',
+        ),
+        _isp.ColumnDefinition(
+          name: 'dry_run',
+          columnType: _isp.ColumnType.boolean,
+          isNullable: false,
+          dartType: 'bool',
+        ),
+        _isp.ColumnDefinition(
+          name: 'status',
+          columnType: _isp.ColumnType.text,
+          isNullable: false,
+          dartType: 'protocol:SyncRunStatus',
+        ),
+        _isp.ColumnDefinition(
+          name: 'file_storage_key',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'file_name',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'file_sha256',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'report_storage_key',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'error_message',
+          columnType: _isp.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'started_at',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'finished_at',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: true,
+          dartType: 'DateTime?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'requested_by',
+          columnType: _isp.ColumnType.uuid,
+          isNullable: true,
+          dartType: 'UuidValue?',
+        ),
+        _isp.ColumnDefinition(
+          name: 'created_at',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _isp.ColumnDefinition(
+          name: 'updated_at',
+          columnType: _isp.ColumnType.timestampWithoutTimeZone,
+          isNullable: false,
+          dartType: 'DateTime',
+        ),
+        _isp.ColumnDefinition(
+          name: 'version',
+          columnType: _isp.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
+      ],
+      foreignKeys: [],
+      indexes: [],
+      managed: false,
+    ),
+    _isp.TableDefinition(
       name: 'tenant_membership_roles',
       dartName: 'TenantMembershipRole',
       schema: 'public',
@@ -1040,6 +1225,42 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == _izyppcov.TenantToken) {
       return _izyppcov.TenantToken.fromJson(data) as T;
     }
+    if (t == _icg69u6o.ImportColumnInfo) {
+      return _icg69u6o.ImportColumnInfo.fromJson(data) as T;
+    }
+    if (t == _iwgsqujn.ImportEntityType) {
+      return _iwgsqujn.ImportEntityType.fromJson(data) as T;
+    }
+    if (t == _iif57p8v.ImportPreview) {
+      return _iif57p8v.ImportPreview.fromJson(data) as T;
+    }
+    if (t == _ir725yxh.ImportRowError) {
+      return _ir725yxh.ImportRowError.fromJson(data) as T;
+    }
+    if (t == _ifdy2oae.ImportRun) {
+      return _ifdy2oae.ImportRun.fromJson(data) as T;
+    }
+    if (t == _i03h52ft.ImportRunInfo) {
+      return _i03h52ft.ImportRunInfo.fromJson(data) as T;
+    }
+    if (t == _ibothc5b.ImportRunPage) {
+      return _ibothc5b.ImportRunPage.fromJson(data) as T;
+    }
+    if (t == _izpdvybk.ImportStats) {
+      return _izpdvybk.ImportStats.fromJson(data) as T;
+    }
+    if (t == _i7o6x8tv.ImportTemplate) {
+      return _i7o6x8tv.ImportTemplate.fromJson(data) as T;
+    }
+    if (t == _itk81loi.SyncRunMode) {
+      return _itk81loi.SyncRunMode.fromJson(data) as T;
+    }
+    if (t == _ilybb2c3.SyncRunStatus) {
+      return _ilybb2c3.SyncRunStatus.fromJson(data) as T;
+    }
+    if (t == _ivfbxo2c.SyncRunTrigger) {
+      return _ivfbxo2c.SyncRunTrigger.fromJson(data) as T;
+    }
     if (t == _i147o0qx.ApiException) {
       return _i147o0qx.ApiException.fromJson(data) as T;
     }
@@ -1157,6 +1378,42 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == _is.getType<_izyppcov.TenantToken?>()) {
       return (data != null ? _izyppcov.TenantToken.fromJson(data) : null) as T;
     }
+    if (t == _is.getType<_icg69u6o.ImportColumnInfo?>()) {
+      return (data != null ? _icg69u6o.ImportColumnInfo.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iwgsqujn.ImportEntityType?>()) {
+      return (data != null ? _iwgsqujn.ImportEntityType.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iif57p8v.ImportPreview?>()) {
+      return (data != null ? _iif57p8v.ImportPreview.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ir725yxh.ImportRowError?>()) {
+      return (data != null ? _ir725yxh.ImportRowError.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ifdy2oae.ImportRun?>()) {
+      return (data != null ? _ifdy2oae.ImportRun.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i03h52ft.ImportRunInfo?>()) {
+      return (data != null ? _i03h52ft.ImportRunInfo.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ibothc5b.ImportRunPage?>()) {
+      return (data != null ? _ibothc5b.ImportRunPage.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_izpdvybk.ImportStats?>()) {
+      return (data != null ? _izpdvybk.ImportStats.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i7o6x8tv.ImportTemplate?>()) {
+      return (data != null ? _i7o6x8tv.ImportTemplate.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_itk81loi.SyncRunMode?>()) {
+      return (data != null ? _itk81loi.SyncRunMode.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ilybb2c3.SyncRunStatus?>()) {
+      return (data != null ? _ilybb2c3.SyncRunStatus.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ivfbxo2c.SyncRunTrigger?>()) {
+      return (data != null ? _ivfbxo2c.SyncRunTrigger.fromJson(data) : null) as T;
+    }
     if (t == _is.getType<_i147o0qx.ApiException?>()) {
       return (data != null ? _i147o0qx.ApiException.fromJson(data) : null) as T;
     }
@@ -1213,6 +1470,15 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
+    if (t == List<_ir725yxh.ImportRowError>) {
+      return (data as List).map((e) => deserialize<_ir725yxh.ImportRowError>(e)).toList() as T;
+    }
+    if (t == List<_i03h52ft.ImportRunInfo>) {
+      return (data as List).map((e) => deserialize<_i03h52ft.ImportRunInfo>(e)).toList() as T;
+    }
+    if (t == List<_icg69u6o.ImportColumnInfo>) {
+      return (data as List).map((e) => deserialize<_icg69u6o.ImportColumnInfo>(e)).toList() as T;
+    }
     if (t == List<_i3z3bgdl.FieldError>) {
       return (data as List).map((e) => deserialize<_i3z3bgdl.FieldError>(e)).toList() as T;
     }
@@ -1230,6 +1496,9 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     }
     if (t == List<_inphvrgt.TenantSummary>) {
       return (data as List).map((e) => deserialize<_inphvrgt.TenantSummary>(e)).toList() as T;
+    }
+    if (t == List<_ir6nxo5z.ImportEntityType>) {
+      return (data as List).map((e) => deserialize<_ir6nxo5z.ImportEntityType>(e)).toList() as T;
     }
     final modules = deserializationMetadata.modulesForDeserialization(
       t,
@@ -1277,6 +1546,18 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _i1iyeyn1.TenantMembership => 'TenantMembership',
       _iutn78jy.TenantMembershipRole => 'TenantMembershipRole',
       _izyppcov.TenantToken => 'TenantToken',
+      _icg69u6o.ImportColumnInfo => 'ImportColumnInfo',
+      _iwgsqujn.ImportEntityType => 'ImportEntityType',
+      _iif57p8v.ImportPreview => 'ImportPreview',
+      _ir725yxh.ImportRowError => 'ImportRowError',
+      _ifdy2oae.ImportRun => 'ImportRun',
+      _i03h52ft.ImportRunInfo => 'ImportRunInfo',
+      _ibothc5b.ImportRunPage => 'ImportRunPage',
+      _izpdvybk.ImportStats => 'ImportStats',
+      _i7o6x8tv.ImportTemplate => 'ImportTemplate',
+      _itk81loi.SyncRunMode => 'SyncRunMode',
+      _ilybb2c3.SyncRunStatus => 'SyncRunStatus',
+      _ivfbxo2c.SyncRunTrigger => 'SyncRunTrigger',
       _i147o0qx.ApiException => 'ApiException',
       _i0p9y4c3.ErrorCategory => 'ErrorCategory',
       _i3z3bgdl.FieldError => 'FieldError',
@@ -1361,6 +1642,30 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
         return 'TenantMembershipRole';
       case _izyppcov.TenantToken():
         return 'TenantToken';
+      case _icg69u6o.ImportColumnInfo():
+        return 'ImportColumnInfo';
+      case _iwgsqujn.ImportEntityType():
+        return 'ImportEntityType';
+      case _iif57p8v.ImportPreview():
+        return 'ImportPreview';
+      case _ir725yxh.ImportRowError():
+        return 'ImportRowError';
+      case _ifdy2oae.ImportRun():
+        return 'ImportRun';
+      case _i03h52ft.ImportRunInfo():
+        return 'ImportRunInfo';
+      case _ibothc5b.ImportRunPage():
+        return 'ImportRunPage';
+      case _izpdvybk.ImportStats():
+        return 'ImportStats';
+      case _i7o6x8tv.ImportTemplate():
+        return 'ImportTemplate';
+      case _itk81loi.SyncRunMode():
+        return 'SyncRunMode';
+      case _ilybb2c3.SyncRunStatus():
+        return 'SyncRunStatus';
+      case _ivfbxo2c.SyncRunTrigger():
+        return 'SyncRunTrigger';
       case _i147o0qx.ApiException():
         return 'ApiException';
       case _i0p9y4c3.ErrorCategory():
@@ -1484,6 +1789,42 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (dataClassName == 'TenantToken') {
       return deserialize<_izyppcov.TenantToken>(data['data']);
     }
+    if (dataClassName == 'ImportColumnInfo') {
+      return deserialize<_icg69u6o.ImportColumnInfo>(data['data']);
+    }
+    if (dataClassName == 'ImportEntityType') {
+      return deserialize<_iwgsqujn.ImportEntityType>(data['data']);
+    }
+    if (dataClassName == 'ImportPreview') {
+      return deserialize<_iif57p8v.ImportPreview>(data['data']);
+    }
+    if (dataClassName == 'ImportRowError') {
+      return deserialize<_ir725yxh.ImportRowError>(data['data']);
+    }
+    if (dataClassName == 'ImportRun') {
+      return deserialize<_ifdy2oae.ImportRun>(data['data']);
+    }
+    if (dataClassName == 'ImportRunInfo') {
+      return deserialize<_i03h52ft.ImportRunInfo>(data['data']);
+    }
+    if (dataClassName == 'ImportRunPage') {
+      return deserialize<_ibothc5b.ImportRunPage>(data['data']);
+    }
+    if (dataClassName == 'ImportStats') {
+      return deserialize<_izpdvybk.ImportStats>(data['data']);
+    }
+    if (dataClassName == 'ImportTemplate') {
+      return deserialize<_i7o6x8tv.ImportTemplate>(data['data']);
+    }
+    if (dataClassName == 'SyncRunMode') {
+      return deserialize<_itk81loi.SyncRunMode>(data['data']);
+    }
+    if (dataClassName == 'SyncRunStatus') {
+      return deserialize<_ilybb2c3.SyncRunStatus>(data['data']);
+    }
+    if (dataClassName == 'SyncRunTrigger') {
+      return deserialize<_ivfbxo2c.SyncRunTrigger>(data['data']);
+    }
     if (dataClassName == 'ApiException') {
       return deserialize<_i147o0qx.ApiException>(data['data']);
     }
@@ -1538,6 +1879,8 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
         return _i1iyeyn1.TenantMembership.t;
       case _iutn78jy.TenantMembershipRole:
         return _iutn78jy.TenantMembershipRole.t;
+      case _ifdy2oae.ImportRun:
+        return _ifdy2oae.ImportRun.t;
       case _i2jhpzjh.Tenant:
         return _i2jhpzjh.Tenant.t;
     }

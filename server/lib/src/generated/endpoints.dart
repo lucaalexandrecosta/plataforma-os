@@ -10,6 +10,7 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'dart:typed_data' as _idt;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_contact_filter.dart' as _ipdid8a4;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_contact_input.dart' as _i0rc22zw;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_contact_patch.dart' as _i8odeyb5;
@@ -19,6 +20,7 @@ import 'package:plataforma_os_server/src/generated/customers/models/customer_pat
 import 'package:plataforma_os_server/src/generated/customers/models/customer_site_filter.dart' as _im9gx6w1;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_site_input.dart' as _iv6e8owq;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_site_patch.dart' as _iqxf8m4v;
+import 'package:plataforma_os_server/src/generated/imports/models/import_entity_type.dart' as _ir6nxo5z;
 import 'package:plataforma_os_server/src/generated/platform/paging/models/page_request.dart' as _i4pk1ojl;
 import 'package:serverpod/serverpod.dart' as _is;
 import '../customers/endpoints/customer_contacts_endpoint.dart' as _ihh0do94;
@@ -26,6 +28,7 @@ import '../customers/endpoints/customer_sites_endpoint.dart' as _icz6lfvl;
 import '../customers/endpoints/customers_endpoint.dart' as _i2n45wl3;
 import '../identity_access/endpoints/auth_endpoint.dart' as _i077kp7v;
 import '../identity_access/endpoints/me_endpoint.dart' as _i2zd8mbu;
+import '../imports/endpoints/imports_endpoint.dart' as _i6nlqm16;
 
 class Endpoints extends _is.EndpointDispatch {
   @override
@@ -59,6 +62,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'me',
+          null,
+        ),
+      'imports': _i6nlqm16.ImportsEndpoint()
+        ..initialize(
+          server,
+          'imports',
           null,
         ),
     };
@@ -641,6 +650,177 @@ class Endpoints extends _is.EndpointDispatch {
                 _is.Session session,
                 Map<String, dynamic> params,
               ) async => (endpoints['me'] as _i2zd8mbu.MeEndpoint).tenants(session),
+        ),
+      },
+    );
+    connectors['imports'] = _is.EndpointConnector(
+      name: 'imports',
+      endpoint: endpoints['imports']!,
+      methodConnectors: {
+        'available': _is.MethodConnector(
+          name: 'available',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['imports'] as _i6nlqm16.ImportsEndpoint).available(session),
+        ),
+        'template': _is.MethodConnector(
+          name: 'template',
+          params: {
+            'entityType': _is.ParameterDescription(
+              name: 'entityType',
+              type: _is.getType<_ir6nxo5z.ImportEntityType>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['imports'] as _i6nlqm16.ImportsEndpoint).template(
+                session,
+                params['entityType'],
+              ),
+        ),
+        'preview': _is.MethodConnector(
+          name: 'preview',
+          params: {
+            'entityType': _is.ParameterDescription(
+              name: 'entityType',
+              type: _is.getType<_ir6nxo5z.ImportEntityType>(),
+              nullable: false,
+            ),
+            'fileName': _is.ParameterDescription(
+              name: 'fileName',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'content': _is.ParameterDescription(
+              name: 'content',
+              type: _is.getType<_idt.ByteData>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['imports'] as _i6nlqm16.ImportsEndpoint).preview(
+                session,
+                params['entityType'],
+                params['fileName'],
+                params['content'],
+              ),
+        ),
+        'confirm': _is.MethodConnector(
+          name: 'confirm',
+          params: {
+            'runId': _is.ParameterDescription(
+              name: 'runId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['imports'] as _i6nlqm16.ImportsEndpoint).confirm(
+                session,
+                params['runId'],
+                params['expectedVersion'],
+              ),
+        ),
+        'cancel': _is.MethodConnector(
+          name: 'cancel',
+          params: {
+            'runId': _is.ParameterDescription(
+              name: 'runId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['imports'] as _i6nlqm16.ImportsEndpoint).cancel(
+                session,
+                params['runId'],
+                params['expectedVersion'],
+              ),
+        ),
+        'list': _is.MethodConnector(
+          name: 'list',
+          params: {
+            'entityType': _is.ParameterDescription(
+              name: 'entityType',
+              type: _is.getType<_ir6nxo5z.ImportEntityType?>(),
+              nullable: true,
+            ),
+            'page': _is.ParameterDescription(
+              name: 'page',
+              type: _is.getType<_i4pk1ojl.PageRequest?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['imports'] as _i6nlqm16.ImportsEndpoint).list(
+                session,
+                params['entityType'],
+                params['page'],
+              ),
+        ),
+        'get': _is.MethodConnector(
+          name: 'get',
+          params: {
+            'runId': _is.ParameterDescription(
+              name: 'runId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['imports'] as _i6nlqm16.ImportsEndpoint).get(
+                session,
+                params['runId'],
+              ),
+        ),
+        'errorReport': _is.MethodConnector(
+          name: 'errorReport',
+          params: {
+            'runId': _is.ParameterDescription(
+              name: 'runId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['imports'] as _i6nlqm16.ImportsEndpoint).errorReport(
+                session,
+                params['runId'],
+              ),
         ),
       },
     );

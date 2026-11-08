@@ -1,0 +1,24 @@
+# app.sync_runs com mode = file_import (connection_id nulo). stats (jsonb) é
+# lido e gravado por SQL próprio (ImportRuns), fora do ORM.
+class: ImportRun
+table: sync_runs
+managedMigration: false
+fields:
+  id: UuidValue, defaultModel=random_v7
+  tenantId: UuidValue, column=tenant_id
+  entityType: ImportEntityType, column=entity_type
+  mode: SyncRunMode
+  trigger: SyncRunTrigger
+  dryRun: bool, column=dry_run
+  status: SyncRunStatus
+  fileStorageKey: String?, column=file_storage_key
+  fileName: String?, column=file_name
+  fileSha256: String?, column=file_sha256
+  reportStorageKey: String?, column=report_storage_key
+  errorMessage: String?, column=error_message
+  startedAt: DateTime?, column=started_at
+  finishedAt: DateTime?, column=finished_at
+  requestedBy: UuidValue?, column=requested_by
+  createdAt: DateTime, column=created_at
+  updatedAt: DateTime, column=updated_at
+  version: int

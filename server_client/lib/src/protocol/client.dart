@@ -11,6 +11,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _ida;
+import 'dart:typed_data' as _idt;
 import 'package:http/http.dart' as _i85jenna;
 import 'package:plataforma_os_client/src/protocol/customers/models/customer.dart' as _isrde2pn;
 import 'package:plataforma_os_client/src/protocol/customers/models/customer_contact.dart' as _iicdz276;
@@ -29,6 +30,11 @@ import 'package:plataforma_os_client/src/protocol/customers/models/customer_site
 import 'package:plataforma_os_client/src/protocol/customers/models/customer_site_patch.dart' as _indfb8jf;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/me_info.dart' as _i8cz5om6;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/tenant_token.dart' as _ii663qav;
+import 'package:plataforma_os_client/src/protocol/imports/models/import_entity_type.dart' as _iielyi2l;
+import 'package:plataforma_os_client/src/protocol/imports/models/import_preview.dart' as _irzmx4pe;
+import 'package:plataforma_os_client/src/protocol/imports/models/import_run_info.dart' as _ivnyuntx;
+import 'package:plataforma_os_client/src/protocol/imports/models/import_run_page.dart' as _ibhaay1a;
+import 'package:plataforma_os_client/src/protocol/imports/models/import_template.dart' as _it7v2gyu;
 import 'package:plataforma_os_client/src/protocol/platform/paging/models/page_request.dart' as _iiqqgmzw;
 import 'package:plataforma_os_client/src/protocol/tenancy/models/tenant_summary.dart' as _i11upz4e;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
@@ -348,6 +354,93 @@ class EndpointMe extends EndpointStaff {
   );
 }
 
+/// `imports` (docs/08 §3.10): modelo, prévia com erros por linha,
+/// confirmação, cancelamento, histórico e relatório de erros. Permissão
+/// `imports.run` (tenant_admin e backoffice_agent).
+/// {@category Endpoint}
+class EndpointImports extends EndpointStaff {
+  EndpointImports(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'imports';
+
+  _ida.Future<List<_iielyi2l.ImportEntityType>> available() =>
+      caller.callServerEndpoint<List<_iielyi2l.ImportEntityType>>(
+        'imports',
+        'available',
+        {},
+      );
+
+  _ida.Future<_it7v2gyu.ImportTemplate> template(_iielyi2l.ImportEntityType entityType) =>
+      caller.callServerEndpoint<_it7v2gyu.ImportTemplate>(
+        'imports',
+        'template',
+        {'entityType': entityType},
+      );
+
+  _ida.Future<_irzmx4pe.ImportPreview> preview(
+    _iielyi2l.ImportEntityType entityType,
+    String fileName,
+    _idt.ByteData content,
+  ) => caller.callServerEndpoint<_irzmx4pe.ImportPreview>(
+    'imports',
+    'preview',
+    {
+      'entityType': entityType,
+      'fileName': fileName,
+      'content': content,
+    },
+  );
+
+  _ida.Future<_ivnyuntx.ImportRunInfo> confirm(
+    _isc.UuidValue runId,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_ivnyuntx.ImportRunInfo>(
+    'imports',
+    'confirm',
+    {
+      'runId': runId,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  _ida.Future<_ivnyuntx.ImportRunInfo> cancel(
+    _isc.UuidValue runId,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_ivnyuntx.ImportRunInfo>(
+    'imports',
+    'cancel',
+    {
+      'runId': runId,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  _ida.Future<_ibhaay1a.ImportRunPage> list(
+    _iielyi2l.ImportEntityType? entityType,
+    _iiqqgmzw.PageRequest? page,
+  ) => caller.callServerEndpoint<_ibhaay1a.ImportRunPage>(
+    'imports',
+    'list',
+    {
+      'entityType': entityType,
+      'page': page,
+    },
+  );
+
+  _ida.Future<_ivnyuntx.ImportRunInfo> get(_isc.UuidValue runId) => caller.callServerEndpoint<_ivnyuntx.ImportRunInfo>(
+    'imports',
+    'get',
+    {'runId': runId},
+  );
+
+  _ida.Future<_idt.ByteData> errorReport(_isc.UuidValue runId) => caller.callServerEndpoint<_idt.ByteData>(
+    'imports',
+    'errorReport',
+    {'runId': runId},
+  );
+}
+
 /// Classes-base por tipo de token (docs/08 §2.2): um token de contato nunca
 /// passa num endpoint da equipe e vice-versa. A permissão fina (papel, escopo
 /// de carteira, prestador ou filial) é conferida por método.
@@ -404,6 +497,7 @@ class Client extends _isc.ServerpodClientShared {
     customers = EndpointCustomers(this);
     auth = EndpointAuth(this);
     me = EndpointMe(this);
+    imports = EndpointImports(this);
   }
 
   late final EndpointCustomerContacts customerContacts;
@@ -416,6 +510,8 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointMe me;
 
+  late final EndpointImports imports;
+
   @override
   Map<String, _isc.EndpointRef> get endpointRefLookup => {
     'customerContacts': customerContacts,
@@ -423,6 +519,7 @@ class Client extends _isc.ServerpodClientShared {
     'customers': customers,
     'auth': auth,
     'me': me,
+    'imports': imports,
   };
 
   @override

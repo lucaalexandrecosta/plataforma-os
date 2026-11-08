@@ -7,16 +7,20 @@ import '../auth/auth_controller.dart';
 /// Itens do menu lateral. Os próximos cadastros (unidades, produtos, ativos,
 /// técnicos) e as OS entram aqui conforme as etapas do guia (docs/13 §4).
 final class _Destination {
-  const _Destination(this.path, this.label, this.icon, this.selectedIcon);
+  const _Destination(this.path, this.label, this.icon, this.selectedIcon, {this.permission});
   final String path;
+
+  /// Só aparece para quem tem a permissão (o servidor confere de novo).
+  final String? permission;
   final String label;
   final IconData icon;
   final IconData selectedIcon;
 }
 
-const _destinations = [
+const _allDestinations = [
   _Destination('/', 'Início', Icons.home_outlined, Icons.home),
   _Destination('/clientes', 'Clientes', Icons.storefront_outlined, Icons.storefront),
+  _Destination('/importacoes', 'Importar', Icons.upload_file_outlined, Icons.upload_file, permission: 'imports.run'),
 ];
 
 /// Estrutura das telas logadas: menu lateral (recolhido em telas estreitas),
@@ -27,9 +31,9 @@ class AppShell extends ConsumerWidget {
   final String location;
   final Widget child;
 
-  int get _selected {
-    for (var i = _destinations.length - 1; i >= 0; i--) {
-      final p = _destinations[i].path;
+  int _selectedIn(List<_Destination> destinations) {
+    for (var i = destinations.length - 1; i >= 0; i--) {
+      final p = destinations[i].path;
       if (p == '/' ? location == '/' : location.startsWith(p)) return i;
     }
     return 0;
@@ -41,6 +45,11 @@ class AppShell extends ConsumerWidget {
     final me = auth is AuthSignedIn ? auth.me : null;
     final wide = MediaQuery.sizeOf(context).width >= 900;
     final theme = Theme.of(context);
+    final destinations = [
+      for (final d in _allDestinations)
+        if (d.permission == null || (auth is AuthSignedIn && auth.can(d.permission!))) d,
+    ];
+    final selected = _selectedIn(destinations);
 
     return Scaffold(
       appBar: AppBar(
@@ -90,18 +99,18 @@ class AppShell extends ConsumerWidget {
             ),
         ],
       ),
-      drawer: wide ? null : Drawer(child: _navList(context, close: true)),
+      drawer: wide ? null : Drawer(child: _navList(context, destinations, selected)),
       body: Row(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           if (wide)
             NavigationRail(
               extended: MediaQuery.sizeOf(context).width >= 1200,
-              selectedIndex: _selected,
+              selectedIndex: selected,
               labelType: MediaQuery.sizeOf(context).width >= 1200 ? null : NavigationRailLabelType.all,
-              onDestinationSelected: (i) => context.go(_destinations[i].path),
+              onDestinationSelected: (i) => context.go(destinations[i].path),
               destinations: [
-                for (final d in _destinations)
+                for (final d in destinations)
                   NavigationRailDestination(
                     icon: Icon(d.icon),
                     selectedIcon: Icon(d.selectedIcon),
@@ -116,16 +125,16 @@ class AppShell extends ConsumerWidget {
     );
   }
 
-  Widget _navList(BuildContext context, {required bool close}) => ListView(
+  Widget _navList(BuildContext context, List<_Destination> destinations, int selected) => ListView(
     children: [
-      for (var i = 0; i < _destinations.length; i++)
+      for (var i = 0; i < destinations.length; i++)
         ListTile(
-          leading: Icon(i == _selected ? _destinations[i].selectedIcon : _destinations[i].icon),
-          title: Text(_destinations[i].label),
-          selected: i == _selected,
+          leading: Icon(i == selected ? destinations[i].selectedIcon : destinations[i].icon),
+          title: Text(destinations[i].label),
+          selected: i == selected,
           onTap: () {
-            if (close) Navigator.of(context).pop();
-            context.go(_destinations[i].path);
+            Navigator.of(context).pop();
+            context.go(destinations[i].path);
           },
         ),
     ],

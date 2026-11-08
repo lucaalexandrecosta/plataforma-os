@@ -20,7 +20,8 @@ lib/
     │   └── models/             # enums comuns (RecordSource)
     ├── tenancy/                # camada 1: tenants (TenantDirectory)
     ├── identity_access/        # camada 2: vínculos, papéis, auth.*, me.*
-    ├── customers/              # camada 2: customers.*, customerSites.*, customerContacts.*
+    ├── customers/              # camada 2: customers.*, customerSites.*, customerContacts.* e as importações deles
+    ├── imports/                # imports.*: planilha (CSV/XLSX) → prévia → confirmação → relatório
     └── generated/              # gerado pelo Serverpod (versionado; o CI confere)
 migrations/                     # só as tabelas internas do Serverpod (schema public)
 test/unit/                      # sem banco

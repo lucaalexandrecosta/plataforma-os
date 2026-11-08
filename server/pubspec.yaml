@@ -12,10 +12,14 @@ dependencies:
   # Serverpod fixado: a API da camada de banco pode mudar numa minor
   # (docs/12 §4.3). Atualização só planejada, com a suíte de isolamento.
   serverpod: 4.1.1
+  # Leitura de XLSX (zip + XML) na importação. O pacote "excel" exige
+  # archive ^3, incompatível com o Serverpod 4.1 (archive ^4).
+  archive: ^4.0.0
   crypto: ^3.0.6
   dart_jsonwebtoken: ^3.4.1
   http: ^1.5.0
   plataforma_os_core: any
+  xml: ^7.0.0
 
 dev_dependencies:
   lints: ^6.0.0

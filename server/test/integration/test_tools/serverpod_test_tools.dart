@@ -13,6 +13,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _ida;
 import 'dart:io' as _idi;
+import 'dart:typed_data' as _idt;
 import 'package:plataforma_os_server/src/generated/customers/models/customer.dart' as _iejihgcl;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_contact.dart' as _in02tur2;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_contact_filter.dart' as _ipdid8a4;
@@ -30,6 +31,11 @@ import 'package:plataforma_os_server/src/generated/customers/models/customer_sit
 import 'package:plataforma_os_server/src/generated/customers/models/customer_site_patch.dart' as _iqxf8m4v;
 import 'package:plataforma_os_server/src/generated/identity_access/models/me_info.dart' as _i70n7l3r;
 import 'package:plataforma_os_server/src/generated/identity_access/models/tenant_token.dart' as _inkkpwsp;
+import 'package:plataforma_os_server/src/generated/imports/models/import_entity_type.dart' as _ir6nxo5z;
+import 'package:plataforma_os_server/src/generated/imports/models/import_preview.dart' as _ig44wpax;
+import 'package:plataforma_os_server/src/generated/imports/models/import_run_info.dart' as _i8ttfs35;
+import 'package:plataforma_os_server/src/generated/imports/models/import_run_page.dart' as _ir57g4xt;
+import 'package:plataforma_os_server/src/generated/imports/models/import_template.dart' as _i4bzs6i7;
 import 'package:plataforma_os_server/src/generated/platform/paging/models/page_request.dart' as _i4pk1ojl;
 import 'package:plataforma_os_server/src/generated/tenancy/models/tenant_summary.dart' as _inphvrgt;
 import 'package:serverpod/serverpod.dart' as _is;
@@ -176,6 +182,8 @@ class TestEndpoints {
   late final _AuthEndpoint auth;
 
   late final _MeEndpoint me;
+
+  late final _ImportsEndpoint imports;
 }
 
 class _InternalTestEndpoints extends TestEndpoints implements _ist.InternalTestEndpoints {
@@ -201,6 +209,10 @@ class _InternalTestEndpoints extends TestEndpoints implements _ist.InternalTestE
       serializationManager,
     );
     me = _MeEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    imports = _ImportsEndpoint(
       endpoints,
       serializationManager,
     );
@@ -1046,6 +1058,272 @@ class _MeEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<List<_inphvrgt.TenantSummary>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
+class _ImportsEndpoint {
+  _ImportsEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _is.EndpointDispatch _endpointDispatch;
+
+  final _is.SerializationManager _serializationManager;
+
+  _ida.Future<List<_ir6nxo5z.ImportEntityType>> available(_ist.TestSessionBuilder sessionBuilder) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'imports',
+        method: 'available',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'imports',
+          methodName: 'available',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_ir6nxo5z.ImportEntityType>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i4bzs6i7.ImportTemplate> template(
+    _ist.TestSessionBuilder sessionBuilder,
+    _ir6nxo5z.ImportEntityType entityType,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'imports',
+        method: 'template',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'imports',
+          methodName: 'template',
+          parameters: _ist.testObjectToJson({'entityType': entityType}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i4bzs6i7.ImportTemplate>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_ig44wpax.ImportPreview> preview(
+    _ist.TestSessionBuilder sessionBuilder,
+    _ir6nxo5z.ImportEntityType entityType,
+    String fileName,
+    _idt.ByteData content,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'imports',
+        method: 'preview',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'imports',
+          methodName: 'preview',
+          parameters: _ist.testObjectToJson({
+            'entityType': entityType,
+            'fileName': fileName,
+            'content': content,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_ig44wpax.ImportPreview>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i8ttfs35.ImportRunInfo> confirm(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue runId,
+    int expectedVersion,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'imports',
+        method: 'confirm',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'imports',
+          methodName: 'confirm',
+          parameters: _ist.testObjectToJson({
+            'runId': runId,
+            'expectedVersion': expectedVersion,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i8ttfs35.ImportRunInfo>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i8ttfs35.ImportRunInfo> cancel(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue runId,
+    int expectedVersion,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'imports',
+        method: 'cancel',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'imports',
+          methodName: 'cancel',
+          parameters: _ist.testObjectToJson({
+            'runId': runId,
+            'expectedVersion': expectedVersion,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i8ttfs35.ImportRunInfo>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_ir57g4xt.ImportRunPage> list(
+    _ist.TestSessionBuilder sessionBuilder,
+    _ir6nxo5z.ImportEntityType? entityType,
+    _i4pk1ojl.PageRequest? page,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'imports',
+        method: 'list',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'imports',
+          methodName: 'list',
+          parameters: _ist.testObjectToJson({
+            'entityType': entityType,
+            'page': page,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_ir57g4xt.ImportRunPage>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i8ttfs35.ImportRunInfo> get(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue runId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'imports',
+        method: 'get',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'imports',
+          methodName: 'get',
+          parameters: _ist.testObjectToJson({'runId': runId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i8ttfs35.ImportRunInfo>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_idt.ByteData> errorReport(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue runId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'imports',
+        method: 'errorReport',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'imports',
+          methodName: 'errorReport',
+          parameters: _ist.testObjectToJson({'runId': runId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_idt.ByteData>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

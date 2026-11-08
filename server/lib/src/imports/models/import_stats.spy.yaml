@@ -1,0 +1,10 @@
+# Contagens da prévia (toCreate, toUpdate) e da aplicação (created, updated).
+class: ImportStats
+fields:
+  totalRows: int
+  toCreate: int
+  toUpdate: int
+  unchanged: int
+  errorRows: int
+  created: int?
+  updated: int?

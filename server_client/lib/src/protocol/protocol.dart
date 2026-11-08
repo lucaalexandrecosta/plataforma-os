@@ -11,6 +11,7 @@
 // ignore_for_file: dead_code, unnecessary_type_check
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:plataforma_os_client/src/protocol/imports/models/import_entity_type.dart' as _iielyi2l;
 import 'package:plataforma_os_client/src/protocol/tenancy/models/tenant_summary.dart' as _i11upz4e;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 import 'customers/models/contact_origin.dart' as _iqp78482;
@@ -44,6 +45,18 @@ import 'identity_access/models/membership_status.dart' as _i2vwv4gx;
 import 'identity_access/models/tenant_membership.dart' as _i1iyeyn1;
 import 'identity_access/models/tenant_membership_role.dart' as _iutn78jy;
 import 'identity_access/models/tenant_token.dart' as _izyppcov;
+import 'imports/models/import_column_info.dart' as _icg69u6o;
+import 'imports/models/import_entity_type.dart' as _iwgsqujn;
+import 'imports/models/import_preview.dart' as _iif57p8v;
+import 'imports/models/import_row_error.dart' as _ir725yxh;
+import 'imports/models/import_run.dart' as _ifdy2oae;
+import 'imports/models/import_run_info.dart' as _i03h52ft;
+import 'imports/models/import_run_page.dart' as _ibothc5b;
+import 'imports/models/import_stats.dart' as _izpdvybk;
+import 'imports/models/import_template.dart' as _i7o6x8tv;
+import 'imports/models/sync_run_mode.dart' as _itk81loi;
+import 'imports/models/sync_run_status.dart' as _ilybb2c3;
+import 'imports/models/sync_run_trigger.dart' as _ivfbxo2c;
 import 'platform/errors/models/api_exception.dart' as _i147o0qx;
 import 'platform/errors/models/error_category.dart' as _i0p9y4c3;
 import 'platform/errors/models/field_error.dart' as _i3z3bgdl;
@@ -83,6 +96,18 @@ export 'identity_access/models/membership_status.dart';
 export 'identity_access/models/tenant_membership.dart';
 export 'identity_access/models/tenant_membership_role.dart';
 export 'identity_access/models/tenant_token.dart';
+export 'imports/models/import_column_info.dart';
+export 'imports/models/import_entity_type.dart';
+export 'imports/models/import_preview.dart';
+export 'imports/models/import_row_error.dart';
+export 'imports/models/import_run.dart';
+export 'imports/models/import_run_info.dart';
+export 'imports/models/import_run_page.dart';
+export 'imports/models/import_stats.dart';
+export 'imports/models/import_template.dart';
+export 'imports/models/sync_run_mode.dart';
+export 'imports/models/sync_run_status.dart';
+export 'imports/models/sync_run_trigger.dart';
 export 'platform/errors/models/api_exception.dart';
 export 'platform/errors/models/error_category.dart';
 export 'platform/errors/models/field_error.dart';
@@ -135,6 +160,18 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<_i1iyeyn1.TenantMembership>,
       _isc.getType<_iutn78jy.TenantMembershipRole>,
       _isc.getType<_izyppcov.TenantToken>,
+      _isc.getType<_icg69u6o.ImportColumnInfo>,
+      _isc.getType<_iwgsqujn.ImportEntityType>,
+      _isc.getType<_iif57p8v.ImportPreview>,
+      _isc.getType<_ir725yxh.ImportRowError>,
+      _isc.getType<_ifdy2oae.ImportRun>,
+      _isc.getType<_i03h52ft.ImportRunInfo>,
+      _isc.getType<_ibothc5b.ImportRunPage>,
+      _isc.getType<_izpdvybk.ImportStats>,
+      _isc.getType<_i7o6x8tv.ImportTemplate>,
+      _isc.getType<_itk81loi.SyncRunMode>,
+      _isc.getType<_ilybb2c3.SyncRunStatus>,
+      _isc.getType<_ivfbxo2c.SyncRunTrigger>,
       _isc.getType<_i147o0qx.ApiException>,
       _isc.getType<_i0p9y4c3.ErrorCategory>,
       _isc.getType<_i3z3bgdl.FieldError>,
@@ -174,6 +211,18 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<_i1iyeyn1.TenantMembership?>,
       _isc.getType<_iutn78jy.TenantMembershipRole?>,
       _isc.getType<_izyppcov.TenantToken?>,
+      _isc.getType<_icg69u6o.ImportColumnInfo?>,
+      _isc.getType<_iwgsqujn.ImportEntityType?>,
+      _isc.getType<_iif57p8v.ImportPreview?>,
+      _isc.getType<_ir725yxh.ImportRowError?>,
+      _isc.getType<_ifdy2oae.ImportRun?>,
+      _isc.getType<_i03h52ft.ImportRunInfo?>,
+      _isc.getType<_ibothc5b.ImportRunPage?>,
+      _isc.getType<_izpdvybk.ImportStats?>,
+      _isc.getType<_i7o6x8tv.ImportTemplate?>,
+      _isc.getType<_itk81loi.SyncRunMode?>,
+      _isc.getType<_ilybb2c3.SyncRunStatus?>,
+      _isc.getType<_ivfbxo2c.SyncRunTrigger?>,
       _isc.getType<_i147o0qx.ApiException?>,
       _isc.getType<_i0p9y4c3.ErrorCategory?>,
       _isc.getType<_i3z3bgdl.FieldError?>,
@@ -192,11 +241,15 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<List<_iyqdtrh1.CustomerSiteField>>,
       _isc.getType<List<_iyqdtrh1.CustomerSiteField>?>,
       _isc.getType<List<String>>,
+      _isc.getType<List<_ir725yxh.ImportRowError>>,
+      _isc.getType<List<_i03h52ft.ImportRunInfo>>,
+      _isc.getType<List<_icg69u6o.ImportColumnInfo>>,
       _isc.getType<List<_i3z3bgdl.FieldError>>,
       _isc.getType<List<_i3z3bgdl.FieldError>?>,
       _isc.getType<Map<String, String>>,
       _isc.getType<Map<String, String>?>,
       _isc.getType<List<_i11upz4e.TenantSummary>>,
+      _isc.getType<List<_iielyi2l.ImportEntityType>>,
     ],
     modules: const [],
     classNames: const [
@@ -231,6 +284,18 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       'TenantMembership',
       'TenantMembershipRole',
       'TenantToken',
+      'ImportColumnInfo',
+      'ImportEntityType',
+      'ImportPreview',
+      'ImportRowError',
+      'ImportRun',
+      'ImportRunInfo',
+      'ImportRunPage',
+      'ImportStats',
+      'ImportTemplate',
+      'SyncRunMode',
+      'SyncRunStatus',
+      'SyncRunTrigger',
       'ApiException',
       'ErrorCategory',
       'FieldError',
@@ -358,6 +423,42 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     if (t == _izyppcov.TenantToken) {
       return _izyppcov.TenantToken.fromJson(data) as T;
     }
+    if (t == _icg69u6o.ImportColumnInfo) {
+      return _icg69u6o.ImportColumnInfo.fromJson(data) as T;
+    }
+    if (t == _iwgsqujn.ImportEntityType) {
+      return _iwgsqujn.ImportEntityType.fromJson(data) as T;
+    }
+    if (t == _iif57p8v.ImportPreview) {
+      return _iif57p8v.ImportPreview.fromJson(data) as T;
+    }
+    if (t == _ir725yxh.ImportRowError) {
+      return _ir725yxh.ImportRowError.fromJson(data) as T;
+    }
+    if (t == _ifdy2oae.ImportRun) {
+      return _ifdy2oae.ImportRun.fromJson(data) as T;
+    }
+    if (t == _i03h52ft.ImportRunInfo) {
+      return _i03h52ft.ImportRunInfo.fromJson(data) as T;
+    }
+    if (t == _ibothc5b.ImportRunPage) {
+      return _ibothc5b.ImportRunPage.fromJson(data) as T;
+    }
+    if (t == _izpdvybk.ImportStats) {
+      return _izpdvybk.ImportStats.fromJson(data) as T;
+    }
+    if (t == _i7o6x8tv.ImportTemplate) {
+      return _i7o6x8tv.ImportTemplate.fromJson(data) as T;
+    }
+    if (t == _itk81loi.SyncRunMode) {
+      return _itk81loi.SyncRunMode.fromJson(data) as T;
+    }
+    if (t == _ilybb2c3.SyncRunStatus) {
+      return _ilybb2c3.SyncRunStatus.fromJson(data) as T;
+    }
+    if (t == _ivfbxo2c.SyncRunTrigger) {
+      return _ivfbxo2c.SyncRunTrigger.fromJson(data) as T;
+    }
     if (t == _i147o0qx.ApiException) {
       return _i147o0qx.ApiException.fromJson(data) as T;
     }
@@ -475,6 +576,42 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     if (t == _isc.getType<_izyppcov.TenantToken?>()) {
       return (data != null ? _izyppcov.TenantToken.fromJson(data) : null) as T;
     }
+    if (t == _isc.getType<_icg69u6o.ImportColumnInfo?>()) {
+      return (data != null ? _icg69u6o.ImportColumnInfo.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iwgsqujn.ImportEntityType?>()) {
+      return (data != null ? _iwgsqujn.ImportEntityType.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iif57p8v.ImportPreview?>()) {
+      return (data != null ? _iif57p8v.ImportPreview.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_ir725yxh.ImportRowError?>()) {
+      return (data != null ? _ir725yxh.ImportRowError.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_ifdy2oae.ImportRun?>()) {
+      return (data != null ? _ifdy2oae.ImportRun.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i03h52ft.ImportRunInfo?>()) {
+      return (data != null ? _i03h52ft.ImportRunInfo.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_ibothc5b.ImportRunPage?>()) {
+      return (data != null ? _ibothc5b.ImportRunPage.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_izpdvybk.ImportStats?>()) {
+      return (data != null ? _izpdvybk.ImportStats.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i7o6x8tv.ImportTemplate?>()) {
+      return (data != null ? _i7o6x8tv.ImportTemplate.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_itk81loi.SyncRunMode?>()) {
+      return (data != null ? _itk81loi.SyncRunMode.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_ilybb2c3.SyncRunStatus?>()) {
+      return (data != null ? _ilybb2c3.SyncRunStatus.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_ivfbxo2c.SyncRunTrigger?>()) {
+      return (data != null ? _ivfbxo2c.SyncRunTrigger.fromJson(data) : null) as T;
+    }
     if (t == _isc.getType<_i147o0qx.ApiException?>()) {
       return (data != null ? _i147o0qx.ApiException.fromJson(data) : null) as T;
     }
@@ -531,6 +668,15 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
+    if (t == List<_ir725yxh.ImportRowError>) {
+      return (data as List).map((e) => deserialize<_ir725yxh.ImportRowError>(e)).toList() as T;
+    }
+    if (t == List<_i03h52ft.ImportRunInfo>) {
+      return (data as List).map((e) => deserialize<_i03h52ft.ImportRunInfo>(e)).toList() as T;
+    }
+    if (t == List<_icg69u6o.ImportColumnInfo>) {
+      return (data as List).map((e) => deserialize<_icg69u6o.ImportColumnInfo>(e)).toList() as T;
+    }
     if (t == List<_i3z3bgdl.FieldError>) {
       return (data as List).map((e) => deserialize<_i3z3bgdl.FieldError>(e)).toList() as T;
     }
@@ -548,6 +694,9 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     }
     if (t == List<_i11upz4e.TenantSummary>) {
       return (data as List).map((e) => deserialize<_i11upz4e.TenantSummary>(e)).toList() as T;
+    }
+    if (t == List<_iielyi2l.ImportEntityType>) {
+      return (data as List).map((e) => deserialize<_iielyi2l.ImportEntityType>(e)).toList() as T;
     }
     return super.deserialize<T>(data, t);
   }
@@ -585,6 +734,18 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _i1iyeyn1.TenantMembership => 'TenantMembership',
       _iutn78jy.TenantMembershipRole => 'TenantMembershipRole',
       _izyppcov.TenantToken => 'TenantToken',
+      _icg69u6o.ImportColumnInfo => 'ImportColumnInfo',
+      _iwgsqujn.ImportEntityType => 'ImportEntityType',
+      _iif57p8v.ImportPreview => 'ImportPreview',
+      _ir725yxh.ImportRowError => 'ImportRowError',
+      _ifdy2oae.ImportRun => 'ImportRun',
+      _i03h52ft.ImportRunInfo => 'ImportRunInfo',
+      _ibothc5b.ImportRunPage => 'ImportRunPage',
+      _izpdvybk.ImportStats => 'ImportStats',
+      _i7o6x8tv.ImportTemplate => 'ImportTemplate',
+      _itk81loi.SyncRunMode => 'SyncRunMode',
+      _ilybb2c3.SyncRunStatus => 'SyncRunStatus',
+      _ivfbxo2c.SyncRunTrigger => 'SyncRunTrigger',
       _i147o0qx.ApiException => 'ApiException',
       _i0p9y4c3.ErrorCategory => 'ErrorCategory',
       _i3z3bgdl.FieldError => 'FieldError',
@@ -669,6 +830,30 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
         return 'TenantMembershipRole';
       case _izyppcov.TenantToken():
         return 'TenantToken';
+      case _icg69u6o.ImportColumnInfo():
+        return 'ImportColumnInfo';
+      case _iwgsqujn.ImportEntityType():
+        return 'ImportEntityType';
+      case _iif57p8v.ImportPreview():
+        return 'ImportPreview';
+      case _ir725yxh.ImportRowError():
+        return 'ImportRowError';
+      case _ifdy2oae.ImportRun():
+        return 'ImportRun';
+      case _i03h52ft.ImportRunInfo():
+        return 'ImportRunInfo';
+      case _ibothc5b.ImportRunPage():
+        return 'ImportRunPage';
+      case _izpdvybk.ImportStats():
+        return 'ImportStats';
+      case _i7o6x8tv.ImportTemplate():
+        return 'ImportTemplate';
+      case _itk81loi.SyncRunMode():
+        return 'SyncRunMode';
+      case _ilybb2c3.SyncRunStatus():
+        return 'SyncRunStatus';
+      case _ivfbxo2c.SyncRunTrigger():
+        return 'SyncRunTrigger';
       case _i147o0qx.ApiException():
         return 'ApiException';
       case _i0p9y4c3.ErrorCategory():
@@ -787,6 +972,42 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     }
     if (dataClassName == 'TenantToken') {
       return deserialize<_izyppcov.TenantToken>(data['data']);
+    }
+    if (dataClassName == 'ImportColumnInfo') {
+      return deserialize<_icg69u6o.ImportColumnInfo>(data['data']);
+    }
+    if (dataClassName == 'ImportEntityType') {
+      return deserialize<_iwgsqujn.ImportEntityType>(data['data']);
+    }
+    if (dataClassName == 'ImportPreview') {
+      return deserialize<_iif57p8v.ImportPreview>(data['data']);
+    }
+    if (dataClassName == 'ImportRowError') {
+      return deserialize<_ir725yxh.ImportRowError>(data['data']);
+    }
+    if (dataClassName == 'ImportRun') {
+      return deserialize<_ifdy2oae.ImportRun>(data['data']);
+    }
+    if (dataClassName == 'ImportRunInfo') {
+      return deserialize<_i03h52ft.ImportRunInfo>(data['data']);
+    }
+    if (dataClassName == 'ImportRunPage') {
+      return deserialize<_ibothc5b.ImportRunPage>(data['data']);
+    }
+    if (dataClassName == 'ImportStats') {
+      return deserialize<_izpdvybk.ImportStats>(data['data']);
+    }
+    if (dataClassName == 'ImportTemplate') {
+      return deserialize<_i7o6x8tv.ImportTemplate>(data['data']);
+    }
+    if (dataClassName == 'SyncRunMode') {
+      return deserialize<_itk81loi.SyncRunMode>(data['data']);
+    }
+    if (dataClassName == 'SyncRunStatus') {
+      return deserialize<_ilybb2c3.SyncRunStatus>(data['data']);
+    }
+    if (dataClassName == 'SyncRunTrigger') {
+      return deserialize<_ivfbxo2c.SyncRunTrigger>(data['data']);
     }
     if (dataClassName == 'ApiException') {
       return deserialize<_i147o0qx.ApiException>(data['data']);

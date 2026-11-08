@@ -6,6 +6,7 @@ import 'package:plataforma_os_client/plataforma_os_client.dart';
 import '../features/customers/customer_form_page.dart';
 import '../features/customers/customers_list_page.dart';
 import '../features/home/home_page.dart';
+import '../features/imports/imports_page.dart';
 import '../ui/app_shell.dart';
 
 /// Rotas das telas logadas. URLs em português, como o usuário as vê.
@@ -21,6 +22,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/',
             pageBuilder: (_, _) => const NoTransitionPage(child: HomePage()),
+          ),
+          GoRoute(
+            path: '/importacoes',
+            pageBuilder: (_, _) => const NoTransitionPage(child: ImportsPage()),
           ),
           GoRoute(
             path: '/clientes',

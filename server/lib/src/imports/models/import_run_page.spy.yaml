@@ -1,0 +1,5 @@
+class: ImportRunPage
+fields:
+  items: List<ImportRunInfo>
+  nextCursor: String?
+  hasMore: bool

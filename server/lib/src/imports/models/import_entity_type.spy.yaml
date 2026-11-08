@@ -1,0 +1,10 @@
+# Mesmos valores de sync_runs.entity_type.
+enum: ImportEntityType
+serialized: byName
+values:
+  - customers
+  - customer_sites
+  - customer_contacts
+  - products
+  - services
+  - assets

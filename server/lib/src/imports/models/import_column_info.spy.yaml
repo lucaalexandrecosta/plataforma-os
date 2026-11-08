@@ -1,0 +1,8 @@
+# Coluna aceita por um tipo de importação (ajuda da tela e modelo).
+class: ImportColumnInfo
+fields:
+  key: String
+  label: String
+  isRequired: bool
+  help: String
+  example: String

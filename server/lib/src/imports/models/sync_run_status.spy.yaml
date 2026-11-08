@@ -1,0 +1,12 @@
+# Importação: queued (prévia pronta, aguardando confirmação) → running →
+# succeeded | partially_succeeded (linhas com erro ignoradas) | failed;
+# cancelled antes de confirmar.
+enum: SyncRunStatus
+serialized: byName
+values:
+  - queued
+  - running
+  - succeeded
+  - partially_succeeded
+  - failed
+  - cancelled

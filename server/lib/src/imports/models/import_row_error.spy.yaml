@@ -1,0 +1,7 @@
+# Erro de uma linha da planilha. rowNumber é a linha como o Excel mostra
+# (cabeçalho = 1). key identifica o registro (ex.: código do cliente).
+class: ImportRowError
+fields:
+  rowNumber: int
+  key: String?
+  messages: List<String>

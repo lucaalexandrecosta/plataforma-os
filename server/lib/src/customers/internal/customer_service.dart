@@ -173,7 +173,7 @@ abstract final class CustomerService {
           tx,
           current,
           expectedVersion,
-          (t) => [for (final e in changed.entries) _columnValue(t, e.key, e.value)],
+          (t) => [for (final e in changed.entries) columnValue(t, e.key, e.value)],
         );
         await _event(
           session,
@@ -274,7 +274,7 @@ abstract final class CustomerService {
     return rows.single;
   }
 
-  static ColumnValue<dynamic, dynamic> _columnValue(CustomerUpdateTable t, String field, Object? value) =>
+  static ColumnValue<dynamic, dynamic> columnValue(CustomerUpdateTable t, String field, Object? value) =>
       switch (field) {
         'code' => t.code(value as String?),
         'name' => t.name(value! as String),
