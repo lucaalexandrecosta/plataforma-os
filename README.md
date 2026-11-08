@@ -132,11 +132,13 @@ Caminhos sugeridos: **gestão** — este README → 01 → 11 → 10. **Backend*
 |---|---|---|
 | Monorepo (pub workspace + melos), convenções de lint e formatação | [pubspec.yaml](pubspec.yaml), [analysis_options.yaml](analysis_options.yaml) | `dart analyze --fatal-infos` sem problemas |
 | Migração inicial do dbmate gerada do `schema.sql`, papéis de login e seed com dois tenants | [db/migrations](db/migrations), [infra/local/postgres](infra/local/postgres), [db/seeds](db/seeds) | `node tool/db/validate_all.mjs`: 42 testes do schema + 12 de migração/seed/isolamento |
-| `packages/core`: máquinas de estado da OS e da visita, centavos e milésimos, short code e token do QR, UUID v7 | [packages/core](packages/core) | 32 testes, com vetores gerados pelo PostgreSQL |
-| Servidor Serverpod 4.1.1: interceptor de tenant, tokens ES256, troca do token do Keycloak, `me.get`/`me.tenants` | [server](server/README.md) | 11 testes unitários + 13 de ponta a ponta no PostgreSQL 18 com o schema completo, incluindo o login real pelo Keycloak; custo do escopo por tenant +0,96 ms (p50) ([relatório do spike S1](docs/spikes/S1-S2-serverpod-rls.md)) |
-| Ambiente local (PostgreSQL 18, Valkey, Keycloak com realm de dev, S3 local com RustFS, Mailpit) e CI | [infra/local](infra/local/README.md), [.github/workflows/ci.yml](.github/workflows/ci.yml) | Compose testado no Docker Desktop; CI ainda não executado (o repositório não tem Git nem remoto) |
+| `packages/core`: máquinas de estado da OS e da visita, centavos e milésimos, short code e token do QR, UUID v7, CPF/CNPJ (inclusive alfanumérico) e telefone E.164 | [packages/core](packages/core) | 40 testes, com vetores gerados pelo PostgreSQL e o exemplo oficial de CNPJ alfanumérico |
+| Servidor Serverpod 4.1.1: interceptor de tenant, tokens ES256, troca do token do Keycloak, `me.get`/`me.tenants` | [server](server/README.md) | Testes de ponta a ponta no PostgreSQL 18 com o schema completo, incluindo o login real pelo Keycloak; custo do escopo por tenant +0,96 ms (p50) ([relatório do spike S1](docs/spikes/S1-S2-serverpod-rls.md)) |
+| **Etapa 2 em andamento:** padrão de cadastro (permissões do banco, cursor assinado, `VERSION_MISMATCH`, outbox); clientes, unidades e contatos (aprovar, bloquear, desbloquear) | [server/README.md, "Padrão de cadastro"](server/README.md) | 27 testes unitários + 32 de ponta a ponta |
+| **Backoffice web** (Flutter Web): login pelo Keycloak (OIDC + PKCE, tokens só em memória), empresa pelo subdomínio, lista de clientes e ficha com abas Dados, Unidades e Contatos | [apps/backoffice_web](apps/backoffice_web/README.md) | Build de release no CI; fluxo de login conferido contra o Keycloak e a API locais |
+| Ambiente local (PostgreSQL 18, Valkey, Keycloak com realm de dev, S3 local com RustFS, Mailpit) e CI | [infra/local](infra/local/README.md), [.github/workflows/ci.yml](.github/workflows/ci.yml) | Compose testado no Docker Desktop; CI verde no GitHub Actions |
 
-Ainda não criados: apps Flutter (`apps/*`), `packages/ui_kit`, `packages/sync_engine`, IaC (`infra/modules`, `infra/envs`).
+Ainda não criados: apps do técnico e do cliente (`apps/technician_app`, `apps/customer_app`), `packages/ui_kit`, `packages/sync_engine`, IaC (`infra/modules`, `infra/envs`).
 
 ## Próximos passos
 

@@ -1,0 +1,78 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+import 'package:plataforma_os_client/plataforma_os_client.dart';
+
+import '../features/customers/customer_form_page.dart';
+import '../features/customers/customers_list_page.dart';
+import '../features/home/home_page.dart';
+import '../ui/app_shell.dart';
+
+/// Rotas das telas logadas. URLs em português, como o usuário as vê.
+/// O login (e a volta do Keycloak em /auth/callback) é resolvido antes do
+/// roteador existir (ver `BackofficeApp`).
+final routerProvider = Provider<GoRouter>((ref) {
+  final router = GoRouter(
+    initialLocation: _initialLocation(),
+    routes: [
+      ShellRoute(
+        builder: (context, state, child) => AppShell(location: state.uri.path, child: child),
+        routes: [
+          GoRoute(
+            path: '/',
+            pageBuilder: (_, _) => const NoTransitionPage(child: HomePage()),
+          ),
+          GoRoute(
+            path: '/clientes',
+            pageBuilder: (_, _) => const NoTransitionPage(child: CustomersListPage()),
+            routes: [
+              GoRoute(path: 'novo', builder: (_, _) => const CustomerFormPage()),
+              GoRoute(
+                path: ':id',
+                builder: (_, state) {
+                  final id = _uuidOrNull(state.pathParameters['id']!);
+                  return id == null ? const _NotFound() : CustomerFormPage(key: ValueKey(id), id: id);
+                },
+              ),
+            ],
+          ),
+        ],
+      ),
+    ],
+    errorBuilder: (_, _) => const _NotFound(),
+  );
+  ref.onDispose(router.dispose);
+  return router;
+});
+
+UuidValue? _uuidOrNull(String raw) {
+  try {
+    return UuidValue.withValidation(raw);
+  } on FormatException {
+    return null;
+  }
+}
+
+String _initialLocation() {
+  final uri = Uri.base;
+  if (uri.path == '/auth/callback' || uri.path.isEmpty) return '/';
+  return uri.hasQuery ? '${uri.path}?${uri.query}' : uri.path;
+}
+
+class _NotFound extends StatelessWidget {
+  const _NotFound();
+
+  @override
+  Widget build(BuildContext context) => Scaffold(
+    body: Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          const Text('Página não encontrada.'),
+          const SizedBox(height: 12),
+          TextButton(onPressed: () => context.go('/'), child: const Text('Ir para o início')),
+        ],
+      ),
+    ),
+  );
+}
