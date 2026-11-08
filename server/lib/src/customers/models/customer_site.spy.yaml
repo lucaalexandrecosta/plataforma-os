@@ -1,0 +1,35 @@
+# app.customer_sites (db/schema.sql §9): unidade/local de atendimento.
+# Sugestão de coordenada do técnico (suggested_*), região e calendário entram
+# com o app do técnico e o módulo de agenda; aqui só leitura do que existe.
+class: CustomerSite
+table: customer_sites
+managedMigration: false
+fields:
+  id: UuidValue, defaultModel=random_v7
+  tenantId: UuidValue, column=tenant_id
+  customerId: UuidValue, column=customer_id
+  code: String?
+  name: String
+  street: String?
+  streetNumber: String?, column=street_number
+  complement: String?
+  district: String?
+  city: String?
+  # UF (2 letras) quando o país é BR.
+  state: String?
+  # CEP só dígitos (8) no Brasil.
+  postalCode: String?, column=postal_code
+  countryCode: String, column=country_code
+  latitude: double?
+  longitude: double?
+  # E.164.
+  phone: String?
+  accessNotes: String?, column=access_notes
+  serviceAreaId: UuidValue?, column=service_area_id
+  isActive: bool, column=is_active
+  source: RecordSource
+  externalSystem: String?, column=external_system
+  externalId: String?, column=external_id
+  createdAt: DateTime, column=created_at
+  updatedAt: DateTime, column=updated_at
+  version: int

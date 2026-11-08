@@ -287,7 +287,7 @@ Janela deslizante no Valkey, por chave. Nos endpoints, o excesso vira `RATE_LIMI
 | Quantidade | `int` em **milésimos** | `"quantity": 1500` = 1,5 |
 | Medidas (latitude, longitude, precisão, distância, leituras de medidor) | `double` (`double precision` no banco) | `"latitude": -23.55052`, `"accuracyM": 12.0`, `"value": 1523.25` |
 | Telefone | E.164 | `"+5511987654321"` |
-| Documento | Só dígitos | `"12345678000190"` |
+| Documento | Sem pontuação, em maiúsculas. CPF só dígitos; CNPJ com 12 posições alfanuméricas e 2 dígitos verificadores (CNPJ alfanumérico da Receita, emitido desde julho de 2026; os numéricos continuam válidos). Regra única em `packages/core` (`BrDocuments`) | `"11222333000181"`, `"12ABC34501DE35"` |
 
 Inteiros evitam erro de ponto flutuante em todos os clientes; no Flutter Web, `int` tem 53 bits de precisão, o que sobra para centavos. O banco grava `bigint` ([doc 12](12-stack-dart-flutter-serverpod.md), seção 4.1). Onde o JSON é externo (pedido ao ERP, webhooks para tenants), o adaptador converte para decimal na borda ([Integração ERP Senior](07-integracao-erp-senior.md), seção 9.5; seção 7).
 
@@ -330,7 +330,7 @@ Todo endpoint de cadastro tem o mesmo conjunto de métodos, que não é repetido
 
 | Endpoint | Contexto | Escrita | Leitura | Métodos próprios |
 |---|---|---|---|---|
-| `customers` | customers | TA, DI, BA | internos; SR (carteira, MVP) | `listSites`, `listContacts`, `listAssets`, `listWorkOrders` (por cliente); v0.2: `primarySalesRepId` e `kind` (`external`, `internal`) editáveis por TA e DI; `salesSummaries` (F3; TA, MG, SR da carteira) |
+| `customers` | customers | TA, DI, BA | internos; SR (carteira, MVP) | `listSites`, `listContacts`, `listAssets`, `listWorkOrders` (por cliente); v0.2: `primarySalesRepId` e `kind` (`standard`, `internal`) editáveis por TA e DI; `salesSummaries` (F3; TA, MG, SR da carteira) |
 | `customerSites` | customers | TA, DI, BA | internos | `geocode` |
 | `customerContacts` | customers | TA, DI, BA | internos | `invite`, `approve`, `reject`, `block`, `unblock`, `revokeSessions` |
 | `products` | catalog | TA, DI, BA | internos | `listAssets` |
@@ -464,7 +464,7 @@ Cada ação exige `expectedVersion`, grava `work_order_status_history`, publica 
 | `assets.documents` · `assets.addDocument` (MVP) | Documentos do ativo por categoria (`comodato_contract`, `invoice`, `manual`, `movement_term`, `photo`, `other`); `addDocument` registra um anexo já enviado (seção 2.13). Contratos vindos do ERP (F2) aparecem com `source = erp` | listar internos e SR (carteira); adicionar TA, DI, BA |
 | `assetMeters.listByAsset` · `assetMeters.create` (F2) | Medidores do ativo (`hour_meter`, `energy_kwh`, `temperature`, `cycles`), unidade, limites e última leitura | listar internos; criar TA, DI |
 | `assetMeters.update` · `assetMeters.deactivate` (F2) | Ajusta limites e unidade / inativa | TA, DI |
-| `assetMeters.readings` (F2) | Leituras (`meter_readings`) por período e `origin` (`manual`, `iot`, `import`); `bucket` = `hour` ou `day` devolve agregados | internos |
+| `assetMeters.readings` (F2) | Leituras (`meter_readings`) por período e `origin` (`manual`, `iot`, `file_import`); `bucket` = `hour` ou `day` devolve agregados | internos |
 | `assetMeters.recordReading` (F2) | Leitura manual pelo backoffice (`origin = manual`, `measuredAt`, valor `double`, `reset` opcional para troca do horímetro). Evento `meter_reading.recorded` | TA, DI, BA |
 | `meterReadings.annul` (F2) | Anula leitura errada com motivo; os planos por medidor recalculam a previsão | TA, DI |
 
@@ -1206,6 +1206,7 @@ Consumidores: **N** = notificações · **RT** = tempo real (aviso de invalidaç
 | `asset.registered` · `asset.updated` · `asset.assigned` · `asset.transferred` · `asset.withdrawn` · `asset.retired` · `asset.status_changed` | Ciclo do ativo | `asset_id`, `customer_id`, `customer_site_id`, `assignment_id` | assets | RT, R, S, W |
 | `qr_tag_batch.generated` · `qr_tag.bound` · `qr_tag.revoked` · `qr_tag.unbound` | Etiquetas | `qr_tag_id`, `asset_id`, `reason` | assets | RT, S |
 | `customer.created` · `customer.updated` · `customer.deactivated` | Cadastro (local ou ERP) | `customer_id`, `source` | customers | RT, S, W |
+| `customer_site.created` · `customer_site.updated` · `customer_site.deactivated` | Unidade criada, alterada ou inativada (local, importação ou ERP) | `customer_site_id`, `customer_id`, `source` | customers | RT, S |
 | `customer_contact.created` · `customer_contact.updated` · `customer_contact.deactivated` | Contato criado ou alterado (local, importação, ERP ou autocadastro via QR com `status = pending_approval`) | `contact_id`, `customer_id`, `origin`, `status` | customers | N (triagem, no autocadastro), RT |
 | `customer_contact.approved` · `customer_contact.blocked` | Decisão do tenant | `contact_id` | customers | N, identity_access (revoga sessões no bloqueio) |
 | `product.created` · `product.updated` · `service.created` · `service.updated` | Catálogo | `id`, `source`, `is_active` | catalog | S |

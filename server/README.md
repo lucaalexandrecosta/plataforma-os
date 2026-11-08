@@ -13,14 +13,36 @@ lib/
     │   ├── db/                 # TenantScopedDatabase (set_config por transação)
     │   ├── auth/               # tokens ES256, token do Keycloak, handler, revogação
     │   ├── endpoints/          # StaffEndpoint, CustomerEndpoint, PublicEndpoint
-    │   └── errors/             # ApiException (modelo) e fábricas
+    │   ├── errors/             # ApiException (modelo) e fábricas do catálogo
+    │   ├── authz/              # Grants: papéis e permissões relidos do banco por requisição
+    │   ├── paging/             # PageRequest + cursor keyset assinado (HMAC)
+    │   ├── outbox/             # eventos de domínio na mesma transação
+    │   └── models/             # enums comuns (RecordSource)
     ├── tenancy/                # camada 1: tenants (TenantDirectory)
     ├── identity_access/        # camada 2: vínculos, papéis, auth.*, me.*
+    ├── customers/              # camada 2: customers.*, customerSites.*, customerContacts.*
     └── generated/              # gerado pelo Serverpod (versionado; o CI confere)
 migrations/                     # só as tabelas internas do Serverpod (schema public)
 test/unit/                      # sem banco
-test/e2e/                       # servidor + banco reais (isolamento entre tenants)
+test/e2e/                       # servidor + banco reais (isolamento, Keycloak, cadastros)
 ```
+
+## Padrão de cadastro (docs/08 §3.1)
+
+O [cadastro de clientes](lib/src/customers/internal/customer_service.dart) é a referência para os próximos:
+
+| Peça | Como |
+|---|---|
+| Leitura | `requireAnyRole(internalRoles)`; outro tenant → `NOT_FOUND` (a RLS esconde) |
+| Escrita | `requirePermission('<recurso>.manage')`, relida do banco: um token com papel forjado não ganha nada |
+| Validação | Regras puras em `internal/<recurso>_rules.dart` (testes unitários), todos os erros por campo de uma vez; a importação por planilha usa as mesmas |
+| Criação | Aceita `id` UUID v7 do app (`INVALID_UUID` se não for); `tenantId` só do contexto |
+| Alteração | `<Recurso>Patch` (nulo = sem mudança, `clear` = apagar) + `expectedVersion`; `updateWhere(id & version)`; patch sem mudança real não gasta versão |
+| Inativação | `deactivate(reason)` / `reactivate`; nada é apagado |
+| Eventos | `Outbox.record` na mesma transação (nomes do catálogo do docs/08) |
+| Auditoria, versão, `created_by` | Triggers do banco |
+| Lista | `<Recurso>Filter` tipado + `PageRequest`; ordenação só pelos campos da lista; cursor de outra combinação → `CURSOR_MISMATCH` |
+| Origem ERP | Campos mestres → `MASTER_FIELD_READ_ONLY` (espelha `trg_guard_erp_master`) |
 
 Cada módulo expõe só o arquivo `<módulo>.dart`; o resto fica em `internal/`. As tabelas de negócio são SQL-first (`db/schema.sql` + dbmate) e entram nos modelos com `managedMigration: false`.
 

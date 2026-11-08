@@ -1,0 +1,12 @@
+# Campos opcionais que um patch pode limpar (gravar nulo). Campo nulo no
+# CustomerPatch = "não mexer"; para apagar, liste-o em clear.
+enum: CustomerField
+serialized: byName
+values:
+  - code
+  - tradeName
+  - documentNumber
+  - stateRegistration
+  - email
+  - phone
+  - notes

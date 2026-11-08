@@ -1,0 +1,9 @@
+# cnpj (numérico ou alfanumérico), cpf, foreign (documento estrangeiro, texto
+# livre) ou none (sem documento).
+enum: DocumentType
+serialized: byName
+values:
+  - cnpj
+  - cpf
+  - foreign
+  - none

@@ -1,0 +1,14 @@
+# customerContacts.create. Precisa de celular ou e-mail (o login do contato é
+# por OTP num deles).
+class: CustomerContactInput
+fields:
+  id: UuidValue?
+  customerId: UuidValue
+  customerSiteId: UuidValue?
+  name: String
+  email: String?
+  phone: String?
+  jobTitle: String?
+  contactRole: ContactRole?
+  canOpenRequests: bool?
+  preferredChannel: NotificationChannel?

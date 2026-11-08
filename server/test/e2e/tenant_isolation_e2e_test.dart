@@ -16,7 +16,6 @@ import 'package:plataforma_os_client/plataforma_os_client.dart';
 import 'package:plataforma_os_server/src/platform/auth/access_token_service.dart';
 import 'package:plataforma_os_server/src/platform/auth/token_claims.dart';
 import 'package:plataforma_os_server/src/platform/context/request_context.dart';
-import 'package:serverpod_client/serverpod_client.dart';
 import 'package:test/test.dart';
 import 'package:yaml/yaml.dart';
 

@@ -1,0 +1,32 @@
+# app.customers (db/schema.sql §9). Tabela SQL-first: o Serverpod só mapeia.
+# Colunas técnicas (row_version, sync_xid, external_payload, external_hash,
+# created_by/updated_by) ficam fora do modelo e são mantidas pelo banco.
+class: Customer
+table: customers
+managedMigration: false
+fields:
+  id: UuidValue, defaultModel=random_v7
+  tenantId: UuidValue, column=tenant_id
+  code: String?
+  name: String
+  tradeName: String?, column=trade_name
+  personType: PersonType, column=person_type
+  documentType: DocumentType, column=document_type
+  # Normalizado: sem pontuação, maiúsculas (CNPJ alfanumérico).
+  documentNumber: String?, column=document_number
+  stateRegistration: String?, column=state_registration
+  email: String?
+  # E.164.
+  phone: String?
+  notes: String?
+  kind: CustomerKind
+  primarySalesRepId: UuidValue?, column=primary_sales_rep_id
+  skipTriage: bool, column=skip_triage
+  isActive: bool, column=is_active
+  deactivatedAt: DateTime?, column=deactivated_at
+  source: RecordSource
+  externalSystem: String?, column=external_system
+  externalId: String?, column=external_id
+  createdAt: DateTime, column=created_at
+  updatedAt: DateTime, column=updated_at
+  version: int

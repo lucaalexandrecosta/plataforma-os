@@ -1,0 +1,7 @@
+class: CustomerContactPage
+fields:
+  items: List<CustomerContact>
+  nextCursor: String?
+  hasMore: bool
+  total: int?
+  totalIsEstimate: bool?

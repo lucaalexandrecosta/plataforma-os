@@ -1,0 +1,34 @@
+# app.customer_contacts (db/schema.sql §9): quem abre chamados pelo app do
+# cliente ou pela página do QR. customerSiteId nulo = todas as unidades.
+# userId é ligado no primeiro login por OTP (não editável aqui).
+class: CustomerContact
+table: customer_contacts
+managedMigration: false
+fields:
+  id: UuidValue, defaultModel=random_v7
+  tenantId: UuidValue, column=tenant_id
+  customerId: UuidValue, column=customer_id
+  customerSiteId: UuidValue?, column=customer_site_id
+  userId: UuidValue?, column=user_id
+  name: String
+  email: String?
+  phoneE164: String?, column=phone_e164
+  jobTitle: String?, column=job_title
+  contactRole: ContactRole, column=contact_role
+  status: ContactStatus
+  origin: ContactOrigin
+  canOpenRequests: bool, column=can_open_requests
+  preferredChannel: NotificationChannel?, column=preferred_channel
+  # Consentimento do próprio contato (fluxo de OTP); só leitura no backoffice.
+  whatsappOptInAt: DateTime?, column=whatsapp_opt_in_at
+  approvedAt: DateTime?, column=approved_at
+  approvedBy: UuidValue?, column=approved_by
+  blockedReason: String?, column=blocked_reason
+  lastLoginAt: DateTime?, column=last_login_at
+  isActive: bool, column=is_active
+  source: RecordSource
+  externalSystem: String?, column=external_system
+  externalId: String?, column=external_id
+  createdAt: DateTime, column=created_at
+  updatedAt: DateTime, column=updated_at
+  version: int

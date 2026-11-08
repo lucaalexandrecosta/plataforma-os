@@ -1,0 +1,14 @@
+# customerContacts.update(id, patch, expectedVersion). Status muda só pelas
+# ações approve/block/unblock. Com source = erp, nome, e-mail, celular e
+# cargo são do ERP.
+class: CustomerContactPatch
+fields:
+  customerSiteId: UuidValue?
+  name: String?
+  email: String?
+  phone: String?
+  jobTitle: String?
+  contactRole: ContactRole?
+  canOpenRequests: bool?
+  preferredChannel: NotificationChannel?
+  clear: List<CustomerContactField>?

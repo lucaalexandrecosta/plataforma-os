@@ -1,0 +1,9 @@
+# standard: cliente de verdade; internal: setor ou oficina do próprio tenant
+# (F3, manutenção interna). Cliente interno é sempre local (CHECK do banco).
+# "external" seria o nome natural, mas é palavra reservada do Serverpod
+# (tool/db/check_enum_values.mjs).
+enum: CustomerKind
+serialized: byName
+values:
+  - standard
+  - internal

@@ -88,7 +88,11 @@ Dentro da meta, mas o p95 está perto do limite. O custo são três idas e volta
 | `uuid` com `UuidValue`, enums `byName`, `column=` para snake_case, `managedMigration: false` | ✔ funcionam no ORM (`Tenant`, `TenantMembership`, `TenantMembershipRole`, `AppUser`) |
 | `UuidValue` como parâmetro de SQL próprio | ✘ o driver não infere o tipo. **Regra:** passar `.uuid` (texto) com cast explícito `@id::uuid` |
 | `timestamptz` × `DateTime` | ⚠ O Serverpod 4.1 só mapeia `DateTime` para `timestamp without time zone`; `timestamptz` aparece como `unknown` na verificação de integridade, que não pode ser desligada para tabelas não gerenciadas. Na api e no worker é só um aviso na inicialização (achado 11 para o modo de migração). **Mantemos `timestamptz`** (decisão do schema). A leitura e a gravação em UTC ainda precisam de teste no S2 |
-| `bigint` em centavos, `jsonb`, CHECKs de texto, CRUD completo de `work_orders` e `work_order_items` | Pendente (etapa 4) |
+| Leitura e gravação de `timestamptz` com `DateTime` | ✔ (cadastro de clientes): o ORM grava e lê em UTC, `createdAt.isUtc` e o valor batem com o banco. O aviso da inicialização continua e é inofensivo |
+| Enums com os valores dos `CHECK`s | ⚠ O gerador recusa valores que são palavras reservadas (`external`, `import`, `part`, `break`) e não aceita valor serializado diferente do nome. **Decisão:** trocar no banco antes da homologação (`standard`, `file_import`, `spare_part`, `rest_break`, 9 colunas). [check_enum_values.mjs](../../tool/db/check_enum_values.mjs) roda no CI e recusa valor de `CHECK` ou nome de coluna que não caiba num modelo |
+| Concorrência otimista pelo ORM | ✔ `updateWhere(where: id = x & version = esperada)`; zero linhas → `VERSION_MISMATCH`. Unicidade do banco chega como `DatabaseUniqueViolationException` com `constraintName`, mapeada para `DUPLICATE` no campo certo |
+| `jsonb` em SQL próprio | ✔ texto + `@payload::jsonb` (outbox) |
+| `bigint` em centavos, CRUD completo de `work_orders` e `work_order_items` | Pendente (etapa 4) |
 
 ## 6. Próximos passos
 

@@ -12,11 +12,293 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _ida;
 import 'package:http/http.dart' as _i85jenna;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer.dart' as _isrde2pn;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_contact.dart' as _iicdz276;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_contact_filter.dart' as _i9rfeui9;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_contact_input.dart' as _ixru6art;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_contact_page.dart' as _is39dqw1;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_contact_patch.dart' as _iks49tp6;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_filter.dart' as _it5zcv8o;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_input.dart' as _il30a9yx;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_page.dart' as _igrzlp6q;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_patch.dart' as _iv7lbpqh;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_site.dart' as _iq0mn52n;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_site_filter.dart' as _itjpt449;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_site_input.dart' as _i10zqbaj;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_site_page.dart' as _iwv5pqpt;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_site_patch.dart' as _indfb8jf;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/me_info.dart' as _i8cz5om6;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/tenant_token.dart' as _ii663qav;
+import 'package:plataforma_os_client/src/protocol/platform/paging/models/page_request.dart' as _iiqqgmzw;
 import 'package:plataforma_os_client/src/protocol/tenancy/models/tenant_summary.dart' as _i11upz4e;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 import 'protocol.dart' as _il2as5qe;
+
+/// `customerContacts` (docs/08 §3.1). Escrita: `customers.manage`; leitura:
+/// papéis internos. Faltam `invite` (com as notificações) e `revokeSessions`
+/// (com o login do contato por OTP).
+/// {@category Endpoint}
+class EndpointCustomerContacts extends EndpointStaff {
+  EndpointCustomerContacts(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'customerContacts';
+
+  _ida.Future<_is39dqw1.CustomerContactPage> list(
+    _i9rfeui9.CustomerContactFilter? filter,
+    _iiqqgmzw.PageRequest? page,
+  ) => caller.callServerEndpoint<_is39dqw1.CustomerContactPage>(
+    'customerContacts',
+    'list',
+    {
+      'filter': filter,
+      'page': page,
+    },
+  );
+
+  _ida.Future<_iicdz276.CustomerContact> get(_isc.UuidValue id) => caller.callServerEndpoint<_iicdz276.CustomerContact>(
+    'customerContacts',
+    'get',
+    {'id': id},
+  );
+
+  _ida.Future<_iicdz276.CustomerContact> create(_ixru6art.CustomerContactInput input) =>
+      caller.callServerEndpoint<_iicdz276.CustomerContact>(
+        'customerContacts',
+        'create',
+        {'input': input},
+      );
+
+  _ida.Future<_iicdz276.CustomerContact> update(
+    _isc.UuidValue id,
+    _iks49tp6.CustomerContactPatch patch,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_iicdz276.CustomerContact>(
+    'customerContacts',
+    'update',
+    {
+      'id': id,
+      'patch': patch,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  _ida.Future<_iicdz276.CustomerContact> approve(
+    _isc.UuidValue id,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_iicdz276.CustomerContact>(
+    'customerContacts',
+    'approve',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  _ida.Future<_iicdz276.CustomerContact> block(
+    _isc.UuidValue id,
+    String reason,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_iicdz276.CustomerContact>(
+    'customerContacts',
+    'block',
+    {
+      'id': id,
+      'reason': reason,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  _ida.Future<_iicdz276.CustomerContact> unblock(
+    _isc.UuidValue id,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_iicdz276.CustomerContact>(
+    'customerContacts',
+    'unblock',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  _ida.Future<_iicdz276.CustomerContact> deactivate(
+    _isc.UuidValue id,
+    String reason,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_iicdz276.CustomerContact>(
+    'customerContacts',
+    'deactivate',
+    {
+      'id': id,
+      'reason': reason,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  _ida.Future<_iicdz276.CustomerContact> reactivate(
+    _isc.UuidValue id,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_iicdz276.CustomerContact>(
+    'customerContacts',
+    'reactivate',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+    },
+  );
+}
+
+/// `customerSites` (docs/08 §3.1). Escrita: `customers.manage`; leitura:
+/// papéis internos. Falta `geocode` (provedor de geocodificação a escolher).
+/// {@category Endpoint}
+class EndpointCustomerSites extends EndpointStaff {
+  EndpointCustomerSites(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'customerSites';
+
+  _ida.Future<_iwv5pqpt.CustomerSitePage> list(
+    _itjpt449.CustomerSiteFilter? filter,
+    _iiqqgmzw.PageRequest? page,
+  ) => caller.callServerEndpoint<_iwv5pqpt.CustomerSitePage>(
+    'customerSites',
+    'list',
+    {
+      'filter': filter,
+      'page': page,
+    },
+  );
+
+  _ida.Future<_iq0mn52n.CustomerSite> get(_isc.UuidValue id) => caller.callServerEndpoint<_iq0mn52n.CustomerSite>(
+    'customerSites',
+    'get',
+    {'id': id},
+  );
+
+  _ida.Future<_iq0mn52n.CustomerSite> create(_i10zqbaj.CustomerSiteInput input) =>
+      caller.callServerEndpoint<_iq0mn52n.CustomerSite>(
+        'customerSites',
+        'create',
+        {'input': input},
+      );
+
+  _ida.Future<_iq0mn52n.CustomerSite> update(
+    _isc.UuidValue id,
+    _indfb8jf.CustomerSitePatch patch,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_iq0mn52n.CustomerSite>(
+    'customerSites',
+    'update',
+    {
+      'id': id,
+      'patch': patch,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  _ida.Future<_iq0mn52n.CustomerSite> deactivate(
+    _isc.UuidValue id,
+    String reason,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_iq0mn52n.CustomerSite>(
+    'customerSites',
+    'deactivate',
+    {
+      'id': id,
+      'reason': reason,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  _ida.Future<_iq0mn52n.CustomerSite> reactivate(
+    _isc.UuidValue id,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_iq0mn52n.CustomerSite>(
+    'customerSites',
+    'reactivate',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+    },
+  );
+}
+
+/// `customers` (docs/08 §3.1). Escrita: tenant_admin, dispatcher e
+/// backoffice_agent (`customers.manage`); leitura: papéis internos.
+/// Faltam do padrão: `audit`, `export` e os métodos próprios por cliente
+/// (`listSites`, `listContacts`, `listAssets`, `listWorkOrders`).
+/// {@category Endpoint}
+class EndpointCustomers extends EndpointStaff {
+  EndpointCustomers(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'customers';
+
+  _ida.Future<_igrzlp6q.CustomerPage> list(
+    _it5zcv8o.CustomerFilter? filter,
+    _iiqqgmzw.PageRequest? page,
+  ) => caller.callServerEndpoint<_igrzlp6q.CustomerPage>(
+    'customers',
+    'list',
+    {
+      'filter': filter,
+      'page': page,
+    },
+  );
+
+  _ida.Future<_isrde2pn.Customer> get(_isc.UuidValue id) => caller.callServerEndpoint<_isrde2pn.Customer>(
+    'customers',
+    'get',
+    {'id': id},
+  );
+
+  _ida.Future<_isrde2pn.Customer> create(_il30a9yx.CustomerInput input) =>
+      caller.callServerEndpoint<_isrde2pn.Customer>(
+        'customers',
+        'create',
+        {'input': input},
+      );
+
+  _ida.Future<_isrde2pn.Customer> update(
+    _isc.UuidValue id,
+    _iv7lbpqh.CustomerPatch patch,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_isrde2pn.Customer>(
+    'customers',
+    'update',
+    {
+      'id': id,
+      'patch': patch,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  _ida.Future<_isrde2pn.Customer> deactivate(
+    _isc.UuidValue id,
+    String reason,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_isrde2pn.Customer>(
+    'customers',
+    'deactivate',
+    {
+      'id': id,
+      'reason': reason,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  _ida.Future<_isrde2pn.Customer> reactivate(
+    _isc.UuidValue id,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_isrde2pn.Customer>(
+    'customers',
+    'reactivate',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+    },
+  );
+}
 
 /// `auth.*` — métodos sem login (o token do Keycloak vem como parâmetro).
 /// {@category Endpoint}
@@ -117,9 +399,18 @@ class Client extends _isc.ServerpodClientShared {
          disconnectStreamsOnLostInternetConnection: disconnectStreamsOnLostInternetConnection,
          httpClientOverride: httpClientOverride,
        ) {
+    customerContacts = EndpointCustomerContacts(this);
+    customerSites = EndpointCustomerSites(this);
+    customers = EndpointCustomers(this);
     auth = EndpointAuth(this);
     me = EndpointMe(this);
   }
+
+  late final EndpointCustomerContacts customerContacts;
+
+  late final EndpointCustomerSites customerSites;
+
+  late final EndpointCustomers customers;
 
   late final EndpointAuth auth;
 
@@ -127,6 +418,9 @@ class Client extends _isc.ServerpodClientShared {
 
   @override
   Map<String, _isc.EndpointRef> get endpointRefLookup => {
+    'customerContacts': customerContacts,
+    'customerSites': customerSites,
+    'customers': customers,
     'auth': auth,
     'me': me,
   };

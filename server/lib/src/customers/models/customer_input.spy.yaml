@@ -1,0 +1,17 @@
+# customers.create (docs/08 §3.1). id opcional: UUID v7 gerado pelo app.
+# documentType ausente: cnpj para empresa, cpf para pessoa física.
+class: CustomerInput
+fields:
+  id: UuidValue?
+  code: String?
+  name: String
+  tradeName: String?
+  personType: PersonType?
+  documentType: DocumentType?
+  documentNumber: String?
+  stateRegistration: String?
+  email: String?
+  phone: String?
+  notes: String?
+  kind: CustomerKind?
+  skipTriage: bool?

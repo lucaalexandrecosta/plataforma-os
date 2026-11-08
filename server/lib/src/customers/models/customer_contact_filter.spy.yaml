@@ -1,0 +1,8 @@
+# q busca em nome, e-mail e celular.
+class: CustomerContactFilter
+fields:
+  customerId: UuidValue?
+  customerSiteId: UuidValue?
+  q: String?
+  status: ContactStatus?
+  isActive: bool?

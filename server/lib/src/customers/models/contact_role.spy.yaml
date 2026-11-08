@@ -1,0 +1,6 @@
+# customer_admin gerencia os contatos do próprio cliente (app do cliente).
+enum: ContactRole
+serialized: byName
+values:
+  - customer_contact
+  - customer_admin

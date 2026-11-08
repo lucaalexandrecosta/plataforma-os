@@ -1,0 +1,7 @@
+# Origem do cadastro (coluna source): local (backoffice/importação) ou erp
+# (fase 2). Registros do ERP têm campos mestres somente leitura (docs/07).
+enum: RecordSource
+serialized: byName
+values:
+  - local
+  - erp

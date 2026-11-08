@@ -5,8 +5,10 @@
 /// cliente e no backoffice (Flutter Web).
 library;
 
+export 'src/br_documents.dart' show BrDocuments;
 export 'src/crockford.dart' show Crockford;
 export 'src/money.dart' show Money, Quantity;
+export 'src/phones.dart' show Phones;
 export 'src/qr_codes.dart' show QrCodes;
 export 'src/uuid_v7.dart' show UuidV7;
 export 'src/visit_status.dart' show VisitStatus, VisitOutcome;

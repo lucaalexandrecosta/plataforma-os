@@ -1,0 +1,6 @@
+# q busca em nome, código, cidade e bairro.
+class: CustomerSiteFilter
+fields:
+  customerId: UuidValue?
+  q: String?
+  isActive: bool?

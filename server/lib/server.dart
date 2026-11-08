@@ -6,6 +6,7 @@ import 'src/platform/auth/access_token_service.dart';
 import 'src/platform/auth/authentication_handler.dart';
 import 'src/platform/auth/idp_token_verifier.dart';
 import 'src/platform/db/tenant_scoped_database.dart';
+import 'src/platform/paging/paging.dart';
 
 /// Inicia o servidor. O mesmo executável sobe em dois papéis (docs/02 §3.1):
 ///
@@ -27,12 +28,14 @@ Future<void> run(List<String> args) async {
   await pod.start();
 }
 
-/// Configura emissão/validação de tokens a partir de `config/passwords.yaml`
+/// Configura tokens e cursores de paginação a partir de `config/passwords.yaml`
 /// (dev) ou das variáveis do cofre (homologação e produção). Nunca do
 /// repositório (docs/13 §5, segredos).
 void configureAuth(Serverpod pod) {
   String required(String key) =>
       pod.getPassword(key) ?? (throw StateError('Segredo "$key" ausente (config/passwords.yaml ou cofre).'));
+
+  Paging.configure(required('cursorSigningKey'));
 
   final kid = required('tokenSigningKeyId');
   AuthServices.configure(

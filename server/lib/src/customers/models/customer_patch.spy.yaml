@@ -1,0 +1,18 @@
+# customers.update(id, patch, expectedVersion). Campo nulo = sem mudança;
+# clear = campos a apagar. Com source = erp, só as extensões locais
+# (notes, kind, skipTriage) aceitam mudança: o resto → MASTER_FIELD_READ_ONLY.
+class: CustomerPatch
+fields:
+  code: String?
+  name: String?
+  tradeName: String?
+  personType: PersonType?
+  documentType: DocumentType?
+  documentNumber: String?
+  stateRegistration: String?
+  email: String?
+  phone: String?
+  notes: String?
+  kind: CustomerKind?
+  skipTriage: bool?
+  clear: List<CustomerField>?

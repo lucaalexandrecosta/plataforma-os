@@ -1,0 +1,7 @@
+# pending_approval: autocadastro pelo QR aguardando o tenant (docs/05).
+enum: ContactStatus
+serialized: byName
+values:
+  - active
+  - pending_approval
+  - blocked

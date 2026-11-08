@@ -1,0 +1,7 @@
+enum: ContactOrigin
+serialized: byName
+values:
+  - backoffice
+  - file_import
+  - erp
+  - qr_self_service

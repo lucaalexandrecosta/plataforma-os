@@ -1,0 +1,20 @@
+# customerSites.update(id, patch, expectedVersion). Nulo = sem mudança;
+# clear = apagar. A unidade não troca de cliente. Com source = erp, só
+# location, phone e accessNotes (extensões locais) aceitam mudança.
+class: CustomerSitePatch
+fields:
+  code: String?
+  name: String?
+  street: String?
+  streetNumber: String?
+  complement: String?
+  district: String?
+  city: String?
+  state: String?
+  postalCode: String?
+  countryCode: String?
+  latitude: double?
+  longitude: double?
+  phone: String?
+  accessNotes: String?
+  clear: List<CustomerSiteField>?

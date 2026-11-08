@@ -1,0 +1,16 @@
+# Campos opcionais da unidade que um patch pode apagar. latitude e longitude
+# saem juntas (location).
+enum: CustomerSiteField
+serialized: byName
+values:
+  - code
+  - street
+  - streetNumber
+  - complement
+  - district
+  - city
+  - state
+  - postalCode
+  - location
+  - phone
+  - accessNotes

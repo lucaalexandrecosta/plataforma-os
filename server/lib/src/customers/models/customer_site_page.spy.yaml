@@ -1,0 +1,7 @@
+class: CustomerSitePage
+fields:
+  items: List<CustomerSite>
+  nextCursor: String?
+  hasMore: bool
+  total: int?
+  totalIsEstimate: bool?

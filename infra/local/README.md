@@ -25,7 +25,11 @@ docker compose -f infra/local/compose.yaml exec -T postgres \
   psql -v ON_ERROR_STOP=1 -U postgres -d plataforma_os < db/seeds/dev_seed.sql
 ```
 
-Para recriar do zero: `docker compose -f infra/local/compose.yaml down -v` e repetir.
+Para recriar do zero (depois de mudar o `schema.sql` ou o seed), os dois bancos ou só um deles, com migração, seed e migrações do Serverpod:
+
+```bash
+bash tool/dev/reset_local_db.sh all     # ou dev | test
+```
 
 ## 3. Servidor
 

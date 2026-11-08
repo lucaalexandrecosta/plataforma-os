@@ -1,0 +1,8 @@
+# Canal preferido do contato. WhatsApp só com consentimento registrado
+# (whatsapp_opt_in_at); sem ele, o módulo de notificações cai para SMS/e-mail.
+enum: NotificationChannel
+serialized: byName
+values:
+  - whatsapp
+  - sms
+  - email

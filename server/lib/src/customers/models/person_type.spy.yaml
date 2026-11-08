@@ -1,0 +1,5 @@
+enum: PersonType
+serialized: byName
+values:
+  - company
+  - individual

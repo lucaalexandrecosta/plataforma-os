@@ -1,0 +1,8 @@
+# Filtros de customers.list (docs/08 §2.7). q busca em nome, nome fantasia,
+# código e documento. isActive nulo = todos.
+class: CustomerFilter
+fields:
+  q: String?
+  isActive: bool?
+  kind: CustomerKind?
+  source: RecordSource?

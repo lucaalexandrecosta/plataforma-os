@@ -13,7 +13,6 @@ import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:plataforma_os_client/plataforma_os_client.dart';
-import 'package:serverpod_client/serverpod_client.dart';
 import 'package:test/test.dart';
 
 final class _Bearer implements ClientAuthKeyProvider {

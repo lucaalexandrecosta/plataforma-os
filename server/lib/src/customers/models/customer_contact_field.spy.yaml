@@ -1,0 +1,8 @@
+enum: CustomerContactField
+serialized: byName
+values:
+  - customerSiteId
+  - email
+  - phone
+  - jobTitle
+  - preferredChannel

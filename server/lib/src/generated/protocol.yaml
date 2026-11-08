@@ -1,3 +1,27 @@
+customerContacts:
+  - list:
+  - get:
+  - create:
+  - update:
+  - approve:
+  - block:
+  - unblock:
+  - deactivate:
+  - reactivate:
+customerSites:
+  - list:
+  - get:
+  - create:
+  - update:
+  - deactivate:
+  - reactivate:
+customers:
+  - list:
+  - get:
+  - create:
+  - update:
+  - deactivate:
+  - reactivate:
 auth:
   - exchangeIdpToken:
 me:

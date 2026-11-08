@@ -12,6 +12,7 @@ dependencies:
   # Serverpod fixado: a API da camada de banco pode mudar numa minor
   # (docs/12 §4.3). Atualização só planejada, com a suíte de isolamento.
   serverpod: 4.1.1
+  crypto: ^3.0.6
   dart_jsonwebtoken: ^3.4.1
   http: ^1.5.0
   plataforma_os_core: any
@@ -19,6 +20,8 @@ dependencies:
 dev_dependencies:
   lints: ^6.0.0
   plataforma_os_client: any
+  # Testes e2e conferem outbox e auditoria direto no banco de teste.
+  postgres: ^3.5.0
   serverpod_client: 4.1.1
   serverpod_test: 4.1.1
   test: ^1.26.0

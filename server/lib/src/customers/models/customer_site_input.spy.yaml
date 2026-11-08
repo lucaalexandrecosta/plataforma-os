@@ -1,0 +1,19 @@
+# customerSites.create. countryCode ausente = BR.
+class: CustomerSiteInput
+fields:
+  id: UuidValue?
+  customerId: UuidValue
+  code: String?
+  name: String
+  street: String?
+  streetNumber: String?
+  complement: String?
+  district: String?
+  city: String?
+  state: String?
+  postalCode: String?
+  countryCode: String?
+  latitude: double?
+  longitude: double?
+  phone: String?
+  accessNotes: String?
