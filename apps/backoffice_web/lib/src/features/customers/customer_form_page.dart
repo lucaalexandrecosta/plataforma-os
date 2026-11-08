@@ -9,6 +9,7 @@ import '../../api/api_client.dart';
 import '../../auth/auth_controller.dart';
 import '../../ui/dialogs.dart';
 import '../../ui/errors.dart';
+import '../../ui/form_layout.dart';
 import 'contacts_tab.dart';
 import 'customer_format.dart';
 import 'sites_tab.dart';
@@ -373,11 +374,11 @@ class _CustomerFormPageState extends ConsumerState<CustomerFormPage> with Single
       ],
       if (!canManage) ...[
         const SizedBox(height: 12),
-        const _Banner(icon: Icons.visibility_outlined, text: 'Você pode consultar, mas não alterar clientes.'),
+        const InfoBanner(icon: Icons.visibility_outlined, text: 'Você pode consultar, mas não alterar clientes.'),
       ],
       if (_fromErp) ...[
         const SizedBox(height: 12),
-        const _Banner(
+        const InfoBanner(
           icon: Icons.sync,
           text:
               'Este cadastro vem do ERP: nome, documento e contatos só mudam por lá. Observações e triagem são editáveis.',
@@ -386,10 +387,10 @@ class _CustomerFormPageState extends ConsumerState<CustomerFormPage> with Single
     ];
 
     final sections = <Widget>[
-      _Section(
+      FormSection(
         title: 'Identificação',
         children: [
-          _Field(
+          FieldBox(
             width: 260,
             child: SegmentedButton<PersonType>(
               segments: [
@@ -404,7 +405,7 @@ class _CustomerFormPageState extends ConsumerState<CustomerFormPage> with Single
                     }),
             ),
           ),
-          _Field(
+          FieldBox(
             width: 520,
             child: TextFormField(
               controller: _name,
@@ -416,7 +417,7 @@ class _CustomerFormPageState extends ConsumerState<CustomerFormPage> with Single
               validator: (v) => (v?.trim().isEmpty ?? true) ? 'Informe o nome.' : _serverErrors['name'],
             ),
           ),
-          _Field(
+          FieldBox(
             width: 360,
             child: TextFormField(
               controller: _tradeName,
@@ -426,7 +427,7 @@ class _CustomerFormPageState extends ConsumerState<CustomerFormPage> with Single
               validator: (_) => _serverErrors['tradeName'],
             ),
           ),
-          _Field(
+          FieldBox(
             width: 200,
             child: TextFormField(
               controller: _code,
@@ -438,10 +439,10 @@ class _CustomerFormPageState extends ConsumerState<CustomerFormPage> with Single
           ),
         ],
       ),
-      _Section(
+      FormSection(
         title: 'Documentos',
         children: [
-          _Field(
+          FieldBox(
             width: 240,
             child: DropdownButtonFormField<DocumentType>(
               initialValue: _documentType,
@@ -455,7 +456,7 @@ class _CustomerFormPageState extends ConsumerState<CustomerFormPage> with Single
             ),
           ),
           if (_documentType != DocumentType.none)
-            _Field(
+            FieldBox(
               width: 260,
               child: TextFormField(
                 controller: _document,
@@ -467,7 +468,7 @@ class _CustomerFormPageState extends ConsumerState<CustomerFormPage> with Single
                 validator: _validateDocument,
               ),
             ),
-          _Field(
+          FieldBox(
             width: 220,
             child: TextFormField(
               controller: _stateRegistration,
@@ -478,10 +479,10 @@ class _CustomerFormPageState extends ConsumerState<CustomerFormPage> with Single
           ),
         ],
       ),
-      _Section(
+      FormSection(
         title: 'Contato geral',
         children: [
-          _Field(
+          FieldBox(
             width: 320,
             child: TextFormField(
               controller: _email,
@@ -491,7 +492,7 @@ class _CustomerFormPageState extends ConsumerState<CustomerFormPage> with Single
               validator: _validateEmail,
             ),
           ),
-          _Field(
+          FieldBox(
             width: 240,
             child: TextFormField(
               controller: _phone,
@@ -507,10 +508,10 @@ class _CustomerFormPageState extends ConsumerState<CustomerFormPage> with Single
           ),
         ],
       ),
-      _Section(
+      FormSection(
         title: 'Atendimento',
         children: [
-          _Field(
+          FieldBox(
             width: 700,
             child: TextFormField(
               controller: _notes,
@@ -525,7 +526,7 @@ class _CustomerFormPageState extends ConsumerState<CustomerFormPage> with Single
               validator: (_) => _serverErrors['notes'],
             ),
           ),
-          _Field(
+          FieldBox(
             width: 700,
             child: SwitchListTile(
               contentPadding: EdgeInsets.zero,
@@ -584,66 +585,6 @@ class _CustomerFormPageState extends ConsumerState<CustomerFormPage> with Single
           ),
         ),
       ],
-    );
-  }
-}
-
-class _Section extends StatelessWidget {
-  const _Section({required this.title, required this.children});
-  final String title;
-  final List<Widget> children;
-
-  @override
-  Widget build(BuildContext context) => Padding(
-    padding: const EdgeInsets.only(bottom: 16),
-    child: Card(
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(20, 16, 20, 8),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(title, style: Theme.of(context).textTheme.titleMedium),
-            const SizedBox(height: 16),
-            Wrap(spacing: 16, runSpacing: 8, children: children),
-          ],
-        ),
-      ),
-    ),
-  );
-}
-
-class _Field extends StatelessWidget {
-  const _Field({required this.width, required this.child});
-  final double width;
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context) => ConstrainedBox(
-    constraints: BoxConstraints(maxWidth: width, minWidth: width < 300 ? width : 280),
-    child: SizedBox(width: width, child: child),
-  );
-}
-
-class _Banner extends StatelessWidget {
-  const _Banner({required this.icon, required this.text});
-  final IconData icon;
-  final String text;
-
-  @override
-  Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
-    return Container(
-      padding: const EdgeInsets.all(12),
-      decoration: BoxDecoration(color: scheme.secondaryContainer, borderRadius: BorderRadius.circular(8)),
-      child: Row(
-        children: [
-          Icon(icon, color: scheme.onSecondaryContainer),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Text(text, style: TextStyle(color: scheme.onSecondaryContainer)),
-          ),
-        ],
-      ),
     );
   }
 }

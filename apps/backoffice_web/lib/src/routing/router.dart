@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:plataforma_os_client/plataforma_os_client.dart';
 
+import '../features/catalog/catalog_page.dart';
+import '../features/catalog/product_form_page.dart';
+import '../features/catalog/service_form_page.dart';
 import '../features/customers/customer_form_page.dart';
 import '../features/customers/customers_list_page.dart';
 import '../features/home/home_page.dart';
@@ -26,6 +29,39 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/importacoes',
             pageBuilder: (_, _) => const NoTransitionPage(child: ImportsPage()),
+          ),
+          GoRoute(path: '/catalogo', redirect: (_, _) => '/catalogo/produtos'),
+          GoRoute(
+            path: '/catalogo/produtos',
+            pageBuilder: (_, _) => const NoTransitionPage(child: CatalogPage(tab: CatalogTab.products)),
+            routes: [
+              GoRoute(path: 'novo', builder: (_, _) => const ProductFormPage()),
+              GoRoute(
+                path: ':id',
+                builder: (_, state) {
+                  final id = _uuidOrNull(state.pathParameters['id']!);
+                  return id == null ? const _NotFound() : ProductFormPage(key: ValueKey(id), id: id);
+                },
+              ),
+            ],
+          ),
+          GoRoute(
+            path: '/catalogo/servicos',
+            pageBuilder: (_, _) => const NoTransitionPage(child: CatalogPage(tab: CatalogTab.services)),
+            routes: [
+              GoRoute(path: 'novo', builder: (_, _) => const ServiceFormPage()),
+              GoRoute(
+                path: ':id',
+                builder: (_, state) {
+                  final id = _uuidOrNull(state.pathParameters['id']!);
+                  return id == null ? const _NotFound() : ServiceFormPage(key: ValueKey(id), id: id);
+                },
+              ),
+            ],
+          ),
+          GoRoute(
+            path: '/catalogo/familias',
+            pageBuilder: (_, _) => const NoTransitionPage(child: CatalogPage(tab: CatalogTab.families)),
           ),
           GoRoute(
             path: '/clientes',

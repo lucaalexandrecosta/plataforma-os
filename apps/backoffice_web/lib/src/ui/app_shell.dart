@@ -4,8 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../auth/auth_controller.dart';
 
-/// Itens do menu lateral. Os próximos cadastros (unidades, produtos, ativos,
-/// técnicos) e as OS entram aqui conforme as etapas do guia (docs/13 §4).
+/// Itens do menu lateral. Os próximos cadastros (ativos, técnicos) e as OS entram aqui conforme as etapas do guia (docs/13 §4).
 final class _Destination {
   const _Destination(this.path, this.label, this.icon, this.selectedIcon, {this.permission});
   final String path;
@@ -20,6 +19,7 @@ final class _Destination {
 const _allDestinations = [
   _Destination('/', 'Início', Icons.home_outlined, Icons.home),
   _Destination('/clientes', 'Clientes', Icons.storefront_outlined, Icons.storefront),
+  _Destination('/catalogo', 'Catálogo', Icons.inventory_2_outlined, Icons.inventory_2),
   _Destination('/importacoes', 'Importar', Icons.upload_file_outlined, Icons.upload_file, permission: 'imports.run'),
 ];
 

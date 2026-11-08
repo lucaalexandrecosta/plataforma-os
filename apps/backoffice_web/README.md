@@ -23,8 +23,8 @@ Abra **http://frio-sul.localhost:8090** (a empresa vem do subdomínio) ou **http
 
 | Usuário | O que vê |
 |---|---|
-| `ana.admin@frio-sul.test` | frio-sul, administradora (cria e edita clientes) |
-| `bruno.despacho@frio-sul.test` | frio-sul, despacho (cria e edita clientes) |
+| `ana.admin@frio-sul.test` | frio-sul, administradora (clientes, catálogo e importações) |
+| `bruno.despacho@frio-sul.test` | frio-sul, despacho (edita clientes; só consulta o catálogo) |
 | `davi.consultor@dev.test` | frio-sul ou forno-norte, gestor (só consulta) |
 | `carla.admin@forno-norte.test` | forno-norte, administradora |
 
@@ -57,8 +57,10 @@ lib/
     ├── auth/                 # OIDC + PKCE, AuthController (Riverpod), tela de entrada
     ├── api/                  # cliente gerado do Serverpod com o token do tenant
     ├── routing/              # go_router (URLs em português, sem #)
-    ├── ui/                   # tema, menu lateral, erros
+    ├── ui/                   # tema, menu lateral, erros, PagedTable (lista por cursor), RecordHeader e FormSection
     └── features/
         ├── home/
-        └── customers/        # lista (busca, filtro, cursor) e ficha com abas Dados, Unidades e Contatos
+        ├── customers/        # lista (busca, filtro, cursor) e ficha com abas Dados, Unidades e Contatos
+        ├── catalog/          # /catalogo: produtos, serviços e famílias (árvore)
+        └── imports/          # /importacoes: modelo, conferência, importação e histórico
 ```
