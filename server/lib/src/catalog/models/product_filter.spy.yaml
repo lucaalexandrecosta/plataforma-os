@@ -1,0 +1,8 @@
+# q busca em nome, código e GTIN. productFamilyId inclui as subfamílias.
+class: ProductFilter
+fields:
+  q: String?
+  isActive: bool?
+  productKind: ProductKind?
+  productFamilyId: UuidValue?
+  source: RecordSource?

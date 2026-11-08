@@ -1,0 +1,9 @@
+# services.service_kind: usado na conferência para converter apontamentos em
+# itens (docs/07 §9.4).
+enum: ServiceKind
+serialized: byName
+values:
+  - labour
+  - travel
+  - visit
+  - other

@@ -1,0 +1,19 @@
+# app.product_families (db/schema.sql §10): árvore de famílias de produto
+# (ex.: Refrigeração > Freezer horizontal). Filtra sintomas, causas,
+# checklists e habilidades.
+class: ProductFamily
+table: product_families
+managedMigration: false
+fields:
+  id: UuidValue, defaultModel=random_v7
+  tenantId: UuidValue, column=tenant_id
+  parentId: UuidValue?, column=parent_id
+  code: String
+  name: String
+  isActive: bool, column=is_active
+  source: RecordSource
+  externalSystem: String?, column=external_system
+  externalId: String?, column=external_id
+  createdAt: DateTime, column=created_at
+  updatedAt: DateTime, column=updated_at
+  version: int

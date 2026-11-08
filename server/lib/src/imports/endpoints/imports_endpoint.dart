@@ -10,7 +10,7 @@ import '../internal/import_service.dart';
 /// confirmação, cancelamento, histórico e relatório de erros. Permissão
 /// `imports.run` (tenant_admin e backoffice_agent).
 class ImportsEndpoint extends StaffEndpoint {
-  Future<List<ImportEntityType>> available(Session session) async => ImportService.available;
+  Future<List<ImportEntityType>> available(Session session) => ImportService.available(session);
 
   Future<ImportTemplate> template(Session session, ImportEntityType entityType) =>
       ImportService.template(session, entityType);

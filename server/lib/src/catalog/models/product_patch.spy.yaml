@@ -1,0 +1,17 @@
+# Campo nulo = sem mudança; clear = campos a apagar. Com source = erp, código,
+# nome, descrição, unidade, GTIN e preço são do ERP (MASTER_FIELD_READ_ONLY).
+class: ProductPatch
+fields:
+  code: String?
+  name: String?
+  description: String?
+  productFamilyId: UuidValue?
+  productKind: ProductKind?
+  unitCode: String?
+  gtin: String?
+  isSerialized: bool?
+  tracksAssets: bool?
+  defaultWarrantyMonths: int?
+  referencePrice: int?
+  labelPositionInstructions: String?
+  clear: List<ProductField>?

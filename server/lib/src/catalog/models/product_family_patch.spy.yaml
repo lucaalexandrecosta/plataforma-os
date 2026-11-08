@@ -1,0 +1,7 @@
+# Campo nulo = sem mudança; clearParent = virar família raiz.
+class: ProductFamilyPatch
+fields:
+  code: String?
+  name: String?
+  parentId: UuidValue?
+  clearParent: bool?

@@ -7,6 +7,7 @@ library;
 
 export 'src/br_documents.dart' show BrDocuments;
 export 'src/crockford.dart' show Crockford;
+export 'src/gtin.dart' show Gtin;
 export 'src/money.dart' show Money, Quantity;
 export 'src/phones.dart' show Phones;
 export 'src/qr_codes.dart' show QrCodes;

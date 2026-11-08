@@ -1,0 +1,8 @@
+# q busca em nome e código. parentId filtra as filhas diretas; rootsOnly = só
+# as raízes.
+class: ProductFamilyFilter
+fields:
+  q: String?
+  isActive: bool?
+  parentId: UuidValue?
+  rootsOnly: bool?

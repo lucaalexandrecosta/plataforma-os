@@ -335,6 +335,7 @@ Todo endpoint de cadastro tem o mesmo conjunto de métodos, que não é repetido
 | `customerContacts` | customers | TA, DI, BA | internos | `invite`, `approve`, `reject`, `block`, `unblock`, `revokeSessions` |
 | `products` | catalog | TA, DI, BA | internos | `listAssets` |
 | `services` | catalog | TA, DI, BA | internos | — |
+| `productFamilies` | catalog | TA | internos | Árvore de até 5 níveis (`parentId`); `list` filtra por `parentId` ou `rootsOnly`. Inativar exige subfamílias inativas; ciclo ou profundidade acima de 5 → `VALIDATION_FAILED` em `parentId` |
 | `technicians` | scheduling | TA, DI | internos; PV (os da sua empresa) | `invite` (cria `user` + `tenant_membership`), `schedule`, `devices`; v0.2: `kind` (`employee`, `contractor`), `serviceProviderId` e `branchId`; PV convida e inativa só técnicos `contractor` da própria empresa |
 | `teams`, `serviceAreas` | scheduling | TA, DI | internos | `teams.setMembers` |
 | `workShifts`, `technicianShiftAssignments` | scheduling | TA, DI | internos | `technicianShiftAssignments.generate` (aplica padrão 5x2, 12x36 num período) |
@@ -351,6 +352,8 @@ Todo endpoint de cadastro tem o mesmo conjunto de métodos, que não é repetido
 | `maintenancePlans` (F2) | maintenance | TA, DI | internos | Ver seção 3.14 |
 | `iotDevices`, `telemetryAlertRules` (F3) | telemetry | TA | TA, DI, MG | Ver seção 3.17 |
 | `webhookSubscriptions` (F3) | integrations | TA | TA | Ver seção 7 |
+
+> **Implementado (08/11/2026):** `productFamilies`, `products` e `services` no padrão de cadastro. `products.list` com `productFamilyId` inclui as subfamílias; `q` busca também no GTIN. Preços em centavos (`int`). Padrões na criação: produto `equipment` com `tracksAssets` e `isSerialized`; peça e consumível sem ativo; serviço `other` em `H`. Eventos `product.*` e `service.*` com `id`, `source`, `is_active` (inativar e reativar saem como `*.updated` com `changed_fields = [isActive]` e o motivo). Falta `products.listAssets`, com o módulo `assets`. **Papéis:** vale a permissão `catalog.manage` do schema, que hoje está só em tenant_admin. A tabela acima diz TA, DI, BA para produtos e serviços. É preciso decidir qual dos dois vale.
 
 Registros com `source = 'erp'` aceitam `update` apenas nas extensões locais ([Integração ERP Senior](07-integracao-erp-senior.md)).
 
@@ -480,7 +483,7 @@ Com `require_movement_approval` ligado, `assets.assign`, `assets.transfer` e `as
 | `imports.confirm` · `imports.cancel` | Aplica (`AsyncJobRef`) / cancela | TA, DI |
 | `imports.list` · `imports.get` · `imports.reportUrl` | Histórico, situação, relatório de erros | TA, DI |
 
-> **Implementado no MVP (07/11/2026):** `imports.available`, `imports.template(entityType)` (CSV com BOM e `;`, mais a ajuda das colunas), `imports.preview(entityType, fileName, content)` (o arquivo vai no pedido, até 700 KB, CSV ou XLSX; grava em `sync_runs` e no armazenamento `private`; devolve a simulação), `imports.confirm(runId, expectedVersion)` (replaneja e aplica numa transação; síncrono), `imports.cancel`, `imports.list`, `imports.get` e `imports.errorReport(runId)` (CSV das linhas com erro). Tipos: `customers`, `customer_sites`, `customer_contacts`. O upload direto ao S3 e o processamento em job do worker entram para planilhas maiores. **Papéis:** vale a permissão `imports.run` do schema, que hoje está em tenant_admin e backoffice_agent (não em dispatcher, como dizia esta tabela); decidir qual dos dois é o certo.
+> **Implementado no MVP (07/11/2026):** `imports.available`, `imports.template(entityType)` (CSV com BOM e `;`, mais a ajuda das colunas), `imports.preview(entityType, fileName, content)` (o arquivo vai no pedido, até 700 KB, CSV ou XLSX; grava em `sync_runs` e no armazenamento `private`; devolve a simulação), `imports.confirm(runId, expectedVersion)` (replaneja e aplica numa transação; síncrono), `imports.cancel`, `imports.list`, `imports.get` e `imports.errorReport(runId)` (CSV das linhas com erro). Tipos: `customers`, `customer_sites`, `customer_contacts`, `products` (família pelo código) e `services`. Além de `imports.run`, cada tipo exige a permissão de escrita do cadastro de destino (`customers.manage` ou `catalog.manage`), para que importar não dê mais poder que a tela do cadastro. `imports.available` devolve só os tipos que o ator pode usar. O upload direto ao S3 e o processamento em job do worker entram para planilhas maiores. **Papéis:** vale a permissão `imports.run` do schema, que hoje está em tenant_admin e backoffice_agent (não em dispatcher, como dizia esta tabela); decidir qual dos dois é o certo.
 | `integrationConnections.list` · `.create` | Conexões ERP | listar TA, DI, MG; criar TA |
 | `integrationConnections.get` · `.update` | Configuração (sem segredo) | idem |
 | `integrationConnections.setCredentials` | Grava credencial no cofre (só escrita; o resultado não traz o segredo) | TA |

@@ -1,0 +1,7 @@
+class: CatalogServicePage
+fields:
+  items: List<CatalogService>
+  nextCursor: String?
+  hasMore: bool
+  total: int?
+  totalIsEstimate: bool?

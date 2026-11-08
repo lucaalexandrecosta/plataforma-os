@@ -1,0 +1,6 @@
+class: CatalogServiceFilter
+fields:
+  q: String?
+  isActive: bool?
+  serviceKind: ServiceKind?
+  source: RecordSource?

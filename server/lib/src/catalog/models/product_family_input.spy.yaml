@@ -1,0 +1,6 @@
+class: ProductFamilyInput
+fields:
+  id: UuidValue?
+  code: String
+  name: String
+  parentId: UuidValue?

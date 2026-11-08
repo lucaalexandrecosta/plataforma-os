@@ -1,0 +1,7 @@
+class: ProductFamilyPage
+fields:
+  items: List<ProductFamily>
+  nextCursor: String?
+  hasMore: bool
+  total: int?
+  totalIsEstimate: bool?

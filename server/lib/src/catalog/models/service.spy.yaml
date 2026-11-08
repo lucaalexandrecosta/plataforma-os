@@ -1,0 +1,23 @@
+# app.services (db/schema.sql §10): item faturável de mão de obra, visita ou
+# deslocamento. Preço padrão em centavos por unidade (unitCode).
+class: CatalogService
+table: services
+managedMigration: false
+fields:
+  id: UuidValue, defaultModel=random_v7
+  tenantId: UuidValue, column=tenant_id
+  code: String
+  name: String
+  description: String?
+  unitCode: String, column=unit_code
+  defaultPrice: int?, column=default_price
+  estimatedMinutes: int?, column=estimated_minutes
+  serviceKind: ServiceKind, column=service_kind
+  isActive: bool, column=is_active
+  source: RecordSource
+  externalSystem: String?, column=external_system
+  externalId: String?, column=external_id
+  missingSince: DateTime?, column=missing_since
+  createdAt: DateTime, column=created_at
+  updatedAt: DateTime, column=updated_at
+  version: int

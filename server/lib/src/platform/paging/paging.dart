@@ -137,3 +137,44 @@ final class PagePlan {
 
 /// Escapa `%`, `_` e `\` para `ILIKE` com o padrão `%termo%`.
 String likeContains(String term) => '%${term.replaceAll(r'\', r'\\').replaceAll('%', r'\%').replaceAll('_', r'\_')}%';
+
+/// Peças comuns das listagens: condição "depois do cursor", ordem com
+/// desempate pelo `id` e o fatiamento da página.
+extension PagePlanQuery on PagePlan {
+  /// `(col, id) > (valor, id)` (ou `<` na ordem decrescente).
+  Expression<dynamic> afterCursor<T>(
+    ColumnComparable<T> column,
+    ColumnComparable<UuidValue> id,
+    T Function(String raw) parse,
+  ) {
+    final a = after;
+    if (a == null) return Constant.bool(true);
+    final v = parse(a.sortValue);
+    return descending
+        ? (column < v) | (column.equals(v) & (id < a.id))
+        : (column > v) | (column.equals(v) & (id > a.id));
+  }
+
+  List<Order> orderBy(Column<dynamic> column, Column<dynamic> id) =>
+      descending ? [column.desc(), id.desc()] : [column.asc(), id.asc()];
+
+  /// Corta o `limit + 1` lido e monta o cursor do último item.
+  ({List<T> items, bool hasMore, String? nextCursor}) slice<T>(
+    List<T> rows, {
+    required String Function(T last) sortValue,
+    required UuidValue Function(T last) id,
+  }) {
+    final hasMore = rows.length > limit;
+    final items = hasMore ? rows.sublist(0, limit) : rows;
+    return (
+      items: items,
+      hasMore: hasMore,
+      nextCursor: hasMore ? Paging.encode(this, sortValue: sortValue(items.last), id: id(items.last)) : null,
+    );
+  }
+
+  /// Total limitado a [Paging.totalCap] (acima disso, estimativa).
+  ({int? total, bool? isEstimate}) capTotal(int? counted) => counted == null
+      ? (total: null, isEstimate: null)
+      : (total: counted > Paging.totalCap ? Paging.totalCap : counted, isEstimate: counted > Paging.totalCap);
+}

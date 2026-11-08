@@ -1,0 +1,17 @@
+# products.create (docs/08 §3.1). Padrões: productKind = equipment; unitCode =
+# UN; equipamento controla ativos e tem número de série, salvo se informado.
+class: ProductInput
+fields:
+  id: UuidValue?
+  code: String
+  name: String
+  description: String?
+  productFamilyId: UuidValue?
+  productKind: ProductKind?
+  unitCode: String?
+  gtin: String?
+  isSerialized: bool?
+  tracksAssets: bool?
+  defaultWarrantyMonths: int?
+  referencePrice: int?
+  labelPositionInstructions: String?

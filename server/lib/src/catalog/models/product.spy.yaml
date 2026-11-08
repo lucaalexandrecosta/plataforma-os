@@ -1,0 +1,29 @@
+# app.products (db/schema.sql §10): modelo/SKU do catálogo. A unidade física
+# é o ativo. Preço em centavos (int).
+class: Product
+table: products
+managedMigration: false
+fields:
+  id: UuidValue, defaultModel=random_v7
+  tenantId: UuidValue, column=tenant_id
+  code: String
+  name: String
+  description: String?
+  productFamilyId: UuidValue?, column=product_family_id
+  productKind: ProductKind, column=product_kind
+  unitCode: String, column=unit_code
+  gtin: String?
+  isSerialized: bool, column=is_serialized
+  tracksAssets: bool, column=tracks_assets
+  defaultWarrantyMonths: int?, column=default_warranty_months
+  referencePrice: int?, column=reference_price
+  labelPositionInstructions: String?, column=label_position_instructions
+  labelPositionAttachmentId: UuidValue?, column=label_position_attachment_id
+  isActive: bool, column=is_active
+  source: RecordSource
+  externalSystem: String?, column=external_system
+  externalId: String?, column=external_id
+  missingSince: DateTime?, column=missing_since
+  createdAt: DateTime, column=created_at
+  updatedAt: DateTime, column=updated_at
+  version: int

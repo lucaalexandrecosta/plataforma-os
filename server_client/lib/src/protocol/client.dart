@@ -13,6 +13,21 @@
 import 'dart:async' as _ida;
 import 'dart:typed_data' as _idt;
 import 'package:http/http.dart' as _i85jenna;
+import 'package:plataforma_os_client/src/protocol/catalog/models/product.dart' as _iredsp4f;
+import 'package:plataforma_os_client/src/protocol/catalog/models/product_family.dart' as _ix55de1f;
+import 'package:plataforma_os_client/src/protocol/catalog/models/product_family_filter.dart' as _i5map379;
+import 'package:plataforma_os_client/src/protocol/catalog/models/product_family_input.dart' as _i8dph1o7;
+import 'package:plataforma_os_client/src/protocol/catalog/models/product_family_page.dart' as _idck1waj;
+import 'package:plataforma_os_client/src/protocol/catalog/models/product_family_patch.dart' as _ivp5topr;
+import 'package:plataforma_os_client/src/protocol/catalog/models/product_filter.dart' as _i7ri6s06;
+import 'package:plataforma_os_client/src/protocol/catalog/models/product_input.dart' as _i2gecgw3;
+import 'package:plataforma_os_client/src/protocol/catalog/models/product_page.dart' as _iwzf2cme;
+import 'package:plataforma_os_client/src/protocol/catalog/models/product_patch.dart' as _i5bwvkqf;
+import 'package:plataforma_os_client/src/protocol/catalog/models/service.dart' as _i4io8sr1;
+import 'package:plataforma_os_client/src/protocol/catalog/models/service_filter.dart' as _ics1gvn3;
+import 'package:plataforma_os_client/src/protocol/catalog/models/service_input.dart' as _iy0vavfk;
+import 'package:plataforma_os_client/src/protocol/catalog/models/service_page.dart' as _inxv9ege;
+import 'package:plataforma_os_client/src/protocol/catalog/models/service_patch.dart' as _i9pfpou9;
 import 'package:plataforma_os_client/src/protocol/customers/models/customer.dart' as _isrde2pn;
 import 'package:plataforma_os_client/src/protocol/customers/models/customer_contact.dart' as _iicdz276;
 import 'package:plataforma_os_client/src/protocol/customers/models/customer_contact_filter.dart' as _i9rfeui9;
@@ -39,6 +54,230 @@ import 'package:plataforma_os_client/src/protocol/platform/paging/models/page_re
 import 'package:plataforma_os_client/src/protocol/tenancy/models/tenant_summary.dart' as _i11upz4e;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 import 'protocol.dart' as _il2as5qe;
+
+/// `productFamilies`: árvore de famílias de produto. Escrita: `catalog.manage`
+/// (TA); leitura: papéis internos.
+/// {@category Endpoint}
+class EndpointProductFamilies extends EndpointStaff {
+  EndpointProductFamilies(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'productFamilies';
+
+  _ida.Future<_idck1waj.ProductFamilyPage> list(
+    _i5map379.ProductFamilyFilter? filter,
+    _iiqqgmzw.PageRequest? page,
+  ) => caller.callServerEndpoint<_idck1waj.ProductFamilyPage>(
+    'productFamilies',
+    'list',
+    {
+      'filter': filter,
+      'page': page,
+    },
+  );
+
+  _ida.Future<_ix55de1f.ProductFamily> get(_isc.UuidValue id) => caller.callServerEndpoint<_ix55de1f.ProductFamily>(
+    'productFamilies',
+    'get',
+    {'id': id},
+  );
+
+  _ida.Future<_ix55de1f.ProductFamily> create(_i8dph1o7.ProductFamilyInput input) =>
+      caller.callServerEndpoint<_ix55de1f.ProductFamily>(
+        'productFamilies',
+        'create',
+        {'input': input},
+      );
+
+  _ida.Future<_ix55de1f.ProductFamily> update(
+    _isc.UuidValue id,
+    _ivp5topr.ProductFamilyPatch patch,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_ix55de1f.ProductFamily>(
+    'productFamilies',
+    'update',
+    {
+      'id': id,
+      'patch': patch,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  _ida.Future<_ix55de1f.ProductFamily> deactivate(
+    _isc.UuidValue id,
+    String reason,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_ix55de1f.ProductFamily>(
+    'productFamilies',
+    'deactivate',
+    {
+      'id': id,
+      'reason': reason,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  _ida.Future<_ix55de1f.ProductFamily> reactivate(
+    _isc.UuidValue id,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_ix55de1f.ProductFamily>(
+    'productFamilies',
+    'reactivate',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+    },
+  );
+}
+
+/// `products` (docs/08 §3.1). Escrita: `catalog.manage`; leitura: papéis
+/// internos. Falta `listAssets` (entra com o módulo `assets`).
+/// {@category Endpoint}
+class EndpointProducts extends EndpointStaff {
+  EndpointProducts(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'products';
+
+  _ida.Future<_iwzf2cme.ProductPage> list(
+    _i7ri6s06.ProductFilter? filter,
+    _iiqqgmzw.PageRequest? page,
+  ) => caller.callServerEndpoint<_iwzf2cme.ProductPage>(
+    'products',
+    'list',
+    {
+      'filter': filter,
+      'page': page,
+    },
+  );
+
+  _ida.Future<_iredsp4f.Product> get(_isc.UuidValue id) => caller.callServerEndpoint<_iredsp4f.Product>(
+    'products',
+    'get',
+    {'id': id},
+  );
+
+  _ida.Future<_iredsp4f.Product> create(_i2gecgw3.ProductInput input) => caller.callServerEndpoint<_iredsp4f.Product>(
+    'products',
+    'create',
+    {'input': input},
+  );
+
+  _ida.Future<_iredsp4f.Product> update(
+    _isc.UuidValue id,
+    _i5bwvkqf.ProductPatch patch,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_iredsp4f.Product>(
+    'products',
+    'update',
+    {
+      'id': id,
+      'patch': patch,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  _ida.Future<_iredsp4f.Product> deactivate(
+    _isc.UuidValue id,
+    String reason,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_iredsp4f.Product>(
+    'products',
+    'deactivate',
+    {
+      'id': id,
+      'reason': reason,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  _ida.Future<_iredsp4f.Product> reactivate(
+    _isc.UuidValue id,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_iredsp4f.Product>(
+    'products',
+    'reactivate',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+    },
+  );
+}
+
+/// `services` (docs/08 §3.1): serviços faturáveis. Escrita: `catalog.manage`;
+/// leitura: papéis internos.
+/// {@category Endpoint}
+class EndpointServices extends EndpointStaff {
+  EndpointServices(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'services';
+
+  _ida.Future<_inxv9ege.CatalogServicePage> list(
+    _ics1gvn3.CatalogServiceFilter? filter,
+    _iiqqgmzw.PageRequest? page,
+  ) => caller.callServerEndpoint<_inxv9ege.CatalogServicePage>(
+    'services',
+    'list',
+    {
+      'filter': filter,
+      'page': page,
+    },
+  );
+
+  _ida.Future<_i4io8sr1.CatalogService> get(_isc.UuidValue id) => caller.callServerEndpoint<_i4io8sr1.CatalogService>(
+    'services',
+    'get',
+    {'id': id},
+  );
+
+  _ida.Future<_i4io8sr1.CatalogService> create(_iy0vavfk.CatalogServiceInput input) =>
+      caller.callServerEndpoint<_i4io8sr1.CatalogService>(
+        'services',
+        'create',
+        {'input': input},
+      );
+
+  _ida.Future<_i4io8sr1.CatalogService> update(
+    _isc.UuidValue id,
+    _i9pfpou9.CatalogServicePatch patch,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_i4io8sr1.CatalogService>(
+    'services',
+    'update',
+    {
+      'id': id,
+      'patch': patch,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  _ida.Future<_i4io8sr1.CatalogService> deactivate(
+    _isc.UuidValue id,
+    String reason,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_i4io8sr1.CatalogService>(
+    'services',
+    'deactivate',
+    {
+      'id': id,
+      'reason': reason,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  _ida.Future<_i4io8sr1.CatalogService> reactivate(
+    _isc.UuidValue id,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_i4io8sr1.CatalogService>(
+    'services',
+    'reactivate',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+    },
+  );
+}
 
 /// `customerContacts` (docs/08 §3.1). Escrita: `customers.manage`; leitura:
 /// papéis internos. Faltam `invite` (com as notificações) e `revokeSessions`
@@ -492,6 +731,9 @@ class Client extends _isc.ServerpodClientShared {
          disconnectStreamsOnLostInternetConnection: disconnectStreamsOnLostInternetConnection,
          httpClientOverride: httpClientOverride,
        ) {
+    productFamilies = EndpointProductFamilies(this);
+    products = EndpointProducts(this);
+    services = EndpointServices(this);
     customerContacts = EndpointCustomerContacts(this);
     customerSites = EndpointCustomerSites(this);
     customers = EndpointCustomers(this);
@@ -499,6 +741,12 @@ class Client extends _isc.ServerpodClientShared {
     me = EndpointMe(this);
     imports = EndpointImports(this);
   }
+
+  late final EndpointProductFamilies productFamilies;
+
+  late final EndpointProducts products;
+
+  late final EndpointServices services;
 
   late final EndpointCustomerContacts customerContacts;
 
@@ -514,6 +762,9 @@ class Client extends _isc.ServerpodClientShared {
 
   @override
   Map<String, _isc.EndpointRef> get endpointRefLookup => {
+    'productFamilies': productFamilies,
+    'products': products,
+    'services': services,
     'customerContacts': customerContacts,
     'customerSites': customerSites,
     'customers': customers,

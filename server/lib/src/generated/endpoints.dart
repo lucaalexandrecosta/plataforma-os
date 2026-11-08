@@ -11,6 +11,15 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:typed_data' as _idt;
+import 'package:plataforma_os_server/src/generated/catalog/models/product_family_filter.dart' as _i2mp8bst;
+import 'package:plataforma_os_server/src/generated/catalog/models/product_family_input.dart' as _ircpj2f1;
+import 'package:plataforma_os_server/src/generated/catalog/models/product_family_patch.dart' as _i1kpaeyd;
+import 'package:plataforma_os_server/src/generated/catalog/models/product_filter.dart' as _is6ry2ff;
+import 'package:plataforma_os_server/src/generated/catalog/models/product_input.dart' as _iku7g2we;
+import 'package:plataforma_os_server/src/generated/catalog/models/product_patch.dart' as _ig5mkkf0;
+import 'package:plataforma_os_server/src/generated/catalog/models/service_filter.dart' as _ifnpnbtg;
+import 'package:plataforma_os_server/src/generated/catalog/models/service_input.dart' as _iemqvx2m;
+import 'package:plataforma_os_server/src/generated/catalog/models/service_patch.dart' as _i6t0g57v;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_contact_filter.dart' as _ipdid8a4;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_contact_input.dart' as _i0rc22zw;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_contact_patch.dart' as _i8odeyb5;
@@ -23,6 +32,9 @@ import 'package:plataforma_os_server/src/generated/customers/models/customer_sit
 import 'package:plataforma_os_server/src/generated/imports/models/import_entity_type.dart' as _ir6nxo5z;
 import 'package:plataforma_os_server/src/generated/platform/paging/models/page_request.dart' as _i4pk1ojl;
 import 'package:serverpod/serverpod.dart' as _is;
+import '../catalog/endpoints/product_families_endpoint.dart' as _i6m7puho;
+import '../catalog/endpoints/products_endpoint.dart' as _i87w2mxb;
+import '../catalog/endpoints/services_endpoint.dart' as _i7qphr7o;
 import '../customers/endpoints/customer_contacts_endpoint.dart' as _ihh0do94;
 import '../customers/endpoints/customer_sites_endpoint.dart' as _icz6lfvl;
 import '../customers/endpoints/customers_endpoint.dart' as _i2n45wl3;
@@ -34,6 +46,24 @@ class Endpoints extends _is.EndpointDispatch {
   @override
   void initializeEndpoints(_is.Server server) {
     var endpoints = <String, _is.Endpoint>{
+      'productFamilies': _i6m7puho.ProductFamiliesEndpoint()
+        ..initialize(
+          server,
+          'productFamilies',
+          null,
+        ),
+      'products': _i87w2mxb.ProductsEndpoint()
+        ..initialize(
+          server,
+          'products',
+          null,
+        ),
+      'services': _i7qphr7o.ServicesEndpoint()
+        ..initialize(
+          server,
+          'services',
+          null,
+        ),
       'customerContacts': _ihh0do94.CustomerContactsEndpoint()
         ..initialize(
           server,
@@ -71,6 +101,456 @@ class Endpoints extends _is.EndpointDispatch {
           null,
         ),
     };
+    connectors['productFamilies'] = _is.EndpointConnector(
+      name: 'productFamilies',
+      endpoint: endpoints['productFamilies']!,
+      methodConnectors: {
+        'list': _is.MethodConnector(
+          name: 'list',
+          params: {
+            'filter': _is.ParameterDescription(
+              name: 'filter',
+              type: _is.getType<_i2mp8bst.ProductFamilyFilter?>(),
+              nullable: true,
+            ),
+            'page': _is.ParameterDescription(
+              name: 'page',
+              type: _is.getType<_i4pk1ojl.PageRequest?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['productFamilies'] as _i6m7puho.ProductFamiliesEndpoint).list(
+                session,
+                params['filter'],
+                params['page'],
+              ),
+        ),
+        'get': _is.MethodConnector(
+          name: 'get',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['productFamilies'] as _i6m7puho.ProductFamiliesEndpoint).get(
+                session,
+                params['id'],
+              ),
+        ),
+        'create': _is.MethodConnector(
+          name: 'create',
+          params: {
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_ircpj2f1.ProductFamilyInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['productFamilies'] as _i6m7puho.ProductFamiliesEndpoint).create(
+                session,
+                params['input'],
+              ),
+        ),
+        'update': _is.MethodConnector(
+          name: 'update',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'patch': _is.ParameterDescription(
+              name: 'patch',
+              type: _is.getType<_i1kpaeyd.ProductFamilyPatch>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['productFamilies'] as _i6m7puho.ProductFamiliesEndpoint).update(
+                session,
+                params['id'],
+                params['patch'],
+                params['expectedVersion'],
+              ),
+        ),
+        'deactivate': _is.MethodConnector(
+          name: 'deactivate',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'reason': _is.ParameterDescription(
+              name: 'reason',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['productFamilies'] as _i6m7puho.ProductFamiliesEndpoint).deactivate(
+                session,
+                params['id'],
+                params['reason'],
+                params['expectedVersion'],
+              ),
+        ),
+        'reactivate': _is.MethodConnector(
+          name: 'reactivate',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['productFamilies'] as _i6m7puho.ProductFamiliesEndpoint).reactivate(
+                session,
+                params['id'],
+                params['expectedVersion'],
+              ),
+        ),
+      },
+    );
+    connectors['products'] = _is.EndpointConnector(
+      name: 'products',
+      endpoint: endpoints['products']!,
+      methodConnectors: {
+        'list': _is.MethodConnector(
+          name: 'list',
+          params: {
+            'filter': _is.ParameterDescription(
+              name: 'filter',
+              type: _is.getType<_is6ry2ff.ProductFilter?>(),
+              nullable: true,
+            ),
+            'page': _is.ParameterDescription(
+              name: 'page',
+              type: _is.getType<_i4pk1ojl.PageRequest?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['products'] as _i87w2mxb.ProductsEndpoint).list(
+                session,
+                params['filter'],
+                params['page'],
+              ),
+        ),
+        'get': _is.MethodConnector(
+          name: 'get',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['products'] as _i87w2mxb.ProductsEndpoint).get(
+                session,
+                params['id'],
+              ),
+        ),
+        'create': _is.MethodConnector(
+          name: 'create',
+          params: {
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_iku7g2we.ProductInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['products'] as _i87w2mxb.ProductsEndpoint).create(
+                session,
+                params['input'],
+              ),
+        ),
+        'update': _is.MethodConnector(
+          name: 'update',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'patch': _is.ParameterDescription(
+              name: 'patch',
+              type: _is.getType<_ig5mkkf0.ProductPatch>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['products'] as _i87w2mxb.ProductsEndpoint).update(
+                session,
+                params['id'],
+                params['patch'],
+                params['expectedVersion'],
+              ),
+        ),
+        'deactivate': _is.MethodConnector(
+          name: 'deactivate',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'reason': _is.ParameterDescription(
+              name: 'reason',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['products'] as _i87w2mxb.ProductsEndpoint).deactivate(
+                session,
+                params['id'],
+                params['reason'],
+                params['expectedVersion'],
+              ),
+        ),
+        'reactivate': _is.MethodConnector(
+          name: 'reactivate',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['products'] as _i87w2mxb.ProductsEndpoint).reactivate(
+                session,
+                params['id'],
+                params['expectedVersion'],
+              ),
+        ),
+      },
+    );
+    connectors['services'] = _is.EndpointConnector(
+      name: 'services',
+      endpoint: endpoints['services']!,
+      methodConnectors: {
+        'list': _is.MethodConnector(
+          name: 'list',
+          params: {
+            'filter': _is.ParameterDescription(
+              name: 'filter',
+              type: _is.getType<_ifnpnbtg.CatalogServiceFilter?>(),
+              nullable: true,
+            ),
+            'page': _is.ParameterDescription(
+              name: 'page',
+              type: _is.getType<_i4pk1ojl.PageRequest?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['services'] as _i7qphr7o.ServicesEndpoint).list(
+                session,
+                params['filter'],
+                params['page'],
+              ),
+        ),
+        'get': _is.MethodConnector(
+          name: 'get',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['services'] as _i7qphr7o.ServicesEndpoint).get(
+                session,
+                params['id'],
+              ),
+        ),
+        'create': _is.MethodConnector(
+          name: 'create',
+          params: {
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_iemqvx2m.CatalogServiceInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['services'] as _i7qphr7o.ServicesEndpoint).create(
+                session,
+                params['input'],
+              ),
+        ),
+        'update': _is.MethodConnector(
+          name: 'update',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'patch': _is.ParameterDescription(
+              name: 'patch',
+              type: _is.getType<_i6t0g57v.CatalogServicePatch>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['services'] as _i7qphr7o.ServicesEndpoint).update(
+                session,
+                params['id'],
+                params['patch'],
+                params['expectedVersion'],
+              ),
+        ),
+        'deactivate': _is.MethodConnector(
+          name: 'deactivate',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'reason': _is.ParameterDescription(
+              name: 'reason',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['services'] as _i7qphr7o.ServicesEndpoint).deactivate(
+                session,
+                params['id'],
+                params['reason'],
+                params['expectedVersion'],
+              ),
+        ),
+        'reactivate': _is.MethodConnector(
+          name: 'reactivate',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['services'] as _i7qphr7o.ServicesEndpoint).reactivate(
+                session,
+                params['id'],
+                params['expectedVersion'],
+              ),
+        ),
+      },
+    );
     connectors['customerContacts'] = _is.EndpointConnector(
       name: 'customerContacts',
       endpoint: endpoints['customerContacts']!,

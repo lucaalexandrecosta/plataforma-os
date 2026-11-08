@@ -18,6 +18,10 @@ abstract class ImportSpec {
   String get description;
   List<ImportColumn> get columns;
 
+  /// Permissão de escrita do cadastro de destino (além de `imports.run`):
+  /// importar não pode dar mais poder que a tela do cadastro.
+  String get managePermission;
+
   /// Classifica cada linha (criar, atualizar, sem mudança, erro) olhando o
   /// banco. Na confirmação roda de novo dentro da transação de aplicação.
   Future<List<ImportRowPlan>> plan(Session session, List<ImportRecord> records, {Transaction? transaction});
@@ -104,6 +108,14 @@ abstract final class ImportCells {
     throw const FormatException('use "sim" ou "não"');
   }
 
+  /// Inteiro (`12`); `null` se vazio.
+  static int? integer(String? v) {
+    if (v == null) return null;
+    final i = int.tryParse(v.trim());
+    if (i == null) throw const FormatException('número inteiro inválido');
+    return i;
+  }
+
   /// Aceita vírgula decimal (`-30,0277`).
   static double? decimal(String? v) {
     if (v == null) return null;
@@ -123,5 +135,38 @@ abstract final class ImportCells {
       buffer.write(i >= 0 ? to[i] : ch);
     }
     return buffer.toString().replaceAll(RegExp(r'[^a-z0-9]+'), '_').replaceAll(RegExp(r'^_+|_+$'), '');
+  }
+}
+
+/// Peças do planejamento comuns às importações dos módulos.
+abstract final class ImportHelpers {
+  /// Erros de validação por campo → mensagens com o rótulo da coluna.
+  static List<String> messages(
+    List<FieldError> errors,
+    List<ImportColumn> columns,
+    Map<String, String> pathToColumn,
+  ) {
+    final labels = {for (final c in columns) c.key: c.label};
+    return [
+      for (final e in errors) '${labels[pathToColumn[e.path] ?? e.path] ?? e.path}: ${e.message}',
+    ];
+  }
+
+  /// Consulta em lotes de 1.000 valores (`IN (...)`).
+  static Future<List<T>> findInChunks<T>(List<String> values, Future<List<T>> Function(Set<String> chunk) query) async {
+    final out = <T>[];
+    for (var i = 0; i < values.length; i += 1000) {
+      out.addAll(await query(values.sublist(i, i + 1000 > values.length ? values.length : i + 1000).toSet()));
+    }
+    return out;
+  }
+
+  /// Lê uma célula com [parse]; erro de formato vira "Rótulo: mensagem".
+  static T? cell<T>(ImportRecord r, ImportColumn column, T? Function(String? raw) parse) {
+    try {
+      return parse(r[column.key]);
+    } on FormatException catch (e) {
+      throw FormatException('${column.label}: ${e.message}.');
+    }
   }
 }

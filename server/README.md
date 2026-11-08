@@ -21,6 +21,7 @@ lib/
     ├── tenancy/                # camada 1: tenants (TenantDirectory)
     ├── identity_access/        # camada 2: vínculos, papéis, auth.*, me.*
     ├── customers/              # camada 2: customers.*, customerSites.*, customerContacts.* e as importações deles
+    ├── catalog/                # camada 2: productFamilies.*, products.*, services.* e as importações deles
     ├── imports/                # imports.*: planilha (CSV/XLSX) → prévia → confirmação → relatório
     └── generated/              # gerado pelo Serverpod (versionado; o CI confere)
 migrations/                     # só as tabelas internas do Serverpod (schema public)
@@ -36,6 +37,7 @@ O [cadastro de clientes](lib/src/customers/internal/customer_service.dart) é a 
 |---|---|
 | Leitura | `requireAnyRole(internalRoles)`; outro tenant → `NOT_FOUND` (a RLS esconde) |
 | Escrita | `requirePermission('<recurso>.manage')`, relida do banco: um token com papel forjado não ganha nada |
+| Listagem | `Paging.plan` + `plan.afterCursor`, `plan.orderBy` e `plan.slice` (ver o catálogo) |
 | Validação | Regras puras em `internal/<recurso>_rules.dart` (testes unitários), todos os erros por campo de uma vez; a importação por planilha usa as mesmas |
 | Criação | Aceita `id` UUID v7 do app (`INVALID_UUID` se não for); `tenantId` só do contexto |
 | Alteração | `<Recurso>Patch` (nulo = sem mudança, `clear` = apagar) + `expectedVersion`; `updateWhere(id & version)`; patch sem mudança real não gasta versão |

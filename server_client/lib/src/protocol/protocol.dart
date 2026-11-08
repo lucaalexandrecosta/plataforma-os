@@ -14,6 +14,25 @@
 import 'package:plataforma_os_client/src/protocol/imports/models/import_entity_type.dart' as _iielyi2l;
 import 'package:plataforma_os_client/src/protocol/tenancy/models/tenant_summary.dart' as _i11upz4e;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
+import 'catalog/models/product.dart' as _i6qsbw6s;
+import 'catalog/models/product_family.dart' as _is31bq1v;
+import 'catalog/models/product_family_filter.dart' as _ifcfic11;
+import 'catalog/models/product_family_input.dart' as _iroevrq4;
+import 'catalog/models/product_family_page.dart' as _iaslsjiy;
+import 'catalog/models/product_family_patch.dart' as _iw5gfrqk;
+import 'catalog/models/product_field.dart' as _ix63vfv9;
+import 'catalog/models/product_filter.dart' as _isilke9y;
+import 'catalog/models/product_input.dart' as _iuumnsch;
+import 'catalog/models/product_kind.dart' as _iobp0yx9;
+import 'catalog/models/product_page.dart' as _isfcb5kd;
+import 'catalog/models/product_patch.dart' as _ipm6h84l;
+import 'catalog/models/service.dart' as _izvigl9t;
+import 'catalog/models/service_field.dart' as _igf61u0d;
+import 'catalog/models/service_filter.dart' as _ikr943tt;
+import 'catalog/models/service_input.dart' as _igake8jw;
+import 'catalog/models/service_kind.dart' as _imdz65g6;
+import 'catalog/models/service_page.dart' as _i9t71zax;
+import 'catalog/models/service_patch.dart' as _izp6dh5z;
 import 'customers/models/contact_origin.dart' as _iqp78482;
 import 'customers/models/contact_role.dart' as _iplumur6;
 import 'customers/models/contact_status.dart' as _izqw5q67;
@@ -65,6 +84,25 @@ import 'platform/paging/models/page_request.dart' as _i18yzlaa;
 import 'tenancy/models/tenant.dart' as _i2jhpzjh;
 import 'tenancy/models/tenant_status.dart' as _i2bjgc9x;
 import 'tenancy/models/tenant_summary.dart' as _i9uizrsf;
+export 'catalog/models/product.dart';
+export 'catalog/models/product_family.dart';
+export 'catalog/models/product_family_filter.dart';
+export 'catalog/models/product_family_input.dart';
+export 'catalog/models/product_family_page.dart';
+export 'catalog/models/product_family_patch.dart';
+export 'catalog/models/product_field.dart';
+export 'catalog/models/product_filter.dart';
+export 'catalog/models/product_input.dart';
+export 'catalog/models/product_kind.dart';
+export 'catalog/models/product_page.dart';
+export 'catalog/models/product_patch.dart';
+export 'catalog/models/service.dart';
+export 'catalog/models/service_field.dart';
+export 'catalog/models/service_filter.dart';
+export 'catalog/models/service_input.dart';
+export 'catalog/models/service_kind.dart';
+export 'catalog/models/service_page.dart';
+export 'catalog/models/service_patch.dart';
 export 'customers/models/contact_origin.dart';
 export 'customers/models/contact_role.dart';
 export 'customers/models/contact_status.dart';
@@ -129,6 +167,25 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
   _isc.ProtocolDeserialization get deserializationMetadata => _isc.ProtocolDeserialization.cached(
     this,
     types: const [
+      _isc.getType<_i6qsbw6s.Product>,
+      _isc.getType<_is31bq1v.ProductFamily>,
+      _isc.getType<_ifcfic11.ProductFamilyFilter>,
+      _isc.getType<_iroevrq4.ProductFamilyInput>,
+      _isc.getType<_iaslsjiy.ProductFamilyPage>,
+      _isc.getType<_iw5gfrqk.ProductFamilyPatch>,
+      _isc.getType<_ix63vfv9.ProductField>,
+      _isc.getType<_isilke9y.ProductFilter>,
+      _isc.getType<_iuumnsch.ProductInput>,
+      _isc.getType<_iobp0yx9.ProductKind>,
+      _isc.getType<_isfcb5kd.ProductPage>,
+      _isc.getType<_ipm6h84l.ProductPatch>,
+      _isc.getType<_izvigl9t.CatalogService>,
+      _isc.getType<_igf61u0d.CatalogServiceField>,
+      _isc.getType<_ikr943tt.CatalogServiceFilter>,
+      _isc.getType<_igake8jw.CatalogServiceInput>,
+      _isc.getType<_imdz65g6.ServiceKind>,
+      _isc.getType<_i9t71zax.CatalogServicePage>,
+      _isc.getType<_izp6dh5z.CatalogServicePatch>,
       _isc.getType<_iqp78482.ContactOrigin>,
       _isc.getType<_iplumur6.ContactRole>,
       _isc.getType<_izqw5q67.ContactStatus>,
@@ -180,6 +237,25 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<_i2jhpzjh.Tenant>,
       _isc.getType<_i2bjgc9x.TenantStatus>,
       _isc.getType<_i9uizrsf.TenantSummary>,
+      _isc.getType<_i6qsbw6s.Product?>,
+      _isc.getType<_is31bq1v.ProductFamily?>,
+      _isc.getType<_ifcfic11.ProductFamilyFilter?>,
+      _isc.getType<_iroevrq4.ProductFamilyInput?>,
+      _isc.getType<_iaslsjiy.ProductFamilyPage?>,
+      _isc.getType<_iw5gfrqk.ProductFamilyPatch?>,
+      _isc.getType<_ix63vfv9.ProductField?>,
+      _isc.getType<_isilke9y.ProductFilter?>,
+      _isc.getType<_iuumnsch.ProductInput?>,
+      _isc.getType<_iobp0yx9.ProductKind?>,
+      _isc.getType<_isfcb5kd.ProductPage?>,
+      _isc.getType<_ipm6h84l.ProductPatch?>,
+      _isc.getType<_izvigl9t.CatalogService?>,
+      _isc.getType<_igf61u0d.CatalogServiceField?>,
+      _isc.getType<_ikr943tt.CatalogServiceFilter?>,
+      _isc.getType<_igake8jw.CatalogServiceInput?>,
+      _isc.getType<_imdz65g6.ServiceKind?>,
+      _isc.getType<_i9t71zax.CatalogServicePage?>,
+      _isc.getType<_izp6dh5z.CatalogServicePatch?>,
       _isc.getType<_iqp78482.ContactOrigin?>,
       _isc.getType<_iplumur6.ContactRole?>,
       _isc.getType<_izqw5q67.ContactStatus?>,
@@ -231,6 +307,13 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<_i2jhpzjh.Tenant?>,
       _isc.getType<_i2bjgc9x.TenantStatus?>,
       _isc.getType<_i9uizrsf.TenantSummary?>,
+      _isc.getType<List<_is31bq1v.ProductFamily>>,
+      _isc.getType<List<_i6qsbw6s.Product>>,
+      _isc.getType<List<_ix63vfv9.ProductField>>,
+      _isc.getType<List<_ix63vfv9.ProductField>?>,
+      _isc.getType<List<_izvigl9t.CatalogService>>,
+      _isc.getType<List<_igf61u0d.CatalogServiceField>>,
+      _isc.getType<List<_igf61u0d.CatalogServiceField>?>,
       _isc.getType<List<_iyonel9d.CustomerContact>>,
       _isc.getType<List<_ial9yste.CustomerContactField>>,
       _isc.getType<List<_ial9yste.CustomerContactField>?>,
@@ -253,6 +336,25 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     ],
     modules: const [],
     classNames: const [
+      'Product',
+      'ProductFamily',
+      'ProductFamilyFilter',
+      'ProductFamilyInput',
+      'ProductFamilyPage',
+      'ProductFamilyPatch',
+      'ProductField',
+      'ProductFilter',
+      'ProductInput',
+      'ProductKind',
+      'ProductPage',
+      'ProductPatch',
+      'CatalogService',
+      'CatalogServiceField',
+      'CatalogServiceFilter',
+      'CatalogServiceInput',
+      'ServiceKind',
+      'CatalogServicePage',
+      'CatalogServicePatch',
       'ContactOrigin',
       'ContactRole',
       'ContactStatus',
@@ -330,6 +432,63 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       }
     }
 
+    if (t == _i6qsbw6s.Product) {
+      return _i6qsbw6s.Product.fromJson(data) as T;
+    }
+    if (t == _is31bq1v.ProductFamily) {
+      return _is31bq1v.ProductFamily.fromJson(data) as T;
+    }
+    if (t == _ifcfic11.ProductFamilyFilter) {
+      return _ifcfic11.ProductFamilyFilter.fromJson(data) as T;
+    }
+    if (t == _iroevrq4.ProductFamilyInput) {
+      return _iroevrq4.ProductFamilyInput.fromJson(data) as T;
+    }
+    if (t == _iaslsjiy.ProductFamilyPage) {
+      return _iaslsjiy.ProductFamilyPage.fromJson(data) as T;
+    }
+    if (t == _iw5gfrqk.ProductFamilyPatch) {
+      return _iw5gfrqk.ProductFamilyPatch.fromJson(data) as T;
+    }
+    if (t == _ix63vfv9.ProductField) {
+      return _ix63vfv9.ProductField.fromJson(data) as T;
+    }
+    if (t == _isilke9y.ProductFilter) {
+      return _isilke9y.ProductFilter.fromJson(data) as T;
+    }
+    if (t == _iuumnsch.ProductInput) {
+      return _iuumnsch.ProductInput.fromJson(data) as T;
+    }
+    if (t == _iobp0yx9.ProductKind) {
+      return _iobp0yx9.ProductKind.fromJson(data) as T;
+    }
+    if (t == _isfcb5kd.ProductPage) {
+      return _isfcb5kd.ProductPage.fromJson(data) as T;
+    }
+    if (t == _ipm6h84l.ProductPatch) {
+      return _ipm6h84l.ProductPatch.fromJson(data) as T;
+    }
+    if (t == _izvigl9t.CatalogService) {
+      return _izvigl9t.CatalogService.fromJson(data) as T;
+    }
+    if (t == _igf61u0d.CatalogServiceField) {
+      return _igf61u0d.CatalogServiceField.fromJson(data) as T;
+    }
+    if (t == _ikr943tt.CatalogServiceFilter) {
+      return _ikr943tt.CatalogServiceFilter.fromJson(data) as T;
+    }
+    if (t == _igake8jw.CatalogServiceInput) {
+      return _igake8jw.CatalogServiceInput.fromJson(data) as T;
+    }
+    if (t == _imdz65g6.ServiceKind) {
+      return _imdz65g6.ServiceKind.fromJson(data) as T;
+    }
+    if (t == _i9t71zax.CatalogServicePage) {
+      return _i9t71zax.CatalogServicePage.fromJson(data) as T;
+    }
+    if (t == _izp6dh5z.CatalogServicePatch) {
+      return _izp6dh5z.CatalogServicePatch.fromJson(data) as T;
+    }
     if (t == _iqp78482.ContactOrigin) {
       return _iqp78482.ContactOrigin.fromJson(data) as T;
     }
@@ -482,6 +641,63 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     }
     if (t == _i9uizrsf.TenantSummary) {
       return _i9uizrsf.TenantSummary.fromJson(data) as T;
+    }
+    if (t == _isc.getType<_i6qsbw6s.Product?>()) {
+      return (data != null ? _i6qsbw6s.Product.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_is31bq1v.ProductFamily?>()) {
+      return (data != null ? _is31bq1v.ProductFamily.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_ifcfic11.ProductFamilyFilter?>()) {
+      return (data != null ? _ifcfic11.ProductFamilyFilter.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iroevrq4.ProductFamilyInput?>()) {
+      return (data != null ? _iroevrq4.ProductFamilyInput.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iaslsjiy.ProductFamilyPage?>()) {
+      return (data != null ? _iaslsjiy.ProductFamilyPage.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iw5gfrqk.ProductFamilyPatch?>()) {
+      return (data != null ? _iw5gfrqk.ProductFamilyPatch.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_ix63vfv9.ProductField?>()) {
+      return (data != null ? _ix63vfv9.ProductField.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_isilke9y.ProductFilter?>()) {
+      return (data != null ? _isilke9y.ProductFilter.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iuumnsch.ProductInput?>()) {
+      return (data != null ? _iuumnsch.ProductInput.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iobp0yx9.ProductKind?>()) {
+      return (data != null ? _iobp0yx9.ProductKind.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_isfcb5kd.ProductPage?>()) {
+      return (data != null ? _isfcb5kd.ProductPage.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_ipm6h84l.ProductPatch?>()) {
+      return (data != null ? _ipm6h84l.ProductPatch.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_izvigl9t.CatalogService?>()) {
+      return (data != null ? _izvigl9t.CatalogService.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_igf61u0d.CatalogServiceField?>()) {
+      return (data != null ? _igf61u0d.CatalogServiceField.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_ikr943tt.CatalogServiceFilter?>()) {
+      return (data != null ? _ikr943tt.CatalogServiceFilter.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_igake8jw.CatalogServiceInput?>()) {
+      return (data != null ? _igake8jw.CatalogServiceInput.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_imdz65g6.ServiceKind?>()) {
+      return (data != null ? _imdz65g6.ServiceKind.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i9t71zax.CatalogServicePage?>()) {
+      return (data != null ? _i9t71zax.CatalogServicePage.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_izp6dh5z.CatalogServicePatch?>()) {
+      return (data != null ? _izp6dh5z.CatalogServicePatch.fromJson(data) : null) as T;
     }
     if (t == _isc.getType<_iqp78482.ContactOrigin?>()) {
       return (data != null ? _iqp78482.ContactOrigin.fromJson(data) : null) as T;
@@ -636,6 +852,28 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     if (t == _isc.getType<_i9uizrsf.TenantSummary?>()) {
       return (data != null ? _i9uizrsf.TenantSummary.fromJson(data) : null) as T;
     }
+    if (t == List<_is31bq1v.ProductFamily>) {
+      return (data as List).map((e) => deserialize<_is31bq1v.ProductFamily>(e)).toList() as T;
+    }
+    if (t == List<_i6qsbw6s.Product>) {
+      return (data as List).map((e) => deserialize<_i6qsbw6s.Product>(e)).toList() as T;
+    }
+    if (t == List<_ix63vfv9.ProductField>) {
+      return (data as List).map((e) => deserialize<_ix63vfv9.ProductField>(e)).toList() as T;
+    }
+    if (t == _isc.getType<List<_ix63vfv9.ProductField>?>()) {
+      return (data != null ? (data as List).map((e) => deserialize<_ix63vfv9.ProductField>(e)).toList() : null) as T;
+    }
+    if (t == List<_izvigl9t.CatalogService>) {
+      return (data as List).map((e) => deserialize<_izvigl9t.CatalogService>(e)).toList() as T;
+    }
+    if (t == List<_igf61u0d.CatalogServiceField>) {
+      return (data as List).map((e) => deserialize<_igf61u0d.CatalogServiceField>(e)).toList() as T;
+    }
+    if (t == _isc.getType<List<_igf61u0d.CatalogServiceField>?>()) {
+      return (data != null ? (data as List).map((e) => deserialize<_igf61u0d.CatalogServiceField>(e)).toList() : null)
+          as T;
+    }
     if (t == List<_iyonel9d.CustomerContact>) {
       return (data as List).map((e) => deserialize<_iyonel9d.CustomerContact>(e)).toList() as T;
     }
@@ -703,6 +941,25 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
 
   static String? getClassNameForType(Type type) {
     return switch (type) {
+      _i6qsbw6s.Product => 'Product',
+      _is31bq1v.ProductFamily => 'ProductFamily',
+      _ifcfic11.ProductFamilyFilter => 'ProductFamilyFilter',
+      _iroevrq4.ProductFamilyInput => 'ProductFamilyInput',
+      _iaslsjiy.ProductFamilyPage => 'ProductFamilyPage',
+      _iw5gfrqk.ProductFamilyPatch => 'ProductFamilyPatch',
+      _ix63vfv9.ProductField => 'ProductField',
+      _isilke9y.ProductFilter => 'ProductFilter',
+      _iuumnsch.ProductInput => 'ProductInput',
+      _iobp0yx9.ProductKind => 'ProductKind',
+      _isfcb5kd.ProductPage => 'ProductPage',
+      _ipm6h84l.ProductPatch => 'ProductPatch',
+      _izvigl9t.CatalogService => 'CatalogService',
+      _igf61u0d.CatalogServiceField => 'CatalogServiceField',
+      _ikr943tt.CatalogServiceFilter => 'CatalogServiceFilter',
+      _igake8jw.CatalogServiceInput => 'CatalogServiceInput',
+      _imdz65g6.ServiceKind => 'ServiceKind',
+      _i9t71zax.CatalogServicePage => 'CatalogServicePage',
+      _izp6dh5z.CatalogServicePatch => 'CatalogServicePatch',
       _iqp78482.ContactOrigin => 'ContactOrigin',
       _iplumur6.ContactRole => 'ContactRole',
       _izqw5q67.ContactStatus => 'ContactStatus',
@@ -768,6 +1025,44 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     }
 
     switch (data) {
+      case _i6qsbw6s.Product():
+        return 'Product';
+      case _is31bq1v.ProductFamily():
+        return 'ProductFamily';
+      case _ifcfic11.ProductFamilyFilter():
+        return 'ProductFamilyFilter';
+      case _iroevrq4.ProductFamilyInput():
+        return 'ProductFamilyInput';
+      case _iaslsjiy.ProductFamilyPage():
+        return 'ProductFamilyPage';
+      case _iw5gfrqk.ProductFamilyPatch():
+        return 'ProductFamilyPatch';
+      case _ix63vfv9.ProductField():
+        return 'ProductField';
+      case _isilke9y.ProductFilter():
+        return 'ProductFilter';
+      case _iuumnsch.ProductInput():
+        return 'ProductInput';
+      case _iobp0yx9.ProductKind():
+        return 'ProductKind';
+      case _isfcb5kd.ProductPage():
+        return 'ProductPage';
+      case _ipm6h84l.ProductPatch():
+        return 'ProductPatch';
+      case _izvigl9t.CatalogService():
+        return 'CatalogService';
+      case _igf61u0d.CatalogServiceField():
+        return 'CatalogServiceField';
+      case _ikr943tt.CatalogServiceFilter():
+        return 'CatalogServiceFilter';
+      case _igake8jw.CatalogServiceInput():
+        return 'CatalogServiceInput';
+      case _imdz65g6.ServiceKind():
+        return 'ServiceKind';
+      case _i9t71zax.CatalogServicePage():
+        return 'CatalogServicePage';
+      case _izp6dh5z.CatalogServicePatch():
+        return 'CatalogServicePatch';
       case _iqp78482.ContactOrigin():
         return 'ContactOrigin';
       case _iplumur6.ContactRole():
@@ -879,6 +1174,63 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     var dataClassName = data['className'];
     if (dataClassName is! String) {
       return super.deserializeByClassName(data);
+    }
+    if (dataClassName == 'Product') {
+      return deserialize<_i6qsbw6s.Product>(data['data']);
+    }
+    if (dataClassName == 'ProductFamily') {
+      return deserialize<_is31bq1v.ProductFamily>(data['data']);
+    }
+    if (dataClassName == 'ProductFamilyFilter') {
+      return deserialize<_ifcfic11.ProductFamilyFilter>(data['data']);
+    }
+    if (dataClassName == 'ProductFamilyInput') {
+      return deserialize<_iroevrq4.ProductFamilyInput>(data['data']);
+    }
+    if (dataClassName == 'ProductFamilyPage') {
+      return deserialize<_iaslsjiy.ProductFamilyPage>(data['data']);
+    }
+    if (dataClassName == 'ProductFamilyPatch') {
+      return deserialize<_iw5gfrqk.ProductFamilyPatch>(data['data']);
+    }
+    if (dataClassName == 'ProductField') {
+      return deserialize<_ix63vfv9.ProductField>(data['data']);
+    }
+    if (dataClassName == 'ProductFilter') {
+      return deserialize<_isilke9y.ProductFilter>(data['data']);
+    }
+    if (dataClassName == 'ProductInput') {
+      return deserialize<_iuumnsch.ProductInput>(data['data']);
+    }
+    if (dataClassName == 'ProductKind') {
+      return deserialize<_iobp0yx9.ProductKind>(data['data']);
+    }
+    if (dataClassName == 'ProductPage') {
+      return deserialize<_isfcb5kd.ProductPage>(data['data']);
+    }
+    if (dataClassName == 'ProductPatch') {
+      return deserialize<_ipm6h84l.ProductPatch>(data['data']);
+    }
+    if (dataClassName == 'CatalogService') {
+      return deserialize<_izvigl9t.CatalogService>(data['data']);
+    }
+    if (dataClassName == 'CatalogServiceField') {
+      return deserialize<_igf61u0d.CatalogServiceField>(data['data']);
+    }
+    if (dataClassName == 'CatalogServiceFilter') {
+      return deserialize<_ikr943tt.CatalogServiceFilter>(data['data']);
+    }
+    if (dataClassName == 'CatalogServiceInput') {
+      return deserialize<_igake8jw.CatalogServiceInput>(data['data']);
+    }
+    if (dataClassName == 'ServiceKind') {
+      return deserialize<_imdz65g6.ServiceKind>(data['data']);
+    }
+    if (dataClassName == 'CatalogServicePage') {
+      return deserialize<_i9t71zax.CatalogServicePage>(data['data']);
+    }
+    if (dataClassName == 'CatalogServicePatch') {
+      return deserialize<_izp6dh5z.CatalogServicePatch>(data['data']);
     }
     if (dataClassName == 'ContactOrigin') {
       return deserialize<_iqp78482.ContactOrigin>(data['data']);

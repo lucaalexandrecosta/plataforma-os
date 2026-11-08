@@ -14,25 +14,10 @@ import 'site_and_contact_rules.dart';
 /// Importações por planilha do módulo `customers`. As linhas passam pelas
 /// mesmas regras das telas (`CustomerRules`, `SiteRules`, `ContactRules`).
 
-List<String> _messages(List<FieldError> errors, List<ImportColumn> columns, Map<String, String> pathToColumn) {
-  final labels = {for (final c in columns) c.key: c.label};
-  return [
-    for (final e in errors) '${labels[pathToColumn[e.path] ?? e.path] ?? e.path}: ${e.message}',
-  ];
-}
-
-Map<String, Object?> _changed(Map<String, Object?> before, Map<String, Object?> after) => {
+Map<String, Object?> _changedFields(Map<String, Object?> before, Map<String, Object?> after) => {
   for (final e in after.entries)
     if (e.value != before[e.key]) e.key: e.value,
 };
-
-Future<List<T>> _findIn<T>(List<String> values, Future<List<T>> Function(Set<String> chunk) query) async {
-  final out = <T>[];
-  for (var i = 0; i < values.length; i += 1000) {
-    out.addAll(await query(values.sublist(i, i + 1000 > values.length ? values.length : i + 1000).toSet()));
-  }
-  return out;
-}
 
 Future<void> _event(
   Session session,
@@ -73,6 +58,8 @@ final class CustomersImport extends ImportSpec {
   ImportEntityType get entity => ImportEntityType.customers;
   @override
   String get title => 'Clientes';
+  @override
+  String get managePermission => 'customers.manage';
   @override
   String get description =>
       'Cria ou atualiza clientes pelo código. Células vazias não apagam o que já está cadastrado.';
@@ -162,7 +149,7 @@ final class CustomersImport extends ImportSpec {
         if (r['codigo'] != null) r['codigo']!,
     ];
     final existing = {
-      for (final c in await _findIn(
+      for (final c in await ImportHelpers.findInChunks(
         codes,
         (chunk) => Customer.db.find(session, where: (t) => t.code.inSet(chunk), transaction: transaction),
       ))
@@ -230,7 +217,7 @@ final class CustomersImport extends ImportSpec {
               rowNumber: r.rowNumber,
               key: code,
               action: ImportAction.error,
-              messages: _messages(v.errors, columns, _pathToColumn),
+              messages: ImportHelpers.messages(v.errors, columns, _pathToColumn),
             ),
           );
           continue;
@@ -246,7 +233,7 @@ final class CustomersImport extends ImportSpec {
           );
           continue;
         }
-        final changed = _changed(base!.toFields(), v.draft!.toFields());
+        final changed = _changedFields(base!.toFields(), v.draft!.toFields());
         if (changed.isEmpty) {
           plans.add(ImportRowPlan(rowNumber: r.rowNumber, key: code, action: ImportAction.unchanged));
         } else if (current.source == RecordSource.erp && changed.keys.any(customerMasterFields.contains)) {
@@ -383,6 +370,8 @@ final class CustomerSitesImport extends ImportSpec {
   @override
   String get title => 'Unidades de clientes';
   @override
+  String get managePermission => 'customers.manage';
+  @override
   String get description =>
       'Cria ou atualiza unidades pelo código do cliente + código da unidade. Importe os clientes antes.';
 
@@ -469,7 +458,7 @@ final class CustomerSitesImport extends ImportSpec {
   Future<List<ImportRowPlan>> plan(Session session, List<ImportRecord> records, {Transaction? transaction}) async {
     final customerCodes = {for (final r in records) ?r['codigo_cliente']}.toList();
     final customers = {
-      for (final c in await _findIn(
+      for (final c in await ImportHelpers.findInChunks(
         customerCodes,
         (chunk) => Customer.db.find(session, where: (t) => t.code.inSet(chunk), transaction: transaction),
       ))
@@ -477,7 +466,7 @@ final class CustomerSitesImport extends ImportSpec {
     };
     final customerIds = [for (final c in customers.values) c.id.uuid];
     final sites = <String, CustomerSite>{};
-    for (final s in await _findIn(
+    for (final s in await ImportHelpers.findInChunks(
       customerIds,
       (chunk) => CustomerSite.db.find(
         session,
@@ -537,7 +526,7 @@ final class CustomerSitesImport extends ImportSpec {
         );
         final v = SiteRules.validate(draft);
         if (v.errors.isNotEmpty) {
-          plans.add(error(_messages(v.errors, columns, _pathToColumn)));
+          plans.add(error(ImportHelpers.messages(v.errors, columns, _pathToColumn)));
           continue;
         }
         if (current == null) {
@@ -551,7 +540,7 @@ final class CustomerSitesImport extends ImportSpec {
           );
           continue;
         }
-        final changed = _changed(base!.toFields(), v.value!.toFields());
+        final changed = _changedFields(base!.toFields(), v.value!.toFields());
         if (changed.isEmpty) {
           plans.add(ImportRowPlan(rowNumber: r.rowNumber, key: key, action: ImportAction.unchanged));
         } else if (current.source == RecordSource.erp && changed.keys.any(siteMasterFields.contains)) {
@@ -684,6 +673,8 @@ final class CustomerContactsImport extends ImportSpec {
   @override
   String get title => 'Contatos de clientes';
   @override
+  String get managePermission => 'customers.manage';
+  @override
   String get description =>
       'Cria ou atualiza contatos pelo cliente + e-mail (ou celular, se não houver e-mail). Importe clientes e unidades antes.';
 
@@ -755,7 +746,7 @@ final class CustomerContactsImport extends ImportSpec {
   Future<List<ImportRowPlan>> plan(Session session, List<ImportRecord> records, {Transaction? transaction}) async {
     final customerCodes = {for (final r in records) ?r['codigo_cliente']}.toList();
     final customers = {
-      for (final c in await _findIn(
+      for (final c in await ImportHelpers.findInChunks(
         customerCodes,
         (chunk) => Customer.db.find(session, where: (t) => t.code.inSet(chunk), transaction: transaction),
       ))
@@ -764,7 +755,7 @@ final class CustomerContactsImport extends ImportSpec {
     final ids = [for (final c in customers.values) c.id.uuid];
     Set<UuidValue> uuids(Set<String> chunk) => {for (final id in chunk) UuidValue.withValidation(id)};
     final sites = <String, CustomerSite>{
-      for (final s in await _findIn(
+      for (final s in await ImportHelpers.findInChunks(
         ids,
         (chunk) => CustomerSite.db.find(
           session,
@@ -776,7 +767,7 @@ final class CustomerContactsImport extends ImportSpec {
     };
     final contactsByEmail = <String, CustomerContact>{};
     final contactsByPhone = <String, CustomerContact>{};
-    for (final c in await _findIn(
+    for (final c in await ImportHelpers.findInChunks(
       ids,
       (chunk) =>
           CustomerContact.db.find(session, where: (t) => t.customerId.inSet(uuids(chunk)), transaction: transaction),
@@ -843,7 +834,7 @@ final class CustomerContactsImport extends ImportSpec {
         );
         final v = ContactRules.validate(draft);
         if (v.errors.isNotEmpty) {
-          plans.add(error(_messages(v.errors, columns, _pathToColumn)));
+          plans.add(error(ImportHelpers.messages(v.errors, columns, _pathToColumn)));
           continue;
         }
         if (current == null) {
@@ -857,7 +848,7 @@ final class CustomerContactsImport extends ImportSpec {
           );
           continue;
         }
-        final changed = _changed(base!.toFields(), v.value!.toFields());
+        final changed = _changedFields(base!.toFields(), v.value!.toFields());
         if (changed.isEmpty) {
           plans.add(ImportRowPlan(rowNumber: r.rowNumber, key: key, action: ImportAction.unchanged));
         } else if (current.source == RecordSource.erp && changed.keys.any(contactMasterFields.contains)) {

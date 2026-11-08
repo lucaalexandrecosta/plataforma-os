@@ -4,6 +4,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart';
 import 'package:serverpod/serverpod.dart';
 
+import '../../catalog/catalog.dart';
 import '../../customers/customers.dart';
 import '../../generated/protocol.dart';
 import '../../platform/authz/grants.dart';
@@ -26,19 +27,40 @@ abstract final class ImportService {
   static const _previewErrors = 200;
 
   static final Map<ImportEntityType, ImportSpec> _specs = {
-    for (final s in <ImportSpec>[CustomersImport(), CustomerSitesImport(), CustomerContactsImport()]) s.entity: s,
+    for (final s in <ImportSpec>[
+      CustomersImport(),
+      CustomerSitesImport(),
+      CustomerContactsImport(),
+      ProductsImport(),
+      ServicesImport(),
+    ])
+      s.entity: s,
   };
 
-  static ImportSpec _spec(Session session, ImportEntityType entity) =>
-      _specs[entity] ?? (throw ApiErrors.businessRule(session, 'Importação de "${entity.name}" ainda não disponível.'));
+  /// A especificação, conferindo `imports.run` e a permissão do cadastro.
+  static Future<ImportSpec> _spec(Session session, ImportEntityType entity) async {
+    await session.requirePermission(_permission);
+    final spec =
+        _specs[entity] ??
+        (throw ApiErrors.businessRule(session, 'Importação de "${entity.name}" ainda não disponível.'));
+    await session.requirePermission(spec.managePermission);
+    return spec;
+  }
 
-  static List<ImportEntityType> get available => _specs.keys.toList();
+  /// Importações que o ator pode usar.
+  static Future<List<ImportEntityType>> available(Session session) async {
+    final grants = await session.grants();
+    if (!grants.can(_permission)) return const [];
+    return [
+      for (final s in _specs.values)
+        if (grants.can(s.managePermission)) s.entity,
+    ];
+  }
 
   // --- modelo ----------------------------------------------------------------
 
   static Future<ImportTemplate> template(Session session, ImportEntityType entity) async {
-    await session.requirePermission(_permission);
-    final spec = _spec(session, entity);
+    final spec = await _spec(session, entity);
     final header = spec.columns.map((c) => c.key).join(';');
     final example = spec.columns.map((c) => _csvCell(c.example)).join(';');
     final csv = '﻿$header\r\n$example\r\n';
@@ -60,8 +82,7 @@ abstract final class ImportService {
     String fileName,
     ByteData content,
   ) async {
-    await session.requirePermission(_permission);
-    final spec = _spec(session, entity);
+    final spec = await _spec(session, entity);
     final bytes = content.buffer.asUint8List(content.offsetInBytes, content.lengthInBytes);
     if (bytes.isEmpty) throw ApiErrors.businessRule(session, 'O arquivo está vazio.', path: 'file');
     if (bytes.length > maxFileBytes) {
@@ -139,7 +160,7 @@ abstract final class ImportService {
   static Future<ImportRunInfo> confirm(Session session, UuidValue runId, int expectedVersion) async {
     await session.requirePermission(_permission);
     final initial = await ImportRun.db.findById(session, runId) ?? (throw ApiErrors.notFound(session));
-    final spec = _spec(session, initial.entityType);
+    final spec = await _spec(session, initial.entityType);
     final file = await session.storage.retrieveFile(storageId: _storage, path: initial.fileStorageKey!);
     final bytes = file.buffer.asUint8List(file.offsetInBytes, file.lengthInBytes);
     final parsed = _parse(bytes, initial.fileName ?? 'arquivo.csv', spec);

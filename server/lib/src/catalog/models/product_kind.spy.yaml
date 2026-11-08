@@ -1,0 +1,8 @@
+# products.product_kind.
+enum: ProductKind
+serialized: byName
+values:
+  - equipment
+  - spare_part
+  - consumable
+  - other

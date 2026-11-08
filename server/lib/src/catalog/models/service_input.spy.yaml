@@ -1,0 +1,11 @@
+# services.create. Padrões: serviceKind = other; unitCode = H.
+class: CatalogServiceInput
+fields:
+  id: UuidValue?
+  code: String
+  name: String
+  description: String?
+  unitCode: String?
+  defaultPrice: int?
+  estimatedMinutes: int?
+  serviceKind: ServiceKind?

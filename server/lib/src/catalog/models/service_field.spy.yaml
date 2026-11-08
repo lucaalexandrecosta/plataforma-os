@@ -1,0 +1,6 @@
+enum: CatalogServiceField
+serialized: byName
+values:
+  - description
+  - defaultPrice
+  - estimatedMinutes

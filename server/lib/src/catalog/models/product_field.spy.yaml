@@ -1,0 +1,9 @@
+enum: ProductField
+serialized: byName
+values:
+  - description
+  - productFamilyId
+  - gtin
+  - defaultWarrantyMonths
+  - referencePrice
+  - labelPositionInstructions
