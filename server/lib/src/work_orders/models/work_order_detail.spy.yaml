@@ -1,0 +1,7 @@
+# OS com o histórico de status e as outras OS em aberto do mesmo bem (aviso de
+# chamado duplicado, docs/03 §7.3).
+class: WorkOrderDetail
+fields:
+  workOrder: WorkOrder
+  history: List<WorkOrderStatusChange>
+  otherOpenOnAsset: List<WorkOrder>

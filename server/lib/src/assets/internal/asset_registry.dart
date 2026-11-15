@@ -105,6 +105,29 @@ abstract final class AssetRegistry {
     return (await _find(session, id))!;
   }
 
+  /// Dados do bem que a OS herda na abertura (sem checar permissão: quem
+  /// chama já conferiu a dele). `null` = inexistente ou de outro tenant.
+  static Future<AssetForWorkOrder?> findForWorkOrder(Session session, UuidValue id) async {
+    final rows = await session.db.unsafeQuery(
+      'SELECT a.id, coalesce(a.asset_tag, a.serial_number), a.status, a.is_active, a.branch_id, a.cost_center_id, '
+      '       a.current_customer_id, a.current_customer_site_id '
+      '  FROM app.assets a WHERE a.id = @id::uuid',
+      parameters: QueryParameters.named({'id': id.uuid}),
+    );
+    if (rows.isEmpty) return null;
+    final r = rows.first;
+    return AssetForWorkOrder(
+      id: sqlUuid(r[0]),
+      label: r[1] as String,
+      status: r[2] as String,
+      isActive: r[3] as bool,
+      branchId: sqlUuidOrNull(r[4]),
+      costCenterId: sqlUuidOrNull(r[5]),
+      customerId: sqlUuidOrNull(r[6]),
+      customerSiteId: sqlUuidOrNull(r[7]),
+    );
+  }
+
   // ------------------------------------------------------------------ internos
 
   static Future<Asset?> _find(Session session, UuidValue id) async {
@@ -207,4 +230,29 @@ abstract final class AssetRegistry {
     version: r[18] as int,
     qrShortCode: r[19] == null ? null : QrCodes.formatShortCode(r[19] as String),
   );
+}
+
+/// O que a abertura de OS precisa saber do bem.
+final class AssetForWorkOrder {
+  const AssetForWorkOrder({
+    required this.id,
+    required this.label,
+    required this.status,
+    required this.isActive,
+    required this.branchId,
+    required this.costCenterId,
+    required this.customerId,
+    required this.customerSiteId,
+  });
+
+  final UuidValue id;
+  final String label;
+  final String status;
+  final bool isActive;
+  final UuidValue? branchId;
+  final UuidValue? costCenterId;
+
+  /// Alocação vigente em cliente (comodato); nulos = bem interno.
+  final UuidValue? customerId;
+  final UuidValue? customerSiteId;
 }

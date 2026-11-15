@@ -47,3 +47,17 @@ costCenters:
   - list:
   - create:
   - update:
+workOrders:
+  - list:
+  - get:
+  - open:
+  - update:
+  - start:
+  - hold:
+  - complete:
+  - close:
+  - cancel:
+  - reopen:
+  - types:
+  - createType:
+  - updateType:

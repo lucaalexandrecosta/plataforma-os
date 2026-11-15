@@ -1,0 +1,12 @@
+# Abertura de OS (workOrders.open). Informe o bem pela lista (assetId) ou pelo
+# que foi lido na etiqueta (scannedCode: código curto, token ou URL do QR).
+class: WorkOrderInput
+fields:
+  workOrderTypeId: UuidValue
+  assetId: UuidValue?
+  scannedCode: String?
+  # Padrão: a prioridade do tipo.
+  priority: String?
+  problemDescription: String?
+  requesterName: String?
+  requesterPhone: String?

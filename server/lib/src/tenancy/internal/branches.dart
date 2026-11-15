@@ -32,6 +32,15 @@ abstract final class Branches {
     return rows.isEmpty ? null : _map(rows.first);
   }
 
+  /// Filial padrão do tenant ativo, se houver (destino de bem sem filial).
+  static Future<Branch?> findDefault(Session session, {Transaction? transaction}) async {
+    final rows = await session.db.unsafeQuery(
+      'SELECT $_columns FROM app.branches WHERE is_default AND is_active',
+      transaction: transaction,
+    );
+    return rows.isEmpty ? null : _map(rows.first);
+  }
+
   static Future<Branch> create(Session session, BranchInput input) async {
     await Authorization.require(session, managePermission);
     final data = _validate(session, input);
