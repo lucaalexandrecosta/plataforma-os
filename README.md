@@ -51,7 +51,7 @@ flowchart LR
         PG[("PostgreSQL<br/>RLS por tenant")]
         VK[("Valkey<br/>cache, mensagens globais")]
         S3[("S3<br/>fotos, assinaturas, etiquetas")]
-        KC["Keycloak<br/>login da equipe"]
+        KC["Login próprio<br/>e-mail e senha da equipe"]
     end
     subgraph Externos["Externos"]
         ERP["ERP X Senior"]
@@ -84,7 +84,7 @@ flowchart LR
 | Arquitetura | Monólito modular com dois deployables (`api` e `worker`) | [ADR-001](docs/adr/ADR-001-monolito-modular.md) |
 | Multi-tenancy | Banco compartilhado, RLS com FORCE, FKs compostas com `tenant_id` | [ADR-002](docs/adr/ADR-002-multi-tenancy-rls.md) |
 | Dados | SQL-first: tabelas não gerenciadas pelo Serverpod, tenant pelo `databaseInterceptor`, dinheiro em centavos | [ADR-019](docs/adr/ADR-019-dados-com-serverpod.md) |
-| Identidade | Keycloak para a equipe (token de tenant emitido pela api); OTP próprio por WhatsApp para clientes | [ADR-003](docs/adr/ADR-003-identidade-idp-e-otp.md) |
+| Identidade | Login próprio por e-mail e senha para a equipe (token de tenant emitido pela api); OTP próprio por WhatsApp para clientes | [ADR-003](docs/adr/ADR-003-identidade-idp-e-otp.md) |
 | Offline | Sync por comandos idempotentes; endpoint direto sem broker; Drift + SQLCipher no aparelho | [ADR-005](docs/adr/ADR-005-sync-offline-por-comandos.md), [ADR-018](docs/adr/ADR-018-sync-endpoint-direto-e-drift.md) |
 | QR | URL curta + token opaco + código curto com verificador, em domínio estável da plataforma | [ADR-006](docs/adr/ADR-006-qr-url-token-opaco.md) |
 | Ordem de serviço | Entidade única (nasce "Solicitada"), várias visitas, status do ERP separado | [ADR-007](docs/adr/ADR-007-os-unica-com-visitas.md) |
@@ -133,8 +133,8 @@ Caminhos sugeridos: **gestão** — este README → 01 → 11 → 10. **Backend*
 | Monorepo (pub workspace + melos), convenções de lint e formatação | [pubspec.yaml](pubspec.yaml), [analysis_options.yaml](analysis_options.yaml) | `dart analyze --fatal-infos` sem problemas |
 | Migração inicial do dbmate gerada do `schema.sql`, papéis de login e seed com dois tenants | [db/migrations](db/migrations), [infra/local/postgres](infra/local/postgres), [db/seeds](db/seeds) | `node tool/db/validate_all.mjs`: 42 testes do schema + 12 de migração/seed/isolamento |
 | `packages/core`: máquinas de estado da OS e da visita, centavos e milésimos, short code e token do QR, UUID v7 | [packages/core](packages/core) | 32 testes, com vetores gerados pelo PostgreSQL |
-| Servidor Serverpod 4.1.1: interceptor de tenant, tokens ES256, troca do token do Keycloak, `me.get`/`me.tenants` | [server](server/README.md) | 11 testes unitários + 13 de ponta a ponta no PostgreSQL 18 com o schema completo, incluindo o login real pelo Keycloak; custo do escopo por tenant +0,96 ms (p50) ([relatório do spike S1](docs/spikes/S1-S2-serverpod-rls.md)) |
-| Ambiente local (PostgreSQL 18, Valkey, Keycloak com realm de dev, S3 local com RustFS, Mailpit) e CI | [infra/local](infra/local/README.md), [.github/workflows/ci.yml](.github/workflows/ci.yml) | Compose testado no Docker Desktop; CI ainda não executado (o repositório não tem Git nem remoto) |
+| Servidor Serverpod 4.1.1: interceptor de tenant, tokens ES256, login por e-mail e senha com escolha do tenant, `me.get`/`me.tenants` | [server](server/README.md) | 11 testes unitários + 13 de ponta a ponta no PostgreSQL 18 com o schema completo, incluindo o login real pelo Keycloak; custo do escopo por tenant +0,96 ms (p50) ([relatório do spike S1](docs/spikes/S1-S2-serverpod-rls.md)) |
+| Ambiente local (PostgreSQL 18, Valkey, S3 local com RustFS, Mailpit) e CI | [infra/local](infra/local/README.md), [.github/workflows/ci.yml](.github/workflows/ci.yml) | Compose testado no Docker Desktop; CI ainda não executado (o repositório não tem Git nem remoto) |
 
 Ainda não criados: apps Flutter (`apps/*`), `packages/ui_kit`, `packages/sync_engine`, IaC (`infra/modules`, `infra/envs`).
 

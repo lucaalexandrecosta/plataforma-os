@@ -1,10 +1,11 @@
 import 'package:serverpod/serverpod.dart';
+import 'package:serverpod_auth_idp_server/core.dart' as login;
 
 import 'src/generated/endpoints.dart';
 import 'src/generated/protocol.dart';
+import 'src/identity_access/internal/login/login_config.dart';
 import 'src/platform/auth/access_token_service.dart';
 import 'src/platform/auth/authentication_handler.dart';
-import 'src/platform/auth/idp_token_verifier.dart';
 import 'src/platform/db/tenant_scoped_database.dart';
 
 /// Inicia o servidor. O mesmo executável sobe em dois papéis (docs/02 §3.1):
@@ -18,7 +19,6 @@ Future<void> run(List<String> args) async {
     args,
     Protocol(),
     Endpoints(),
-    authenticationHandler: tokenAuthenticationHandler,
     databaseInterceptor: tenantScopedDatabaseInterceptor,
   );
 
@@ -34,8 +34,16 @@ void configureAuth(Serverpod pod) {
   String required(String key) =>
       pod.getPassword(key) ?? (throw StateError('Segredo "$key" ausente (config/passwords.yaml ou cofre).'));
 
+  // Login próprio (e-mail e senha + sessão de login em JWT). O módulo instala
+  // o próprio handler; ele vira o segundo passo do handler da plataforma.
+  pod.initializeAuthServices(
+    tokenManagerBuilders: LoginConfig.tokenManagers(),
+    identityProviderBuilders: LoginConfig.identityProviders(pod),
+  );
+  pod.authenticationHandler = platformAuthenticationHandler(login.AuthServices.instance.authenticationHandler);
+
   final kid = required('tokenSigningKeyId');
-  AuthServices.configure(
+  PlatformAuth.configure(
     accessTokens: AccessTokenService(
       issuer: required('tokenIssuer'),
       activeKid: kid,
@@ -46,10 +54,6 @@ void configureAuth(Serverpod pod) {
           publicKeyPem: required('tokenSigningPublicKey'),
         ),
       ],
-    ),
-    idpTokens: IdpTokenVerifier(
-      issuer: required('keycloakStaffIssuer'),
-      allowedClients: {'backoffice-web', 'technician-app'},
     ),
   );
 }

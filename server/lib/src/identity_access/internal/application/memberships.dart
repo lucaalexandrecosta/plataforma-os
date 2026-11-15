@@ -51,7 +51,8 @@ abstract final class Memberships {
     return [for (final row in result) row[0] as String];
   }
 
-  /// Mapeia o `sub` do Keycloak para `users.id` antes de existir `app.user_id`
+  /// Mapeia a conta de login (id do usuário no módulo de autenticação, em
+  /// `users.idp_subject`) para `users.id` antes de existir `app.user_id`
   /// (função SECURITY DEFINER `app.find_user_by_idp_subject`).
   static Future<({UuidValue userId, String status})?> findUserByIdpSubject(Session session, String subject) async {
     final result = await session.db.unsafeQuery(
@@ -62,5 +63,38 @@ abstract final class Memberships {
     final row = result.first;
     final id = row[0];
     return (userId: id is UuidValue ? id : UuidValue.withValidation(id.toString()), status: row[1] as String);
+  }
+
+  /// Primeiro acesso: grava [subject] em `idp_subject` do usuário da equipe
+  /// com o mesmo e-mail, se ainda não tiver conta ligada
+  /// (função SECURITY DEFINER `app.link_staff_user_by_email`).
+  static Future<({UuidValue userId, String status})?> linkStaffUserByEmail(
+    Session session, {
+    required String subject,
+    required String email,
+  }) async {
+    final result = await session.db.unsafeQuery(
+      'SELECT user_id, status FROM app.link_staff_user_by_email(@subject, @email)',
+      parameters: QueryParameters.named({'subject': subject, 'email': email}),
+    );
+    if (result.isEmpty) return null;
+    final row = result.first;
+    final id = row[0];
+    return (userId: id is UuidValue ? id : UuidValue.withValidation(id.toString()), status: row[1] as String);
+  }
+
+  /// Registra o acesso no tenant e aceita o convite pendente
+  /// (`invited` → `active`). Exige o contexto do tenant.
+  static Future<void> recordAccess(Session session, TenantMembership membership) async {
+    await session.db.unsafeExecute(
+      'UPDATE app.tenant_memberships '
+      "   SET status = 'active', "
+      "       joined_at = CASE WHEN status = 'invited' THEN now() ELSE joined_at END, "
+      '       last_access_at = now(), updated_at = now(), '
+      "       updated_by = NULLIF(current_setting('app.user_id', true), '')::uuid, "
+      '       version = version + 1 '
+      " WHERE id = @id::uuid AND status IN ('invited', 'active')",
+      parameters: QueryParameters.named({'id': membership.id.uuid}),
+    );
   }
 }

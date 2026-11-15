@@ -101,10 +101,19 @@ await t('troca de tenant: usuário de um tenant só não enxerga o outro', async
   assert(tn.length === 1 && tn[0].slug === 'frio-sul', `tenants visíveis: ${JSON.stringify(tn)}`)
 })
 
-await t('login da equipe: find_user_by_idp_subject resolve o sub do Keycloak', async () => {
+await t('login próprio: e-mail do seed é convidado e o primeiro login liga a conta', async () => {
   await asRuntime(null, null)
-  const r = await q(`select user_id, status from app.find_user_by_idp_subject($1)`, ['7d0a0001-0000-4000-8000-000000000004'])
+  const inv = await q(`select app.staff_email_is_invited($1) as ok`, ['Davi.Consultor@dev.test'])
+  assert(inv[0].ok === true, 'e-mail do seed com vínculo ativo pode se cadastrar')
+  const no = await q(`select app.staff_email_is_invited($1) as ok`, ['estranho@dev.test'])
+  assert(no[0].ok === false, 'e-mail sem convite não pode se cadastrar')
+  const sub = '7d0a0001-0000-4000-8000-000000000004'
+  const r = await q(`select user_id, status from app.link_staff_user_by_email($1, $2)`, [sub, 'davi.consultor@dev.test'])
   assert(r.length === 1 && r[0].user_id === DAVI && r[0].status === 'active', JSON.stringify(r))
+  const f = await q(`select user_id from app.find_user_by_idp_subject($1)`, [sub])
+  assert(f.length === 1 && f[0].user_id === DAVI, JSON.stringify(f))
+  const again = await q(`select user_id from app.link_staff_user_by_email($1, $2)`, ['outro-sub', 'davi.consultor@dev.test'])
+  assert(again.length === 0, 'usuário já ligado não é religado a outra conta')
 })
 
 await t('QR do seed: short code válido resolve o tenant certo', async () => {

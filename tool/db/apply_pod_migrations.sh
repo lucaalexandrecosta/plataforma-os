@@ -33,7 +33,7 @@ fi
 (
   cd "$root/server" &&
     SERVERPOD_DATABASE_USER=app_pod_migrator SERVERPOD_DATABASE_SEARCH_PATHS=public \
-      dart bin/main.dart --mode "$mode" --role maintenance --apply-migrations
+      dart run bin/main.dart --mode "$mode" --role maintenance --apply-migrations
 ) >"$log" 2>&1
 status=$?
 cat "$log"

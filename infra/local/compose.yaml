@@ -1,5 +1,5 @@
 # Ambiente local (docs/02 §6.1, docs/13 §3.2): PostgreSQL 18, Valkey,
-# Keycloak, S3 (RustFS) e Mailpit. Uso: ver infra/local/README.md.
+# S3 (RustFS) e Mailpit. Uso: ver infra/local/README.md.
 name: plataforma-os
 
 services:
@@ -46,17 +46,6 @@ services:
     image: valkey/valkey:8.1
     ports:
       - "6379:6379"
-
-  keycloak:
-    image: quay.io/keycloak/keycloak:26.4
-    command: ["start-dev", "--import-realm", "--http-port=8180"]
-    environment:
-      KC_BOOTSTRAP_ADMIN_USERNAME: admin
-      KC_BOOTSTRAP_ADMIN_PASSWORD: admin
-    ports:
-      - "8180:8180"
-    volumes:
-      - ./keycloak/realm-staff.json:/opt/keycloak/data/import/realm-staff.json:ro
 
   # Object storage S3-compatível (docs/09 §1). A MinIO deixou de publicar imagens
   # da edição comunitária; RustFS (Apache 2.0) cobre o mesmo papel no ambiente local.

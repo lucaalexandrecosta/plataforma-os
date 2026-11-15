@@ -1,7 +1,7 @@
 -- migrate:up transaction:false
 -- =============================================================================
 -- Migração inicial — GERADA por tool/db/build_initial_migration.mjs. Não editar.
--- Origem: db/schema.sql (sha256 03d6413bb15ab7932deed505c6ce5038406ff730e079939d7340d223a9947308)
+-- Origem: db/schema.sql (sha256 226df99409b976b6ccb9792355285fda546d6774e6fcfe31fc37eb40637b6abf)
 -- Precisa de um papel administrativo (superusuário em dev/CI; o admin do RDS
 -- em homologação e produção), porque cria papéis-grupo e extensões.
 -- =============================================================================
@@ -431,7 +431,7 @@ CREATE TABLE app.tenants (
 );
 CREATE INDEX tenants_plan_id_idx ON app.tenants (plan_id);
 COMMENT ON TABLE app.tenants IS 'Empresa assinante (global; o próprio id é o tenant_id). Catálogo de tenants e caminho para silo.';
-COMMENT ON COLUMN app.tenants.idp_organization_id IS 'Id da Organization no Keycloak (equipe interna).';
+COMMENT ON COLUMN app.tenants.idp_organization_id IS 'Reservado: id da organização num IdP externo (não usado; login próprio desde 15/11/2026).';
 COMMENT ON COLUMN app.tenants.deployment_cell IS 'shared (banco compartilhado) ou identificador do banco dedicado (silo, fase 3).';
 
 CREATE TABLE app.tenant_settings (
@@ -567,7 +567,7 @@ CREATE TABLE app.users (
 );
 CREATE UNIQUE INDEX users_staff_email_key ON app.users (lower(email)) WHERE user_type = 'staff' AND email IS NOT NULL;
 CREATE INDEX users_phone_idx ON app.users (phone_e164) WHERE phone_e164 IS NOT NULL;
-COMMENT ON TABLE app.users IS 'Identidade global (uma pessoa pode estar em vários tenants). Senhas nunca ficam aqui: equipe autentica no IdP (idp_subject); contatos, por OTP.';
+COMMENT ON TABLE app.users IS 'Identidade global (uma pessoa pode estar em vários tenants). Senhas nunca ficam aqui: a equipe entra pelo módulo de e-mail e senha do Serverpod (tabelas em public; idp_subject = id do usuário do módulo); contatos, por OTP.';
 
 CREATE TABLE app.roles (
   id          uuid NOT NULL DEFAULT app.uuid_v7() PRIMARY KEY,
@@ -1548,7 +1548,7 @@ CREATE UNIQUE INDEX technicians_user_key ON app.technicians (tenant_id, user_id)
 CREATE INDEX technicians_user_id_idx ON app.technicians (user_id) WHERE user_id IS NOT NULL;
 CREATE INDEX technicians_service_area_idx ON app.technicians (tenant_id, home_service_area_id);
 CREATE INDEX technicians_row_version_idx ON app.technicians (tenant_id, row_version);
-COMMENT ON TABLE app.technicians IS 'Operador/técnico de campo. user_id liga ao login (Keycloak) com papel technician no tenant; pode existir antes do convite.';
+COMMENT ON TABLE app.technicians IS 'Operador/técnico de campo. user_id liga ao login da plataforma com papel technician no tenant; pode existir antes do convite.';
 COMMENT ON COLUMN app.technicians.kind IS 'v0.2 (MVP). employee (colaborador próprio) ou contractor (técnico de prestador). contractor exige service_provider_id e employee não pode ter (CHECK). Os dois usam o mesmo app.';
 COMMENT ON COLUMN app.technicians.service_provider_id IS 'v0.2 (MVP). Prestador do técnico terceirizado. UNIQUE (tenant_id, service_provider_id, id) permite FKs compostas que garantem "técnico pertence ao prestador" em work_orders e work_order_visits.';
 COMMENT ON COLUMN app.technicians.branch_id IS 'v0.2 (MVP). Filial do técnico (escopo e relatórios); nulo = filial padrão.';
@@ -3889,6 +3889,10 @@ CREATE POLICY system_access ON app.outbox_messages   FOR ALL    TO app_system US
 CREATE POLICY system_access ON app.integration_jobs  FOR ALL    TO app_system USING (true) WITH CHECK (true);
 CREATE POLICY system_access ON app.background_jobs   FOR ALL    TO app_system USING (true) WITH CHECK (true);
 CREATE POLICY system_access ON app.display_tokens    FOR SELECT TO app_system USING (true);
+-- Login próprio (staff_email_is_invited, link_staff_user_by_email): confere o
+-- convite e grava idp_subject no primeiro login.
+CREATE POLICY system_link ON app.users              FOR UPDATE TO app_system USING (user_type = 'staff') WITH CHECK (user_type = 'staff');
+CREATE POLICY system_access ON app.tenant_memberships FOR SELECT TO app_system USING (true);
 
 -- =============================================================================
 -- 23. Grants
@@ -3913,6 +3917,8 @@ GRANT USAGE ON SEQUENCE app.sync_row_version_seq TO app_runtime, app_system;
 GRANT SELECT ON app.tenants, app.users, app.qr_tags, app.customer_contacts, app.auth_sessions TO app_system;
 GRANT SELECT, UPDATE ON app.outbox_messages, app.integration_jobs, app.background_jobs TO app_system;
 GRANT SELECT ON app.display_tokens TO app_system;
+GRANT UPDATE (idp_subject, updated_at, version) ON app.users TO app_system;
+GRANT SELECT ON app.tenant_memberships TO app_system;
 
 ALTER DEFAULT PRIVILEGES FOR ROLE app_owner IN SCHEMA app GRANT SELECT, INSERT, UPDATE ON TABLES TO app_runtime;
 ALTER DEFAULT PRIVILEGES FOR ROLE app_owner IN SCHEMA app GRANT USAGE ON SEQUENCES TO app_runtime;
@@ -4025,7 +4031,7 @@ AS $$
 $$;
 COMMENT ON FUNCTION app.find_auth_session_by_refresh_hash(bytea) IS 'Localiza a sessão pelo hash do refresh token (rotação e detecção de reuso).';
 
--- Login da equipe: idp_subject (sub do Keycloak) -> users.id, antes de existir app.user_id.
+-- Login da equipe: idp_subject (id do usuário no módulo de autenticação) -> users.id, antes de existir app.user_id.
 CREATE FUNCTION app.find_user_by_idp_subject(p_subject text)
 RETURNS TABLE (user_id uuid, status text, is_platform_admin boolean)
 LANGUAGE sql STABLE SECURITY DEFINER
@@ -4034,6 +4040,50 @@ AS $$
   SELECT u.id, u.status, u.is_platform_admin FROM app.users u WHERE u.idp_subject = p_subject
 $$;
 COMMENT ON FUNCTION app.find_user_by_idp_subject(text) IS 'Mapeia o sub do IdP para users.id (início da requisição autenticada).';
+
+-- Login próprio (módulo de e-mail do Serverpod, 15/11/2026): o cadastro só é
+-- aberto para e-mails convidados, e o primeiro login liga a conta de e-mail
+-- (id do usuário do módulo, em idp_subject) ao usuário da equipe.
+CREATE FUNCTION app.staff_email_is_invited(p_email text)
+RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = pg_catalog, pg_temp
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+      FROM app.users u
+      JOIN app.tenant_memberships m ON m.user_id = u.id
+     WHERE u.user_type = 'staff'
+       AND u.status = 'active'
+       AND lower(u.email) = lower(p_email)
+       AND m.status IN ('invited', 'active')
+  )
+$$;
+COMMENT ON FUNCTION app.staff_email_is_invited(text) IS 'Login próprio: o cadastro por e-mail só é aceito para quem tem usuário ativo da equipe com vínculo convidado ou ativo em algum tenant.';
+
+CREATE FUNCTION app.link_staff_user_by_email(p_subject text, p_email text)
+RETURNS TABLE (user_id uuid, status text, is_platform_admin boolean)
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+SET search_path = pg_catalog, pg_temp
+AS $$
+DECLARE
+  v_user app.users%ROWTYPE;
+BEGIN
+  SELECT * INTO v_user
+    FROM app.users u
+   WHERE u.user_type = 'staff'
+     AND u.idp_subject IS NULL
+     AND lower(u.email) = lower(p_email)
+   FOR UPDATE;
+  IF NOT FOUND THEN
+    RETURN;
+  END IF;
+  UPDATE app.users u SET idp_subject = p_subject, updated_at = now(), version = u.version + 1
+   WHERE u.id = v_user.id;
+  RETURN QUERY SELECT v_user.id, v_user.status, v_user.is_platform_admin;
+END
+$$;
+COMMENT ON FUNCTION app.link_staff_user_by_email(text, text) IS 'Login próprio: no primeiro login, liga a conta de e-mail verificada (p_subject = id do usuário no módulo de autenticação) ao usuário da equipe com o mesmo e-mail. Só liga usuário ainda sem idp_subject. O aceite do convite (vínculo invited → active) é feito pela api no contexto do tenant, para passar pela RLS e pela auditoria.';
 
 -- Relay do outbox: reserva um lote entre tenants (SKIP LOCKED, lease). O worker
 -- processa cada mensagem com SET LOCAL app.tenant_id = <tenant da mensagem>.
@@ -4122,11 +4172,13 @@ GRANT EXECUTE ON FUNCTION app.find_display_token_by_hash(bytea) TO app_runtime;
 
 REVOKE ALL ON FUNCTION public.resolve_qr_token(text), public.resolve_qr_short_code(text),
   app.find_contact_logins(text, text), app.find_auth_session_by_refresh_hash(bytea),
-  app.find_user_by_idp_subject(text), app.claim_outbox_messages(integer, text, integer),
+  app.find_user_by_idp_subject(text), app.staff_email_is_invited(text),
+  app.link_staff_user_by_email(text, text), app.claim_outbox_messages(integer, text, integer),
   app.claim_integration_jobs(integer, text, integer), app.claim_background_jobs(integer, text, integer) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.resolve_qr_token(text), public.resolve_qr_short_code(text),
   app.find_contact_logins(text, text), app.find_auth_session_by_refresh_hash(bytea),
-  app.find_user_by_idp_subject(text), app.claim_outbox_messages(integer, text, integer),
+  app.find_user_by_idp_subject(text), app.staff_email_is_invited(text),
+  app.link_staff_user_by_email(text, text), app.claim_outbox_messages(integer, text, integer),
   app.claim_integration_jobs(integer, text, integer), app.claim_background_jobs(integer, text, integer) TO app_runtime;
 
 -- =============================================================================

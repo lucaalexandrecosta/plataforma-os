@@ -315,6 +315,23 @@ export async function run({ db, q, t }) {
     assert(!seen.some(m => m.tenant_id === b.tenant && m.user_id === uu.id), 'V no contexto do A não vê o vínculo de U no B')
   })
 
+  await t('login próprio: convite e ligação da conta por e-mail', async () => {
+    const a = await mkTenant()
+    const email = 'convite-' + Math.random().toString(36).slice(2) + '@teste.dev'
+    const u = await one(`insert into app.users (user_type, full_name, email) values ('staff', 'Convidada', $1) returning id`, [email])
+    await setTenant(a.tenant)
+    await one(`insert into app.tenant_memberships (tenant_id, user_id, status, invited_at) values ($1, $2, 'invited', now()) returning id`, [a.tenant, u.id])
+    await asRuntime(null, null)
+    assert((await one(`select app.staff_email_is_invited($1) as ok`, [email.toUpperCase()])).ok === true, 'convidada pode se cadastrar (sem diferenciar maiúsculas)')
+    const l = await q(`select user_id from app.link_staff_user_by_email($1, $2)`, ['sub-convite', email])
+    assert(l.length === 1 && l[0].user_id === u.id, 'liga a conta')
+    assert((await q(`select 1 from app.link_staff_user_by_email($1, $2)`, ['sub-2', email])).length === 0, 'não religa')
+    await setTenant(a.tenant)
+    await q(`update app.tenant_memberships set status = 'removed', removed_at = now() where user_id = $1`, [u.id])
+    await asRuntime(null, null)
+    assert((await one(`select app.staff_email_is_invited($1) as ok`, [email])).ok === false, 'vínculo removido não pode se cadastrar')
+  })
+
   await t('find_user_by_idp_subject e claim_outbox_messages: entre tenants só pela função', async () => {
     const a = await mkTenant(), b = await mkTenant()
     const sub = 'kc-' + Math.random().toString(36).slice(2)
