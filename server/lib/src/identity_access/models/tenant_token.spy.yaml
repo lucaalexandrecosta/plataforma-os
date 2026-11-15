@@ -1,4 +1,4 @@
-# Resultado de auth.exchangeIdpToken (docs/08 §2.2).
+# Resultado de auth.selectTenant (docs/08 §2.2).
 class: TenantToken
 fields:
   accessToken: String

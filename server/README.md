@@ -11,11 +11,11 @@ lib/
     ├── platform/               # núcleo técnico, sem regra de negócio
     │   ├── context/            # RequestContext anexado à Session
     │   ├── db/                 # TenantScopedDatabase (set_config por transação)
-    │   ├── auth/               # tokens ES256, token do Keycloak, handler, revogação
+    │   ├── auth/               # tokens ES256 do tenant, handler combinado, revogação
     │   ├── endpoints/          # StaffEndpoint, CustomerEndpoint, PublicEndpoint
     │   └── errors/             # ApiException (modelo) e fábricas
     ├── tenancy/                # camada 1: tenants (TenantDirectory)
-    ├── identity_access/        # camada 2: vínculos, papéis, auth.*, me.*
+    ├── identity_access/        # camada 2: login (emailIdp.*), vínculos, papéis, auth.*, me.*
     └── generated/              # gerado pelo Serverpod (versionado; o CI confere)
 migrations/                     # só as tabelas internas do Serverpod (schema public)
 test/unit/                      # sem banco
@@ -23,6 +23,10 @@ test/e2e/                       # servidor + banco reais (isolamento entre tenan
 ```
 
 Cada módulo expõe só o arquivo `<módulo>.dart`; o resto fica em `internal/`. As tabelas de negócio são SQL-first (`db/schema.sql` + dbmate) e entram nos modelos com `managedMigration: false`.
+
+## Login
+
+Login próprio (sem IdP externo): o módulo `serverpod_auth_idp` cuida de e-mail, senha, código de verificação e da sessão de login (JWT, renovada por `refreshJwtTokens`). A sessão de login só identifica a pessoa. Para acessar dados, o app chama `auth.selectTenant(slug)` e recebe o token ES256 do tenant (10 min), o único aceito pelos `StaffEndpoint`. Configuração em `lib/src/identity_access/internal/login/login_config.dart`; segredos `emailSecretHashPepper`, `jwtRefreshTokenHashPepper` e `jwtHmacSha512PrivateKey`.
 
 ## Regras que valem desde já
 
@@ -53,10 +57,9 @@ Ao subir, o servidor avisa `Database does not match target state` por causa das 
 
 ```bash
 dart test test/unit                            # sem banco
-# e2e: banco de teste (porta 5433) com migração + seed, Keycloak do compose,
-# e o servidor em modo test
+# e2e: banco de teste (porta 5433) com migração + seed e o servidor em modo test
 dart bin/main.dart --mode test --role monolith &
-dart test test/e2e                             # isolamento entre tenants + login pelo Keycloak
+dart test test/e2e                             # isolamento entre tenants + login por e-mail e senha
 ```
 
 O passo a passo completo do e2e está no job `e2e` de [.github/workflows/ci.yml](../.github/workflows/ci.yml).

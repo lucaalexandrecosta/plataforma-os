@@ -1,15 +1,23 @@
 import 'package:serverpod/serverpod.dart';
 
 import '../../generated/protocol.dart';
-import '../../platform/endpoints/endpoint_bases.dart';
-import '../internal/application/exchange_idp_token.dart' as uc;
+import '../internal/application/select_tenant.dart' as uc;
 
-/// `auth.*` — métodos sem login (o token do Keycloak vem como parâmetro).
-class AuthEndpoint extends PublicEndpoint {
-  /// Troca o access token do Keycloak (realm `staff`) por um token de tenant.
+/// `auth.*` — escolha do tenant depois do login por e-mail e senha.
+///
+/// Exige a sessão de login do módulo (`emailIdp.login`), sem escopo: o token
+/// de tenant não é aceito aqui.
+class AuthEndpoint extends Endpoint {
+  @override
+  bool get requireLogin => true;
+
+  /// Troca a sessão de login por um token de tenant (10 min).
   ///
-  /// Erros: `UNAUTHENTICATED` (token do IdP inválido), `FORBIDDEN` (sem vínculo
-  /// ativo no tenant, ou tenant inexistente), `TENANT_SUSPENDED`.
-  Future<TenantToken> exchangeIdpToken(Session session, String idpToken, String tenantSlug) =>
-      uc.exchangeIdpToken(session, idpToken: idpToken, tenantSlug: tenantSlug);
+  /// [technicianApp] = chamada do app de campo: exige papel de técnico ou
+  /// coordenador.
+  ///
+  /// Erros: `UNAUTHENTICATED` (sem sessão de login), `FORBIDDEN` (sem vínculo
+  /// no tenant, ou tenant inexistente), `TENANT_SUSPENDED`.
+  Future<TenantToken> selectTenant(Session session, String tenantSlug, {bool? technicianApp}) =>
+      uc.selectTenant(session, tenantSlug: tenantSlug, technicianApp: technicianApp ?? false);
 }

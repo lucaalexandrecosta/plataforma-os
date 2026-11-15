@@ -1,6 +1,6 @@
 # ADR-003 — Identidade: IdP OIDC para a equipe interna e OTP próprio para contatos de clientes
 
-- **Status:** Proposto — 27/10/2026
+- **Status:** Proposto — 27/10/2026 · **Emendado em 15/11/2026** (equipe sem Keycloak, ver Emenda no fim)
 - **Relacionados:** [Multi-tenancy e segurança](../04-multi-tenancy-e-seguranca.md), [Aplicações e fluxos](../06-aplicacoes-e-fluxos.md)
 
 ## Contexto
@@ -35,3 +35,14 @@
 | Link mágico por e-mail para clientes | Muitos contatos não usam e-mail no dia a dia; atrito maior que o WhatsApp |
 | Senha para clientes | Atrito incompatível com "ler o QR e abrir o chamado em segundos" |
 | Autenticação própria também para a equipe | Reimplementar MFA, recuperação e SSO/SAML é caro e arriscado |
+
+## Emenda de 15/11/2026: login próprio para a equipe
+
+Decisão do dono do produto, que também é o único desenvolvedor: a equipe interna entra pela própria plataforma, sem Keycloak no MVP. Operar um IdP auto-hospedado pesa demais para uma pessoa só.
+
+- **Como fica:** e-mail e senha pelo módulo `serverpod_auth_idp` do Serverpod 4.1.1 (hash com pepper, código de verificação, troca de senha, limite de tentativas), com sessão de login em JWT renovável (`refreshJwtTokens`). A sessão de login só identifica a pessoa.
+- **O que não muda (item 1a):** a API continua aceitando nos endpoints só o token de tenant ES256 emitido por ela. `auth.selectTenant(slug)` substitui a troca do token do Keycloak; papéis e vínculos continuam vindo de `tenant_memberships`.
+- **Controle de acesso:** só e-mail convidado para algum tenant consegue criar senha (`app.staff_email_is_invited`). No primeiro acesso, a conta de login é ligada ao usuário da equipe pelo e-mail verificado (`app.link_staff_user_by_email`, grava `users.idp_subject`), e o convite pendente vira vínculo ativo no contexto do tenant, com auditoria.
+- **Fica para depois:** MFA (TOTP) e SSO corporativo. O módulo do Serverpod já tem provedores Google e Microsoft, que podem entrar sem mudar o token de tenant. Envio do código por e-mail entra com o módulo de notificações; até lá o código vai para o log em desenvolvimento.
+- A troca do token no app do técnico com prova de posse da chave do aparelho continua planejada, agora em `auth.selectTenant`.
+

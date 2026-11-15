@@ -1,7 +1,7 @@
 -- migrate:up transaction:false
 -- =============================================================================
 -- Migração inicial — GERADA por tool/db/build_initial_migration.mjs. Não editar.
--- Origem: db/schema.sql (sha256 90f4e7b63d4d52b3637890734caf8149bd1aaddbcb3a298e9aa137a9b6c583d6)
+-- Origem: db/schema.sql (sha256 226df99409b976b6ccb9792355285fda546d6774e6fcfe31fc37eb40637b6abf)
 -- Precisa de um papel administrativo (superusuário em dev/CI; o admin do RDS
 -- em homologação e produção), porque cria papéis-grupo e extensões.
 -- =============================================================================
@@ -431,7 +431,7 @@ CREATE TABLE app.tenants (
 );
 CREATE INDEX tenants_plan_id_idx ON app.tenants (plan_id);
 COMMENT ON TABLE app.tenants IS 'Empresa assinante (global; o próprio id é o tenant_id). Catálogo de tenants e caminho para silo.';
-COMMENT ON COLUMN app.tenants.idp_organization_id IS 'Id da Organization no Keycloak (equipe interna).';
+COMMENT ON COLUMN app.tenants.idp_organization_id IS 'Reservado: id da organização num IdP externo (não usado; login próprio desde 15/11/2026).';
 COMMENT ON COLUMN app.tenants.deployment_cell IS 'shared (banco compartilhado) ou identificador do banco dedicado (silo, fase 3).';
 
 CREATE TABLE app.tenant_settings (
@@ -1548,7 +1548,7 @@ CREATE UNIQUE INDEX technicians_user_key ON app.technicians (tenant_id, user_id)
 CREATE INDEX technicians_user_id_idx ON app.technicians (user_id) WHERE user_id IS NOT NULL;
 CREATE INDEX technicians_service_area_idx ON app.technicians (tenant_id, home_service_area_id);
 CREATE INDEX technicians_row_version_idx ON app.technicians (tenant_id, row_version);
-COMMENT ON TABLE app.technicians IS 'Operador/técnico de campo. user_id liga ao login (Keycloak) com papel technician no tenant; pode existir antes do convite.';
+COMMENT ON TABLE app.technicians IS 'Operador/técnico de campo. user_id liga ao login da plataforma com papel technician no tenant; pode existir antes do convite.';
 COMMENT ON COLUMN app.technicians.kind IS 'v0.2 (MVP). employee (colaborador próprio) ou contractor (técnico de prestador). contractor exige service_provider_id e employee não pode ter (CHECK). Os dois usam o mesmo app.';
 COMMENT ON COLUMN app.technicians.service_provider_id IS 'v0.2 (MVP). Prestador do técnico terceirizado. UNIQUE (tenant_id, service_provider_id, id) permite FKs compostas que garantem "técnico pertence ao prestador" em work_orders e work_order_visits.';
 COMMENT ON COLUMN app.technicians.branch_id IS 'v0.2 (MVP). Filial do técnico (escopo e relatórios); nulo = filial padrão.';

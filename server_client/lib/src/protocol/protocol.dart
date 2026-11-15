@@ -12,6 +12,8 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:plataforma_os_client/src/protocol/tenancy/models/tenant_summary.dart' as _i11upz4e;
+import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart' as _iacc;
+import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart' as _iaic;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 import 'identity_access/models/app_user.dart' as _i5wnkftg;
 import 'identity_access/models/me_info.dart' as _ip4w8f8l;
@@ -44,7 +46,7 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
 
   factory Protocol() => _instance;
 
-  static final Protocol _instance = Protocol._();
+  static final Protocol _instance = Protocol._().._registerHostProtocols();
 
   @override
   _isc.ProtocolDeserialization get deserializationMetadata => _isc.ProtocolDeserialization.cached(
@@ -81,7 +83,10 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<Map<String, String>?>,
       _isc.getType<List<_i11upz4e.TenantSummary>>,
     ],
-    modules: const [],
+    modules: const [
+      _iaic.Protocol.new,
+      _iacc.Protocol.new,
+    ],
     classNames: const [
       'AppUser',
       'MeInfo',
@@ -214,6 +219,16 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     if (t == List<_i11upz4e.TenantSummary>) {
       return (data as List).map((e) => deserialize<_i11upz4e.TenantSummary>(e)).toList() as T;
     }
+    final modules = deserializationMetadata.modulesForDeserialization(
+      t,
+      className: rawDataClassName,
+    );
+    for (final module in modules) {
+      try {
+        return module.deserialize<T>(data, t);
+      } on _isc.DeserializationTypeNotFoundException catch (_) {}
+    }
+
     return super.deserialize<T>(data, t);
   }
 
@@ -270,6 +285,14 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       case _i9uizrsf.TenantSummary():
         return 'TenantSummary';
     }
+    className = _iaic.Protocol().getClassNameForObject(data);
+    if (className != null) {
+      return className.contains('.') ? className : 'serverpod_auth_idp.$className';
+    }
+    className = _iacc.Protocol().getClassNameForObject(data);
+    if (className != null) {
+      return className.contains('.') ? className : 'serverpod_auth_core.$className';
+    }
     return null;
   }
 
@@ -315,7 +338,24 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     if (dataClassName == 'TenantSummary') {
       return deserialize<_i9uizrsf.TenantSummary>(data['data']);
     }
+    if (dataClassName.startsWith('serverpod_auth_idp.')) {
+      return _iaic.Protocol().deserializeByClassName({
+        ...data,
+        'className': dataClassName.substring(19),
+      });
+    }
+    if (dataClassName.startsWith('serverpod_auth_core.')) {
+      return _iacc.Protocol().deserializeByClassName({
+        ...data,
+        'className': dataClassName.substring(20),
+      });
+    }
     return super.deserializeByClassName(data);
+  }
+
+  void _registerHostProtocols() {
+    _iaic.Protocol().registerHostProtocol('plataforma_os', this);
+    _iacc.Protocol().registerHostProtocol('plataforma_os', this);
   }
 
   @override
@@ -330,6 +370,12 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     if (record == null) {
       return null;
     }
+    try {
+      return _iaic.Protocol().mapRecordToJson(record);
+    } catch (_) {}
+    try {
+      return _iacc.Protocol().mapRecordToJson(record);
+    } catch (_) {}
     throw Exception('Unsupported record type ${record.runtimeType}');
   }
 }

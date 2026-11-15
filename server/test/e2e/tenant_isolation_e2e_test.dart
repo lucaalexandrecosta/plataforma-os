@@ -136,9 +136,20 @@ void main() {
     await expectLater(client.me.get(), throwsA(isA<ServerpodClientException>()));
   });
 
-  test('auth.exchangeIdpToken recusa token de IdP inválido sem revelar nada', () async {
+  test('auth.selectTenant exige a sessão de login (sem ela, ou com token de tenant, recusa)', () async {
+    await expectLater(Client(apiUrl).auth.selectTenant('frio-sul'), throwsA(isA<ServerpodClientException>()));
+
+    final tenantToken = tokens.issue(
+      kind: TokenKind.staff,
+      userId: ana,
+      tenantId: tenantA,
+      actorType: ActorType.user,
+      sessionId: 'e2e-select',
+      membershipId: anaMembership,
+    );
+    final client = Client(apiUrl)..authKeyProvider = _Bearer(tenantToken.token);
     await expectLater(
-      Client(apiUrl).auth.exchangeIdpToken('nao-e-um-jwt', 'frio-sul'),
+      client.auth.selectTenant('frio-sul'),
       throwsA(isA<ApiException>().having((e) => e.code, 'code', 'UNAUTHENTICATED')),
     );
   });

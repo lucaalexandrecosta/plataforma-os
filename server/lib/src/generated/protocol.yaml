@@ -1,5 +1,16 @@
 auth:
-  - exchangeIdpToken:
+  - selectTenant:
+emailIdp:
+  - login:
+  - startRegistration:
+  - verifyRegistrationCode:
+  - finishRegistration:
+  - startPasswordReset:
+  - verifyPasswordResetCode:
+  - finishPasswordReset:
+  - hasAccount:
 me:
   - get:
   - tenants:
+refreshJwtTokens:
+  - refreshAccessToken:

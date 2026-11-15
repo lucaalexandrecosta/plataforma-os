@@ -73,13 +73,6 @@ jobs:
         with:
           sdk: ${{ env.DART_VERSION }}
       - run: dart pub get
-      - name: Keycloak com o realm de dev (login pelo IdP nos testes e2e)
-        # Não dá para usar "services": o container precisa de comando (start-dev).
-        run: |
-          docker run -d --name keycloak -p 8180:8180 \
-            -e KC_BOOTSTRAP_ADMIN_USERNAME=admin -e KC_BOOTSTRAP_ADMIN_PASSWORD=admin \
-            -v "$PWD/infra/local/keycloak/realm-staff.json:/opt/keycloak/data/import/realm-staff.json:ro" \
-            quay.io/keycloak/keycloak:26.4 start-dev --import-realm --http-port=8180
       - name: Papéis de login, migração inicial (dbmate) e seed
         run: |
           sudo apt-get install -y postgresql-client >/dev/null
@@ -94,7 +87,7 @@ jobs:
           $DBMATE up
           $DBMATE status --exit-code   # falha se alguma migração ficou sem registro
           $PSQL -f db/seeds/dev_seed.sql
-      - name: Segredos de teste (chave ES256 efêmera)
+      - name: Segredos de teste (chave ES256 e segredos do login, efêmeros)
         run: node tool/dev/generate_dev_secrets.mjs
       - name: Migrações do Serverpod (tabelas serverpod_* em public)
         env:
@@ -105,5 +98,4 @@ jobs:
         run: |
           dart bin/main.dart --mode test --role monolith > server.log 2>&1 &
           for i in $(seq 1 60); do curl -fs http://localhost:9080/ >/dev/null 2>&1 && break; sleep 1; done
-          for i in $(seq 1 90); do curl -fs http://localhost:8180/realms/staff/.well-known/openid-configuration >/dev/null 2>&1 && break; sleep 2; done
-          dart test test/e2e || (cat server.log && docker logs keycloak | tail -50 && exit 1)
+          dart test test/e2e || (cat server.log && exit 1)
