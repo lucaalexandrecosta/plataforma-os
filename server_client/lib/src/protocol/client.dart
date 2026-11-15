@@ -12,8 +12,10 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _ida;
 import 'package:http/http.dart' as _i85jenna;
+import 'package:plataforma_os_client/src/protocol/identity_access/models/assignable_role.dart' as _i2g1699a;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/me_info.dart' as _i8cz5om6;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/tenant_token.dart' as _ii663qav;
+import 'package:plataforma_os_client/src/protocol/identity_access/models/tenant_user.dart' as _i8ihd43z;
 import 'package:plataforma_os_client/src/protocol/tenancy/models/tenant_summary.dart' as _i11upz4e;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart' as _iacc;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart' as _iaic;
@@ -192,6 +194,85 @@ class EndpointRefreshJwtTokens extends _iacc.EndpointRefreshJwtTokens {
       );
 }
 
+/// `users.*` — controle de usuários da empresa (permissão `users.manage`,
+/// que o perfil `tenant_admin` tem).
+///
+/// Erros: `FORBIDDEN` (sem permissão), `VALIDATION_FAILED`, `NOT_FOUND`,
+/// `ALREADY_MEMBER`, `LAST_TENANT_ADMIN`, `CANNOT_CHANGE_OWN_ACCESS`,
+/// `INVALID_STATUS`.
+/// {@category Endpoint}
+class EndpointUsers extends EndpointStaff {
+  EndpointUsers(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'users';
+
+  /// Perfis que podem ser atribuídos.
+  _ida.Future<List<_i2g1699a.AssignableRole>> roles() => caller.callServerEndpoint<List<_i2g1699a.AssignableRole>>(
+    'users',
+    'roles',
+    {},
+  );
+
+  /// Pessoas com acesso à empresa (convidadas, ativas e suspensas).
+  _ida.Future<List<_i8ihd43z.TenantUser>> list() => caller.callServerEndpoint<List<_i8ihd43z.TenantUser>>(
+    'users',
+    'list',
+    {},
+  );
+
+  /// Convida pelo e-mail. A pessoa cria a senha no primeiro acesso e, ao
+  /// escolher a empresa, o convite vira acesso ativo.
+  _ida.Future<_i8ihd43z.TenantUser> invite(
+    String email,
+    String fullName,
+    List<String> roles,
+  ) => caller.callServerEndpoint<_i8ihd43z.TenantUser>(
+    'users',
+    'invite',
+    {
+      'email': email,
+      'fullName': fullName,
+      'roles': roles,
+    },
+  );
+
+  /// Troca os perfis (a lista substitui a anterior).
+  _ida.Future<_i8ihd43z.TenantUser> setRoles(
+    _isc.UuidValue membershipId,
+    List<String> roles,
+  ) => caller.callServerEndpoint<_i8ihd43z.TenantUser>(
+    'users',
+    'setRoles',
+    {
+      'membershipId': membershipId,
+      'roles': roles,
+    },
+  );
+
+  _ida.Future<_i8ihd43z.TenantUser> suspend(_isc.UuidValue membershipId) =>
+      caller.callServerEndpoint<_i8ihd43z.TenantUser>(
+        'users',
+        'suspend',
+        {'membershipId': membershipId},
+      );
+
+  _ida.Future<_i8ihd43z.TenantUser> reactivate(_isc.UuidValue membershipId) =>
+      caller.callServerEndpoint<_i8ihd43z.TenantUser>(
+        'users',
+        'reactivate',
+        {'membershipId': membershipId},
+      );
+
+  /// Tira o acesso; o histórico fica e a pessoa pode ser convidada de novo.
+  _ida.Future<_i8ihd43z.TenantUser> remove(_isc.UuidValue membershipId) =>
+      caller.callServerEndpoint<_i8ihd43z.TenantUser>(
+        'users',
+        'remove',
+        {'membershipId': membershipId},
+      );
+}
+
 /// Classes-base por tipo de token (docs/08 §2.2): um token de contato nunca
 /// passa num endpoint da equipe e vice-versa. A permissão fina (papel, escopo
 /// de carteira, prestador ou filial) é conferida por método.
@@ -258,6 +339,7 @@ class Client extends _isc.ServerpodClientShared {
     emailIdp = EndpointEmailIdp(this);
     me = EndpointMe(this);
     refreshJwtTokens = EndpointRefreshJwtTokens(this);
+    users = EndpointUsers(this);
     modules = Modules(this);
   }
 
@@ -269,6 +351,8 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointRefreshJwtTokens refreshJwtTokens;
 
+  late final EndpointUsers users;
+
   late final Modules modules;
 
   @override
@@ -277,6 +361,7 @@ class Client extends _isc.ServerpodClientShared {
     'emailIdp': emailIdp,
     'me': me,
     'refreshJwtTokens': refreshJwtTokens,
+    'users': users,
   };
 
   @override

@@ -332,6 +332,21 @@ export async function run({ db, q, t }) {
     assert((await one(`select app.staff_email_is_invited($1) as ok`, [email])).ok === false, 'vínculo removido não pode se cadastrar')
   })
 
+  await t('controle de usuários: convite acha a pessoa de outro tenant só pelo id', async () => {
+    const a = await mkTenant(), b = await mkTenant()
+    const email = 'multi-' + Math.random().toString(36).slice(2) + '@teste.dev'
+    const u = await one(`insert into app.users (user_type, full_name, email) values ('staff', 'Pessoa de A', $1) returning id`, [email])
+    await setTenant(a.tenant)
+    await one(`insert into app.tenant_memberships (tenant_id, user_id, status) values ($1, $2, 'active') returning id`, [a.tenant, u.id])
+    await asRuntime(b.tenant, null)
+    assert((await q(`select 1 from app.users where id = $1`, [u.id])).length === 0, 'no tenant B a pessoa de A não é legível')
+    const found = await one(`select app.staff_user_id_by_email($1) as id`, ['  ' + email.toUpperCase() + ' '])
+    assert(found.id === u.id, 'a função devolve o id (sem diferenciar maiúsculas e espaços)')
+    assert((await one(`select app.staff_user_id_by_email('ninguem@teste.dev') as id`)).id === null, 'e-mail desconhecido => nulo')
+    await one(`insert into app.tenant_memberships (tenant_id, user_id, status, invited_at) values ($1, $2, 'invited', now()) returning id`, [b.tenant, u.id])
+    assert((await q(`select full_name from app.users where id = $1`, [u.id])).length === 1, 'depois do convite, B enxerga a pessoa')
+  })
+
   await t('find_user_by_idp_subject e claim_outbox_messages: entre tenants só pela função', async () => {
     const a = await mkTenant(), b = await mkTenant()
     const sub = 'kc-' + Math.random().toString(36).slice(2)

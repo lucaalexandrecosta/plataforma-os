@@ -27,4 +27,12 @@ abstract final class ApiErrors {
     traceId: session.sessionId.uuid,
     fieldErrors: fieldErrors,
   );
+
+  /// Já existe (ex.: pessoa já tem acesso à empresa).
+  static ApiException conflict(Session session, String code, String detail) =>
+      _make(session, code, ErrorCategory.conflict, detail);
+
+  /// Regra de negócio impede a ação (ex.: tirar o último administrador).
+  static ApiException businessRule(Session session, String code, String detail) =>
+      _make(session, code, ErrorCategory.businessRule, detail);
 }

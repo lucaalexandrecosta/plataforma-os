@@ -1,7 +1,7 @@
 -- migrate:up transaction:false
 -- =============================================================================
 -- Migração inicial — GERADA por tool/db/build_initial_migration.mjs. Não editar.
--- Origem: db/schema.sql (sha256 226df99409b976b6ccb9792355285fda546d6774e6fcfe31fc37eb40637b6abf)
+-- Origem: db/schema.sql (sha256 a7332edf1cd0d76bcee774764a780b62ad99ba5698fd30f7d178406f764bdd19)
 -- Precisa de um papel administrativo (superusuário em dev/CI; o admin do RDS
 -- em homologação e produção), porque cria papéis-grupo e extensões.
 -- =============================================================================
@@ -4085,6 +4085,19 @@ END
 $$;
 COMMENT ON FUNCTION app.link_staff_user_by_email(text, text) IS 'Login próprio: no primeiro login, liga a conta de e-mail verificada (p_subject = id do usuário no módulo de autenticação) ao usuário da equipe com o mesmo e-mail. Só liga usuário ainda sem idp_subject. O aceite do convite (vínculo invited → active) é feito pela api no contexto do tenant, para passar pela RLS e pela auditoria.';
 
+-- Controle de usuários (15/11/2026): o convite precisa achar a pessoa pelo
+-- e-mail mesmo quando ela só existe em outro tenant (a RLS de users esconde).
+-- Devolve só o id: nenhum dado da pessoa vaza para o tenant que convida.
+CREATE FUNCTION app.staff_user_id_by_email(p_email text)
+RETURNS uuid
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = pg_catalog, pg_temp
+AS $$
+  SELECT u.id FROM app.users u
+   WHERE u.user_type = 'staff' AND lower(u.email) = lower(btrim(p_email))
+$$;
+COMMENT ON FUNCTION app.staff_user_id_by_email(text) IS 'Controle de usuários: id do usuário da equipe com o e-mail (de qualquer tenant), para o convite reaproveitar a mesma pessoa. Só o id, sem outros dados.';
+
 -- Relay do outbox: reserva um lote entre tenants (SKIP LOCKED, lease). O worker
 -- processa cada mensagem com SET LOCAL app.tenant_id = <tenant da mensagem>.
 CREATE FUNCTION app.claim_outbox_messages(p_limit integer, p_worker text, p_lease_seconds integer DEFAULT 60)
@@ -4173,12 +4186,12 @@ GRANT EXECUTE ON FUNCTION app.find_display_token_by_hash(bytea) TO app_runtime;
 REVOKE ALL ON FUNCTION public.resolve_qr_token(text), public.resolve_qr_short_code(text),
   app.find_contact_logins(text, text), app.find_auth_session_by_refresh_hash(bytea),
   app.find_user_by_idp_subject(text), app.staff_email_is_invited(text),
-  app.link_staff_user_by_email(text, text), app.claim_outbox_messages(integer, text, integer),
+  app.link_staff_user_by_email(text, text), app.staff_user_id_by_email(text), app.claim_outbox_messages(integer, text, integer),
   app.claim_integration_jobs(integer, text, integer), app.claim_background_jobs(integer, text, integer) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.resolve_qr_token(text), public.resolve_qr_short_code(text),
   app.find_contact_logins(text, text), app.find_auth_session_by_refresh_hash(bytea),
   app.find_user_by_idp_subject(text), app.staff_email_is_invited(text),
-  app.link_staff_user_by_email(text, text), app.claim_outbox_messages(integer, text, integer),
+  app.link_staff_user_by_email(text, text), app.staff_user_id_by_email(text), app.claim_outbox_messages(integer, text, integer),
   app.claim_integration_jobs(integer, text, integer), app.claim_background_jobs(integer, text, integer) TO app_runtime;
 
 -- =============================================================================

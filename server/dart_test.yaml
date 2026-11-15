@@ -1,3 +1,7 @@
+# Os arquivos e2e compartilham o banco de teste (senhas criadas no primeiro
+# acesso, vínculos suspensos e reativados): rodam um de cada vez.
+concurrency: 1
+
 tags:
   e2e:
     # Precisa do servidor e do banco de teste rodando (server/README.md).

@@ -11,17 +11,21 @@
 // ignore_for_file: dead_code, unnecessary_type_check
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:plataforma_os_server/src/generated/identity_access/models/assignable_role.dart' as _iur1xixc;
+import 'package:plataforma_os_server/src/generated/identity_access/models/tenant_user.dart' as _iqhozu6i;
 import 'package:plataforma_os_server/src/generated/tenancy/models/tenant_summary.dart' as _inphvrgt;
 import 'package:serverpod/protocol.dart' as _isp;
 import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart' as _iacs;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart' as _iais;
 import 'identity_access/models/app_user.dart' as _i5wnkftg;
+import 'identity_access/models/assignable_role.dart' as _ilvk5aly;
 import 'identity_access/models/me_info.dart' as _ip4w8f8l;
 import 'identity_access/models/membership_status.dart' as _i2vwv4gx;
 import 'identity_access/models/tenant_membership.dart' as _i1iyeyn1;
 import 'identity_access/models/tenant_membership_role.dart' as _iutn78jy;
 import 'identity_access/models/tenant_token.dart' as _izyppcov;
+import 'identity_access/models/tenant_user.dart' as _i6x1gv4d;
 import 'platform/errors/models/api_exception.dart' as _i147o0qx;
 import 'platform/errors/models/error_category.dart' as _i0p9y4c3;
 import 'platform/errors/models/field_error.dart' as _i3z3bgdl;
@@ -29,11 +33,13 @@ import 'tenancy/models/tenant.dart' as _i2jhpzjh;
 import 'tenancy/models/tenant_status.dart' as _i2bjgc9x;
 import 'tenancy/models/tenant_summary.dart' as _i9uizrsf;
 export 'identity_access/models/app_user.dart';
+export 'identity_access/models/assignable_role.dart';
 export 'identity_access/models/me_info.dart';
 export 'identity_access/models/membership_status.dart';
 export 'identity_access/models/tenant_membership.dart';
 export 'identity_access/models/tenant_membership_role.dart';
 export 'identity_access/models/tenant_token.dart';
+export 'identity_access/models/tenant_user.dart';
 export 'platform/errors/models/api_exception.dart';
 export 'platform/errors/models/error_category.dart';
 export 'platform/errors/models/field_error.dart';
@@ -53,11 +59,13 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     this,
     types: const [
       _is.getType<_i5wnkftg.AppUser>,
+      _is.getType<_ilvk5aly.AssignableRole>,
       _is.getType<_ip4w8f8l.MeInfo>,
       _is.getType<_i2vwv4gx.MembershipStatus>,
       _is.getType<_i1iyeyn1.TenantMembership>,
       _is.getType<_iutn78jy.TenantMembershipRole>,
       _is.getType<_izyppcov.TenantToken>,
+      _is.getType<_i6x1gv4d.TenantUser>,
       _is.getType<_i147o0qx.ApiException>,
       _is.getType<_i0p9y4c3.ErrorCategory>,
       _is.getType<_i3z3bgdl.FieldError>,
@@ -65,11 +73,13 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<_i2bjgc9x.TenantStatus>,
       _is.getType<_i9uizrsf.TenantSummary>,
       _is.getType<_i5wnkftg.AppUser?>,
+      _is.getType<_ilvk5aly.AssignableRole?>,
       _is.getType<_ip4w8f8l.MeInfo?>,
       _is.getType<_i2vwv4gx.MembershipStatus?>,
       _is.getType<_i1iyeyn1.TenantMembership?>,
       _is.getType<_iutn78jy.TenantMembershipRole?>,
       _is.getType<_izyppcov.TenantToken?>,
+      _is.getType<_i6x1gv4d.TenantUser?>,
       _is.getType<_i147o0qx.ApiException?>,
       _is.getType<_i0p9y4c3.ErrorCategory?>,
       _is.getType<_i3z3bgdl.FieldError?>,
@@ -82,6 +92,9 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<Map<String, String>>,
       _is.getType<Map<String, String>?>,
       _is.getType<List<_inphvrgt.TenantSummary>>,
+      _is.getType<List<_iur1xixc.AssignableRole>>,
+      _is.getType<List<_iqhozu6i.TenantUser>>,
+      _is.getType<List<String>>,
     ],
     modules: const [
       _iais.Protocol.new,
@@ -90,11 +103,13 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     ],
     classNames: const [
       'AppUser',
+      'AssignableRole',
       'MeInfo',
       'MembershipStatus',
       'TenantMembership',
       'TenantMembershipRole',
       'TenantToken',
+      'TenantUser',
       'ApiException',
       'ErrorCategory',
       'FieldError',
@@ -334,6 +349,9 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == _i5wnkftg.AppUser) {
       return _i5wnkftg.AppUser.fromJson(data) as T;
     }
+    if (t == _ilvk5aly.AssignableRole) {
+      return _ilvk5aly.AssignableRole.fromJson(data) as T;
+    }
     if (t == _ip4w8f8l.MeInfo) {
       return _ip4w8f8l.MeInfo.fromJson(data) as T;
     }
@@ -348,6 +366,9 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     }
     if (t == _izyppcov.TenantToken) {
       return _izyppcov.TenantToken.fromJson(data) as T;
+    }
+    if (t == _i6x1gv4d.TenantUser) {
+      return _i6x1gv4d.TenantUser.fromJson(data) as T;
     }
     if (t == _i147o0qx.ApiException) {
       return _i147o0qx.ApiException.fromJson(data) as T;
@@ -370,6 +391,9 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == _is.getType<_i5wnkftg.AppUser?>()) {
       return (data != null ? _i5wnkftg.AppUser.fromJson(data) : null) as T;
     }
+    if (t == _is.getType<_ilvk5aly.AssignableRole?>()) {
+      return (data != null ? _ilvk5aly.AssignableRole.fromJson(data) : null) as T;
+    }
     if (t == _is.getType<_ip4w8f8l.MeInfo?>()) {
       return (data != null ? _ip4w8f8l.MeInfo.fromJson(data) : null) as T;
     }
@@ -384,6 +408,9 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     }
     if (t == _is.getType<_izyppcov.TenantToken?>()) {
       return (data != null ? _izyppcov.TenantToken.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i6x1gv4d.TenantUser?>()) {
+      return (data != null ? _i6x1gv4d.TenantUser.fromJson(data) : null) as T;
     }
     if (t == _is.getType<_i147o0qx.ApiException?>()) {
       return (data != null ? _i147o0qx.ApiException.fromJson(data) : null) as T;
@@ -424,6 +451,15 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == List<_inphvrgt.TenantSummary>) {
       return (data as List).map((e) => deserialize<_inphvrgt.TenantSummary>(e)).toList() as T;
     }
+    if (t == List<_iur1xixc.AssignableRole>) {
+      return (data as List).map((e) => deserialize<_iur1xixc.AssignableRole>(e)).toList() as T;
+    }
+    if (t == List<_iqhozu6i.TenantUser>) {
+      return (data as List).map((e) => deserialize<_iqhozu6i.TenantUser>(e)).toList() as T;
+    }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
     final modules = deserializationMetadata.modulesForDeserialization(
       t,
       className: rawDataClassName,
@@ -440,11 +476,13 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
   static String? getClassNameForType(Type type) {
     return switch (type) {
       _i5wnkftg.AppUser => 'AppUser',
+      _ilvk5aly.AssignableRole => 'AssignableRole',
       _ip4w8f8l.MeInfo => 'MeInfo',
       _i2vwv4gx.MembershipStatus => 'MembershipStatus',
       _i1iyeyn1.TenantMembership => 'TenantMembership',
       _iutn78jy.TenantMembershipRole => 'TenantMembershipRole',
       _izyppcov.TenantToken => 'TenantToken',
+      _i6x1gv4d.TenantUser => 'TenantUser',
       _i147o0qx.ApiException => 'ApiException',
       _i0p9y4c3.ErrorCategory => 'ErrorCategory',
       _i3z3bgdl.FieldError => 'FieldError',
@@ -467,6 +505,8 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     switch (data) {
       case _i5wnkftg.AppUser():
         return 'AppUser';
+      case _ilvk5aly.AssignableRole():
+        return 'AssignableRole';
       case _ip4w8f8l.MeInfo():
         return 'MeInfo';
       case _i2vwv4gx.MembershipStatus():
@@ -477,6 +517,8 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
         return 'TenantMembershipRole';
       case _izyppcov.TenantToken():
         return 'TenantToken';
+      case _i6x1gv4d.TenantUser():
+        return 'TenantUser';
       case _i147o0qx.ApiException():
         return 'ApiException';
       case _i0p9y4c3.ErrorCategory():
@@ -514,6 +556,9 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (dataClassName == 'AppUser') {
       return deserialize<_i5wnkftg.AppUser>(data['data']);
     }
+    if (dataClassName == 'AssignableRole') {
+      return deserialize<_ilvk5aly.AssignableRole>(data['data']);
+    }
     if (dataClassName == 'MeInfo') {
       return deserialize<_ip4w8f8l.MeInfo>(data['data']);
     }
@@ -528,6 +573,9 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     }
     if (dataClassName == 'TenantToken') {
       return deserialize<_izyppcov.TenantToken>(data['data']);
+    }
+    if (dataClassName == 'TenantUser') {
+      return deserialize<_i6x1gv4d.TenantUser>(data['data']);
     }
     if (dataClassName == 'ApiException') {
       return deserialize<_i147o0qx.ApiException>(data['data']);

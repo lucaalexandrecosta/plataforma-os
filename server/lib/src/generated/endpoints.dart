@@ -17,6 +17,7 @@ import '../identity_access/endpoints/auth_endpoint.dart' as _i077kp7v;
 import '../identity_access/endpoints/email_idp_endpoint.dart' as _iq8d1u02;
 import '../identity_access/endpoints/me_endpoint.dart' as _i2zd8mbu;
 import '../identity_access/endpoints/refresh_jwt_tokens_endpoint.dart' as _inemdtdo;
+import '../identity_access/endpoints/users_endpoint.dart' as _if041dc0;
 
 class Endpoints extends _is.EndpointDispatch {
   @override
@@ -44,6 +45,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'refreshJwtTokens',
+          null,
+        ),
+      'users': _if041dc0.UsersEndpoint()
+        ..initialize(
+          server,
+          'users',
           null,
         ),
     };
@@ -292,6 +299,138 @@ class Endpoints extends _is.EndpointDispatch {
               ) async => (endpoints['refreshJwtTokens'] as _inemdtdo.RefreshJwtTokensEndpoint).refreshAccessToken(
                 session,
                 refreshToken: params['refreshToken'],
+              ),
+        ),
+      },
+    );
+    connectors['users'] = _is.EndpointConnector(
+      name: 'users',
+      endpoint: endpoints['users']!,
+      methodConnectors: {
+        'roles': _is.MethodConnector(
+          name: 'roles',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['users'] as _if041dc0.UsersEndpoint).roles(session),
+        ),
+        'list': _is.MethodConnector(
+          name: 'list',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['users'] as _if041dc0.UsersEndpoint).list(session),
+        ),
+        'invite': _is.MethodConnector(
+          name: 'invite',
+          params: {
+            'email': _is.ParameterDescription(
+              name: 'email',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'fullName': _is.ParameterDescription(
+              name: 'fullName',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'roles': _is.ParameterDescription(
+              name: 'roles',
+              type: _is.getType<List<String>>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['users'] as _if041dc0.UsersEndpoint).invite(
+                session,
+                params['email'],
+                params['fullName'],
+                params['roles'],
+              ),
+        ),
+        'setRoles': _is.MethodConnector(
+          name: 'setRoles',
+          params: {
+            'membershipId': _is.ParameterDescription(
+              name: 'membershipId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'roles': _is.ParameterDescription(
+              name: 'roles',
+              type: _is.getType<List<String>>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['users'] as _if041dc0.UsersEndpoint).setRoles(
+                session,
+                params['membershipId'],
+                params['roles'],
+              ),
+        ),
+        'suspend': _is.MethodConnector(
+          name: 'suspend',
+          params: {
+            'membershipId': _is.ParameterDescription(
+              name: 'membershipId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['users'] as _if041dc0.UsersEndpoint).suspend(
+                session,
+                params['membershipId'],
+              ),
+        ),
+        'reactivate': _is.MethodConnector(
+          name: 'reactivate',
+          params: {
+            'membershipId': _is.ParameterDescription(
+              name: 'membershipId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['users'] as _if041dc0.UsersEndpoint).reactivate(
+                session,
+                params['membershipId'],
+              ),
+        ),
+        'remove': _is.MethodConnector(
+          name: 'remove',
+          params: {
+            'membershipId': _is.ParameterDescription(
+              name: 'membershipId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['users'] as _if041dc0.UsersEndpoint).remove(
+                session,
+                params['membershipId'],
               ),
         ),
       },
