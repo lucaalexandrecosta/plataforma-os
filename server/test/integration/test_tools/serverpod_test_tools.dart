@@ -16,6 +16,8 @@ import 'dart:io' as _idi;
 import 'package:plataforma_os_server/src/generated/assets/models/asset.dart' as _iceem167;
 import 'package:plataforma_os_server/src/generated/assets/models/asset_input.dart' as _i58orcz5;
 import 'package:plataforma_os_server/src/generated/assets/models/asset_page.dart' as _i7jxv3j6;
+import 'package:plataforma_os_server/src/generated/assets/models/qr_tag.dart' as _idzaz83i;
+import 'package:plataforma_os_server/src/generated/assets/models/qr_tag_batch.dart' as _i07n19u6;
 import 'package:plataforma_os_server/src/generated/catalog/models/product_input.dart' as _iku7g2we;
 import 'package:plataforma_os_server/src/generated/catalog/models/product_summary.dart' as _ico54ik3;
 import 'package:plataforma_os_server/src/generated/identity_access/models/assignable_role.dart' as _iur1xixc;
@@ -165,6 +167,8 @@ void withServerpod(
 class TestEndpoints {
   late final _AssetsEndpoint assets;
 
+  late final _QrTagsEndpoint qrTags;
+
   late final _ProductsEndpoint products;
 
   late final _AuthEndpoint auth;
@@ -189,6 +193,10 @@ class _InternalTestEndpoints extends TestEndpoints implements _ist.InternalTestE
     _is.EndpointDispatch endpoints,
   ) {
     assets = _AssetsEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    qrTags = _QrTagsEndpoint(
       endpoints,
       serializationManager,
     );
@@ -368,6 +376,268 @@ class _AssetsEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<_iceem167.Asset>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
+class _QrTagsEndpoint {
+  _QrTagsEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _is.EndpointDispatch _endpointDispatch;
+
+  final _is.SerializationManager _serializationManager;
+
+  _ida.Future<_i07n19u6.QrTagBatch> generateBatch(
+    _ist.TestSessionBuilder sessionBuilder,
+    int quantity, {
+    String? notes,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'qrTags',
+        method: 'generateBatch',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'qrTags',
+          methodName: 'generateBatch',
+          parameters: _ist.testObjectToJson({
+            'quantity': quantity,
+            'notes': notes,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i07n19u6.QrTagBatch>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_i07n19u6.QrTagBatch>> listBatches(_ist.TestSessionBuilder sessionBuilder) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'qrTags',
+        method: 'listBatches',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'qrTags',
+          methodName: 'listBatches',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_i07n19u6.QrTagBatch>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_idzaz83i.QrTag>> batchTags(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue batchId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'qrTags',
+        method: 'batchTags',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'qrTags',
+          methodName: 'batchTags',
+          parameters: _ist.testObjectToJson({'batchId': batchId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_idzaz83i.QrTag>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i07n19u6.QrTagBatch> markBatchPrinted(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue batchId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'qrTags',
+        method: 'markBatchPrinted',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'qrTags',
+          methodName: 'markBatchPrinted',
+          parameters: _ist.testObjectToJson({'batchId': batchId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i07n19u6.QrTagBatch>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_idzaz83i.QrTag> resolve(
+    _ist.TestSessionBuilder sessionBuilder,
+    String scanned,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'qrTags',
+        method: 'resolve',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'qrTags',
+          methodName: 'resolve',
+          parameters: _ist.testObjectToJson({'scanned': scanned}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_idzaz83i.QrTag>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_idzaz83i.QrTag> bind(
+    _ist.TestSessionBuilder sessionBuilder,
+    String scanned,
+    _is.UuidValue assetId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'qrTags',
+        method: 'bind',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'qrTags',
+          methodName: 'bind',
+          parameters: _ist.testObjectToJson({
+            'scanned': scanned,
+            'assetId': assetId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_idzaz83i.QrTag>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_idzaz83i.QrTag> unbind(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue tagId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'qrTags',
+        method: 'unbind',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'qrTags',
+          methodName: 'unbind',
+          parameters: _ist.testObjectToJson({'tagId': tagId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_idzaz83i.QrTag>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_idzaz83i.QrTag> revoke(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue tagId,
+    String reason, {
+    String? note,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'qrTags',
+        method: 'revoke',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'qrTags',
+          methodName: 'revoke',
+          parameters: _ist.testObjectToJson({
+            'tagId': tagId,
+            'reason': reason,
+            'note': note,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_idzaz83i.QrTag>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

@@ -22,6 +22,8 @@ fields:
   supplierName: String?
   acquisitionDocument: String?
   notes: String?
+  # Código curto (XXXX-XXXX) da etiqueta vinculada, se houver.
+  qrShortCode: String?
   isActive: bool
   # local ou erp (campos mestres do ERP são só leitura).
   source: String

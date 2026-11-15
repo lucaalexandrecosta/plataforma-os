@@ -18,6 +18,7 @@ import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart' as _iacs;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart' as _iais;
 import '../assets/endpoints/assets_endpoint.dart' as _i8oyhoxt;
+import '../assets/endpoints/qr_tags_endpoint.dart' as _ijcbp4ea;
 import '../catalog/endpoints/products_endpoint.dart' as _i87w2mxb;
 import '../identity_access/endpoints/auth_endpoint.dart' as _i077kp7v;
 import '../identity_access/endpoints/email_idp_endpoint.dart' as _iq8d1u02;
@@ -35,6 +36,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'assets',
+          null,
+        ),
+      'qrTags': _ijcbp4ea.QrTagsEndpoint()
+        ..initialize(
+          server,
+          'qrTags',
           null,
         ),
       'products': _i87w2mxb.ProductsEndpoint()
@@ -202,6 +209,171 @@ class Endpoints extends _is.EndpointDispatch {
                 params['id'],
                 params['expectedVersion'],
                 params['input'],
+              ),
+        ),
+      },
+    );
+    connectors['qrTags'] = _is.EndpointConnector(
+      name: 'qrTags',
+      endpoint: endpoints['qrTags']!,
+      methodConnectors: {
+        'generateBatch': _is.MethodConnector(
+          name: 'generateBatch',
+          params: {
+            'quantity': _is.ParameterDescription(
+              name: 'quantity',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'notes': _is.ParameterDescription(
+              name: 'notes',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['qrTags'] as _ijcbp4ea.QrTagsEndpoint).generateBatch(
+                session,
+                params['quantity'],
+                notes: params['notes'],
+              ),
+        ),
+        'listBatches': _is.MethodConnector(
+          name: 'listBatches',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['qrTags'] as _ijcbp4ea.QrTagsEndpoint).listBatches(session),
+        ),
+        'batchTags': _is.MethodConnector(
+          name: 'batchTags',
+          params: {
+            'batchId': _is.ParameterDescription(
+              name: 'batchId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['qrTags'] as _ijcbp4ea.QrTagsEndpoint).batchTags(
+                session,
+                params['batchId'],
+              ),
+        ),
+        'markBatchPrinted': _is.MethodConnector(
+          name: 'markBatchPrinted',
+          params: {
+            'batchId': _is.ParameterDescription(
+              name: 'batchId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['qrTags'] as _ijcbp4ea.QrTagsEndpoint).markBatchPrinted(
+                session,
+                params['batchId'],
+              ),
+        ),
+        'resolve': _is.MethodConnector(
+          name: 'resolve',
+          params: {
+            'scanned': _is.ParameterDescription(
+              name: 'scanned',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['qrTags'] as _ijcbp4ea.QrTagsEndpoint).resolve(
+                session,
+                params['scanned'],
+              ),
+        ),
+        'bind': _is.MethodConnector(
+          name: 'bind',
+          params: {
+            'scanned': _is.ParameterDescription(
+              name: 'scanned',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'assetId': _is.ParameterDescription(
+              name: 'assetId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['qrTags'] as _ijcbp4ea.QrTagsEndpoint).bind(
+                session,
+                params['scanned'],
+                params['assetId'],
+              ),
+        ),
+        'unbind': _is.MethodConnector(
+          name: 'unbind',
+          params: {
+            'tagId': _is.ParameterDescription(
+              name: 'tagId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['qrTags'] as _ijcbp4ea.QrTagsEndpoint).unbind(
+                session,
+                params['tagId'],
+              ),
+        ),
+        'revoke': _is.MethodConnector(
+          name: 'revoke',
+          params: {
+            'tagId': _is.ParameterDescription(
+              name: 'tagId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'reason': _is.ParameterDescription(
+              name: 'reason',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'note': _is.ParameterDescription(
+              name: 'note',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['qrTags'] as _ijcbp4ea.QrTagsEndpoint).revoke(
+                session,
+                params['tagId'],
+                params['reason'],
+                note: params['note'],
               ),
         ),
       },

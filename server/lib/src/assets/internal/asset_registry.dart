@@ -1,3 +1,4 @@
+import 'package:plataforma_os_core/plataforma_os_core.dart';
 import 'package:serverpod/serverpod.dart';
 
 import '../../catalog/catalog.dart';
@@ -18,8 +19,9 @@ abstract final class AssetRegistry {
   static const _select =
       'SELECT a.id, a.product_id, p.name, a.serial_number, a.asset_tag, a.status, a.ownership_type, a.branch_id, '
       '       a.cost_center_id, a.location_note, a.warranty_until, a.acquisition_date, a.acquisition_cost, '
-      '       a.supplier_name, a.acquisition_document, a.notes, a.is_active, a.source, a.version '
-      '  FROM app.assets a JOIN app.products p ON p.tenant_id = a.tenant_id AND p.id = a.product_id ';
+      '       a.supplier_name, a.acquisition_document, a.notes, a.is_active, a.source, a.version, q.short_code '
+      '  FROM app.assets a JOIN app.products p ON p.tenant_id = a.tenant_id AND p.id = a.product_id '
+      "  LEFT JOIN app.qr_tags q ON q.tenant_id = a.tenant_id AND q.asset_id = a.id AND q.status = 'bound' ";
 
   static Future<AssetPage> list(
     Session session, {
@@ -37,7 +39,7 @@ abstract final class AssetRegistry {
         '   AND (@branchId::uuid IS NULL OR a.branch_id = @branchId::uuid) '
         '   AND (@costCenterId::uuid IS NULL OR a.cost_center_id = @costCenterId::uuid) '
         "   AND (@term::text IS NULL OR a.asset_tag ILIKE '%' || @term || '%' OR a.serial_number ILIKE '%' || @term || '%' "
-        "        OR p.name ILIKE '%' || @term || '%') ";
+        "        OR p.name ILIKE '%' || @term || '%' OR q.short_code = upper(replace(@term, '-', ''))) ";
     final params = {
       'all': includeInactive,
       'branchId': branchId?.uuid,
@@ -49,7 +51,8 @@ abstract final class AssetRegistry {
       parameters: QueryParameters.named({...params, 'limit': limit.clamp(1, 200), 'offset': offset < 0 ? 0 : offset}),
     );
     final total = await session.db.unsafeQuery(
-      'SELECT count(*) FROM app.assets a JOIN app.products p ON p.tenant_id = a.tenant_id AND p.id = a.product_id $where',
+      'SELECT count(*) FROM app.assets a JOIN app.products p ON p.tenant_id = a.tenant_id AND p.id = a.product_id '
+      "LEFT JOIN app.qr_tags q ON q.tenant_id = a.tenant_id AND q.asset_id = a.id AND q.status = 'bound' $where",
       parameters: QueryParameters.named(params),
     );
     return AssetPage(items: [for (final r in rows) _map(r)], total: total.first[0] as int);
@@ -202,5 +205,6 @@ abstract final class AssetRegistry {
     isActive: r[16] as bool,
     source: r[17] as String,
     version: r[18] as int,
+    qrShortCode: r[19] == null ? null : QrCodes.formatShortCode(r[19] as String),
   );
 }

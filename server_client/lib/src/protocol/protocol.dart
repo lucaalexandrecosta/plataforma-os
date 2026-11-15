@@ -11,6 +11,8 @@
 // ignore_for_file: dead_code, unnecessary_type_check
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:plataforma_os_client/src/protocol/assets/models/qr_tag.dart' as _ix23buzf;
+import 'package:plataforma_os_client/src/protocol/assets/models/qr_tag_batch.dart' as _ic9pb02v;
 import 'package:plataforma_os_client/src/protocol/catalog/models/product_summary.dart' as _ihgw7zuo;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/assignable_role.dart' as _i2g1699a;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/tenant_user.dart' as _i8ihd43z;
@@ -23,6 +25,8 @@ import 'package:serverpod_client/serverpod_client.dart' as _isc;
 import 'assets/models/asset.dart' as _ib3mptol;
 import 'assets/models/asset_input.dart' as _i6icgsi8;
 import 'assets/models/asset_page.dart' as _is3mug9m;
+import 'assets/models/qr_tag.dart' as _i760nubs;
+import 'assets/models/qr_tag_batch.dart' as _ikikcay0;
 import 'catalog/models/product_input.dart' as _iuumnsch;
 import 'catalog/models/product_summary.dart' as _i4geouqi;
 import 'identity_access/models/app_user.dart' as _i5wnkftg;
@@ -46,6 +50,8 @@ import 'tenancy/models/tenant_summary.dart' as _i9uizrsf;
 export 'assets/models/asset.dart';
 export 'assets/models/asset_input.dart';
 export 'assets/models/asset_page.dart';
+export 'assets/models/qr_tag.dart';
+export 'assets/models/qr_tag_batch.dart';
 export 'catalog/models/product_input.dart';
 export 'catalog/models/product_summary.dart';
 export 'identity_access/models/app_user.dart';
@@ -82,6 +88,8 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<_ib3mptol.Asset>,
       _isc.getType<_i6icgsi8.AssetInput>,
       _isc.getType<_is3mug9m.AssetPage>,
+      _isc.getType<_i760nubs.QrTag>,
+      _isc.getType<_ikikcay0.QrTagBatch>,
       _isc.getType<_iuumnsch.ProductInput>,
       _isc.getType<_i4geouqi.ProductSummary>,
       _isc.getType<_i5wnkftg.AppUser>,
@@ -105,6 +113,8 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<_ib3mptol.Asset?>,
       _isc.getType<_i6icgsi8.AssetInput?>,
       _isc.getType<_is3mug9m.AssetPage?>,
+      _isc.getType<_i760nubs.QrTag?>,
+      _isc.getType<_ikikcay0.QrTagBatch?>,
       _isc.getType<_iuumnsch.ProductInput?>,
       _isc.getType<_i4geouqi.ProductSummary?>,
       _isc.getType<_i5wnkftg.AppUser?>,
@@ -131,6 +141,8 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<List<_i3z3bgdl.FieldError>?>,
       _isc.getType<Map<String, String>>,
       _isc.getType<Map<String, String>?>,
+      _isc.getType<List<_ic9pb02v.QrTagBatch>>,
+      _isc.getType<List<_ix23buzf.QrTag>>,
       _isc.getType<List<_ihgw7zuo.ProductSummary>>,
       _isc.getType<List<_i11upz4e.TenantSummary>>,
       _isc.getType<List<_i2g1699a.AssignableRole>>,
@@ -147,6 +159,8 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       'Asset',
       'AssetInput',
       'AssetPage',
+      'QrTag',
+      'QrTagBatch',
       'ProductInput',
       'ProductSummary',
       'AppUser',
@@ -201,6 +215,12 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     }
     if (t == _is3mug9m.AssetPage) {
       return _is3mug9m.AssetPage.fromJson(data) as T;
+    }
+    if (t == _i760nubs.QrTag) {
+      return _i760nubs.QrTag.fromJson(data) as T;
+    }
+    if (t == _ikikcay0.QrTagBatch) {
+      return _ikikcay0.QrTagBatch.fromJson(data) as T;
     }
     if (t == _iuumnsch.ProductInput) {
       return _iuumnsch.ProductInput.fromJson(data) as T;
@@ -270,6 +290,12 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     }
     if (t == _isc.getType<_is3mug9m.AssetPage?>()) {
       return (data != null ? _is3mug9m.AssetPage.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i760nubs.QrTag?>()) {
+      return (data != null ? _i760nubs.QrTag.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_ikikcay0.QrTagBatch?>()) {
+      return (data != null ? _ikikcay0.QrTagBatch.fromJson(data) : null) as T;
     }
     if (t == _isc.getType<_iuumnsch.ProductInput?>()) {
       return (data != null ? _iuumnsch.ProductInput.fromJson(data) : null) as T;
@@ -352,6 +378,12 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
               : null)
           as T;
     }
+    if (t == List<_ic9pb02v.QrTagBatch>) {
+      return (data as List).map((e) => deserialize<_ic9pb02v.QrTagBatch>(e)).toList() as T;
+    }
+    if (t == List<_ix23buzf.QrTag>) {
+      return (data as List).map((e) => deserialize<_ix23buzf.QrTag>(e)).toList() as T;
+    }
     if (t == List<_ihgw7zuo.ProductSummary>) {
       return (data as List).map((e) => deserialize<_ihgw7zuo.ProductSummary>(e)).toList() as T;
     }
@@ -391,6 +423,8 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _ib3mptol.Asset => 'Asset',
       _i6icgsi8.AssetInput => 'AssetInput',
       _is3mug9m.AssetPage => 'AssetPage',
+      _i760nubs.QrTag => 'QrTag',
+      _ikikcay0.QrTagBatch => 'QrTagBatch',
       _iuumnsch.ProductInput => 'ProductInput',
       _i4geouqi.ProductSummary => 'ProductSummary',
       _i5wnkftg.AppUser => 'AppUser',
@@ -431,6 +465,10 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
         return 'AssetInput';
       case _is3mug9m.AssetPage():
         return 'AssetPage';
+      case _i760nubs.QrTag():
+        return 'QrTag';
+      case _ikikcay0.QrTagBatch():
+        return 'QrTagBatch';
       case _iuumnsch.ProductInput():
         return 'ProductInput';
       case _i4geouqi.ProductSummary():
@@ -497,6 +535,12 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     }
     if (dataClassName == 'AssetPage') {
       return deserialize<_is3mug9m.AssetPage>(data['data']);
+    }
+    if (dataClassName == 'QrTag') {
+      return deserialize<_i760nubs.QrTag>(data['data']);
+    }
+    if (dataClassName == 'QrTagBatch') {
+      return deserialize<_ikikcay0.QrTagBatch>(data['data']);
     }
     if (dataClassName == 'ProductInput') {
       return deserialize<_iuumnsch.ProductInput>(data['data']);

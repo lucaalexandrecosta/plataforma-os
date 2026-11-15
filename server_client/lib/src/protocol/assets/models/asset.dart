@@ -30,6 +30,7 @@ abstract class Asset implements _isc.SerializableModel, _isc.ProtocolSerializati
     this.supplierName,
     this.acquisitionDocument,
     this.notes,
+    this.qrShortCode,
     required this.isActive,
     required this.source,
     required this.version,
@@ -52,6 +53,7 @@ abstract class Asset implements _isc.SerializableModel, _isc.ProtocolSerializati
     String? supplierName,
     String? acquisitionDocument,
     String? notes,
+    String? qrShortCode,
     required bool isActive,
     required String source,
     required int version,
@@ -83,6 +85,7 @@ abstract class Asset implements _isc.SerializableModel, _isc.ProtocolSerializati
       supplierName: jsonSerialization['supplierName'] as String?,
       acquisitionDocument: jsonSerialization['acquisitionDocument'] as String?,
       notes: jsonSerialization['notes'] as String?,
+      qrShortCode: jsonSerialization['qrShortCode'] as String?,
       isActive: _isc.BoolJsonExtension.fromJson(jsonSerialization['isActive']),
       source: jsonSerialization['source'] as String,
       version: jsonSerialization['version'] as int,
@@ -121,6 +124,8 @@ abstract class Asset implements _isc.SerializableModel, _isc.ProtocolSerializati
 
   String? notes;
 
+  String? qrShortCode;
+
   bool isActive;
 
   String source;
@@ -147,6 +152,7 @@ abstract class Asset implements _isc.SerializableModel, _isc.ProtocolSerializati
     String? supplierName,
     String? acquisitionDocument,
     String? notes,
+    String? qrShortCode,
     bool? isActive,
     String? source,
     int? version,
@@ -171,6 +177,7 @@ abstract class Asset implements _isc.SerializableModel, _isc.ProtocolSerializati
       if (supplierName != null) 'supplierName': supplierName,
       if (acquisitionDocument != null) 'acquisitionDocument': acquisitionDocument,
       if (notes != null) 'notes': notes,
+      if (qrShortCode != null) 'qrShortCode': qrShortCode,
       'isActive': isActive,
       'source': source,
       'version': version,
@@ -197,6 +204,7 @@ abstract class Asset implements _isc.SerializableModel, _isc.ProtocolSerializati
       if (supplierName != null) 'supplierName': supplierName,
       if (acquisitionDocument != null) 'acquisitionDocument': acquisitionDocument,
       if (notes != null) 'notes': notes,
+      if (qrShortCode != null) 'qrShortCode': qrShortCode,
       'isActive': isActive,
       'source': source,
       'version': version,
@@ -229,6 +237,7 @@ class _AssetImpl extends Asset {
     String? supplierName,
     String? acquisitionDocument,
     String? notes,
+    String? qrShortCode,
     required bool isActive,
     required String source,
     required int version,
@@ -249,6 +258,7 @@ class _AssetImpl extends Asset {
          supplierName: supplierName,
          acquisitionDocument: acquisitionDocument,
          notes: notes,
+         qrShortCode: qrShortCode,
          isActive: isActive,
          source: source,
          version: version,
@@ -275,6 +285,7 @@ class _AssetImpl extends Asset {
     Object? supplierName = _Undefined,
     Object? acquisitionDocument = _Undefined,
     Object? notes = _Undefined,
+    Object? qrShortCode = _Undefined,
     bool? isActive,
     String? source,
     int? version,
@@ -296,6 +307,7 @@ class _AssetImpl extends Asset {
       supplierName: supplierName is String? ? supplierName : this.supplierName,
       acquisitionDocument: acquisitionDocument is String? ? acquisitionDocument : this.acquisitionDocument,
       notes: notes is String? ? notes : this.notes,
+      qrShortCode: qrShortCode is String? ? qrShortCode : this.qrShortCode,
       isActive: isActive ?? this.isActive,
       source: source ?? this.source,
       version: version ?? this.version,
