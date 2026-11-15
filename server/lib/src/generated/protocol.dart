@@ -19,6 +19,7 @@ import 'package:plataforma_os_server/src/generated/identity_access/models/tenant
 import 'package:plataforma_os_server/src/generated/tenancy/models/branch.dart' as _i7vupwwc;
 import 'package:plataforma_os_server/src/generated/tenancy/models/cost_center.dart' as _islkyssd;
 import 'package:plataforma_os_server/src/generated/tenancy/models/tenant_summary.dart' as _inphvrgt;
+import 'package:plataforma_os_server/src/generated/work_orders/models/work_order_type.dart' as _ith5np2m;
 import 'package:serverpod/protocol.dart' as _isp;
 import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart' as _iacs;
@@ -48,6 +49,14 @@ import 'tenancy/models/cost_center_input.dart' as _iofwzavf;
 import 'tenancy/models/tenant.dart' as _i2jhpzjh;
 import 'tenancy/models/tenant_status.dart' as _i2bjgc9x;
 import 'tenancy/models/tenant_summary.dart' as _i9uizrsf;
+import 'work_orders/models/work_order.dart' as _i5zaa4b8;
+import 'work_orders/models/work_order_changes.dart' as _ijhvbn0n;
+import 'work_orders/models/work_order_detail.dart' as _idkm2e3p;
+import 'work_orders/models/work_order_input.dart' as _i5u8gc5f;
+import 'work_orders/models/work_order_page.dart' as _ixqx063h;
+import 'work_orders/models/work_order_status_change.dart' as _i00stvlt;
+import 'work_orders/models/work_order_type.dart' as _iduxn53h;
+import 'work_orders/models/work_order_type_input.dart' as _iolj0kda;
 export 'assets/models/asset.dart';
 export 'assets/models/asset_input.dart';
 export 'assets/models/asset_page.dart';
@@ -73,6 +82,14 @@ export 'tenancy/models/cost_center_input.dart';
 export 'tenancy/models/tenant.dart';
 export 'tenancy/models/tenant_status.dart';
 export 'tenancy/models/tenant_summary.dart';
+export 'work_orders/models/work_order.dart';
+export 'work_orders/models/work_order_changes.dart';
+export 'work_orders/models/work_order_detail.dart';
+export 'work_orders/models/work_order_input.dart';
+export 'work_orders/models/work_order_page.dart';
+export 'work_orders/models/work_order_status_change.dart';
+export 'work_orders/models/work_order_type.dart';
+export 'work_orders/models/work_order_type_input.dart';
 
 class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseProtocolDeserializationProvider {
   Protocol._();
@@ -110,6 +127,14 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<_i2jhpzjh.Tenant>,
       _is.getType<_i2bjgc9x.TenantStatus>,
       _is.getType<_i9uizrsf.TenantSummary>,
+      _is.getType<_i5zaa4b8.WorkOrder>,
+      _is.getType<_ijhvbn0n.WorkOrderChanges>,
+      _is.getType<_idkm2e3p.WorkOrderDetail>,
+      _is.getType<_i5u8gc5f.WorkOrderInput>,
+      _is.getType<_ixqx063h.WorkOrderPage>,
+      _is.getType<_i00stvlt.WorkOrderStatusChange>,
+      _is.getType<_iduxn53h.WorkOrderType>,
+      _is.getType<_iolj0kda.WorkOrderTypeInput>,
       _is.getType<_ib3mptol.Asset?>,
       _is.getType<_i6icgsi8.AssetInput?>,
       _is.getType<_is3mug9m.AssetPage?>,
@@ -135,12 +160,22 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<_i2jhpzjh.Tenant?>,
       _is.getType<_i2bjgc9x.TenantStatus?>,
       _is.getType<_i9uizrsf.TenantSummary?>,
+      _is.getType<_i5zaa4b8.WorkOrder?>,
+      _is.getType<_ijhvbn0n.WorkOrderChanges?>,
+      _is.getType<_idkm2e3p.WorkOrderDetail?>,
+      _is.getType<_i5u8gc5f.WorkOrderInput?>,
+      _is.getType<_ixqx063h.WorkOrderPage?>,
+      _is.getType<_i00stvlt.WorkOrderStatusChange?>,
+      _is.getType<_iduxn53h.WorkOrderType?>,
+      _is.getType<_iolj0kda.WorkOrderTypeInput?>,
       _is.getType<List<_ib3mptol.Asset>>,
       _is.getType<List<String>>,
       _is.getType<List<_i3z3bgdl.FieldError>>,
       _is.getType<List<_i3z3bgdl.FieldError>?>,
       _is.getType<Map<String, String>>,
       _is.getType<Map<String, String>?>,
+      _is.getType<List<_i00stvlt.WorkOrderStatusChange>>,
+      _is.getType<List<_i5zaa4b8.WorkOrder>>,
       _is.getType<List<_i07n19u6.QrTagBatch>>,
       _is.getType<List<_idzaz83i.QrTag>>,
       _is.getType<List<_ico54ik3.ProductSummary>>,
@@ -150,6 +185,8 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<List<String>>,
       _is.getType<List<_i7vupwwc.Branch>>,
       _is.getType<List<_islkyssd.CostCenter>>,
+      _is.getType<List<String>?>,
+      _is.getType<List<_ith5np2m.WorkOrderType>>,
     ],
     modules: const [
       _iais.Protocol.new,
@@ -182,6 +219,14 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       'Tenant',
       'TenantStatus',
       'TenantSummary',
+      'WorkOrder',
+      'WorkOrderChanges',
+      'WorkOrderDetail',
+      'WorkOrderInput',
+      'WorkOrderPage',
+      'WorkOrderStatusChange',
+      'WorkOrderType',
+      'WorkOrderTypeInput',
     ],
   );
 
@@ -487,6 +532,30 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == _i9uizrsf.TenantSummary) {
       return _i9uizrsf.TenantSummary.fromJson(data) as T;
     }
+    if (t == _i5zaa4b8.WorkOrder) {
+      return _i5zaa4b8.WorkOrder.fromJson(data) as T;
+    }
+    if (t == _ijhvbn0n.WorkOrderChanges) {
+      return _ijhvbn0n.WorkOrderChanges.fromJson(data) as T;
+    }
+    if (t == _idkm2e3p.WorkOrderDetail) {
+      return _idkm2e3p.WorkOrderDetail.fromJson(data) as T;
+    }
+    if (t == _i5u8gc5f.WorkOrderInput) {
+      return _i5u8gc5f.WorkOrderInput.fromJson(data) as T;
+    }
+    if (t == _ixqx063h.WorkOrderPage) {
+      return _ixqx063h.WorkOrderPage.fromJson(data) as T;
+    }
+    if (t == _i00stvlt.WorkOrderStatusChange) {
+      return _i00stvlt.WorkOrderStatusChange.fromJson(data) as T;
+    }
+    if (t == _iduxn53h.WorkOrderType) {
+      return _iduxn53h.WorkOrderType.fromJson(data) as T;
+    }
+    if (t == _iolj0kda.WorkOrderTypeInput) {
+      return _iolj0kda.WorkOrderTypeInput.fromJson(data) as T;
+    }
     if (t == _is.getType<_ib3mptol.Asset?>()) {
       return (data != null ? _ib3mptol.Asset.fromJson(data) : null) as T;
     }
@@ -562,6 +631,30 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == _is.getType<_i9uizrsf.TenantSummary?>()) {
       return (data != null ? _i9uizrsf.TenantSummary.fromJson(data) : null) as T;
     }
+    if (t == _is.getType<_i5zaa4b8.WorkOrder?>()) {
+      return (data != null ? _i5zaa4b8.WorkOrder.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ijhvbn0n.WorkOrderChanges?>()) {
+      return (data != null ? _ijhvbn0n.WorkOrderChanges.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_idkm2e3p.WorkOrderDetail?>()) {
+      return (data != null ? _idkm2e3p.WorkOrderDetail.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i5u8gc5f.WorkOrderInput?>()) {
+      return (data != null ? _i5u8gc5f.WorkOrderInput.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ixqx063h.WorkOrderPage?>()) {
+      return (data != null ? _ixqx063h.WorkOrderPage.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i00stvlt.WorkOrderStatusChange?>()) {
+      return (data != null ? _i00stvlt.WorkOrderStatusChange.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iduxn53h.WorkOrderType?>()) {
+      return (data != null ? _iduxn53h.WorkOrderType.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iolj0kda.WorkOrderTypeInput?>()) {
+      return (data != null ? _iolj0kda.WorkOrderTypeInput.fromJson(data) : null) as T;
+    }
     if (t == List<_ib3mptol.Asset>) {
       return (data as List).map((e) => deserialize<_ib3mptol.Asset>(e)).toList() as T;
     }
@@ -582,6 +675,12 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
               ? (data as Map).map((k, v) => MapEntry(deserialize<String>(k), deserialize<String>(v)))
               : null)
           as T;
+    }
+    if (t == List<_i00stvlt.WorkOrderStatusChange>) {
+      return (data as List).map((e) => deserialize<_i00stvlt.WorkOrderStatusChange>(e)).toList() as T;
+    }
+    if (t == List<_i5zaa4b8.WorkOrder>) {
+      return (data as List).map((e) => deserialize<_i5zaa4b8.WorkOrder>(e)).toList() as T;
     }
     if (t == List<_i07n19u6.QrTagBatch>) {
       return (data as List).map((e) => deserialize<_i07n19u6.QrTagBatch>(e)).toList() as T;
@@ -609,6 +708,12 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     }
     if (t == List<_islkyssd.CostCenter>) {
       return (data as List).map((e) => deserialize<_islkyssd.CostCenter>(e)).toList() as T;
+    }
+    if (t == _is.getType<List<String>?>()) {
+      return (data != null ? (data as List).map((e) => deserialize<String>(e)).toList() : null) as T;
+    }
+    if (t == List<_ith5np2m.WorkOrderType>) {
+      return (data as List).map((e) => deserialize<_ith5np2m.WorkOrderType>(e)).toList() as T;
     }
     final modules = deserializationMetadata.modulesForDeserialization(
       t,
@@ -650,6 +755,14 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _i2jhpzjh.Tenant => 'Tenant',
       _i2bjgc9x.TenantStatus => 'TenantStatus',
       _i9uizrsf.TenantSummary => 'TenantSummary',
+      _i5zaa4b8.WorkOrder => 'WorkOrder',
+      _ijhvbn0n.WorkOrderChanges => 'WorkOrderChanges',
+      _idkm2e3p.WorkOrderDetail => 'WorkOrderDetail',
+      _i5u8gc5f.WorkOrderInput => 'WorkOrderInput',
+      _ixqx063h.WorkOrderPage => 'WorkOrderPage',
+      _i00stvlt.WorkOrderStatusChange => 'WorkOrderStatusChange',
+      _iduxn53h.WorkOrderType => 'WorkOrderType',
+      _iolj0kda.WorkOrderTypeInput => 'WorkOrderTypeInput',
       _ => null,
     };
   }
@@ -714,6 +827,22 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
         return 'TenantStatus';
       case _i9uizrsf.TenantSummary():
         return 'TenantSummary';
+      case _i5zaa4b8.WorkOrder():
+        return 'WorkOrder';
+      case _ijhvbn0n.WorkOrderChanges():
+        return 'WorkOrderChanges';
+      case _idkm2e3p.WorkOrderDetail():
+        return 'WorkOrderDetail';
+      case _i5u8gc5f.WorkOrderInput():
+        return 'WorkOrderInput';
+      case _ixqx063h.WorkOrderPage():
+        return 'WorkOrderPage';
+      case _i00stvlt.WorkOrderStatusChange():
+        return 'WorkOrderStatusChange';
+      case _iduxn53h.WorkOrderType():
+        return 'WorkOrderType';
+      case _iolj0kda.WorkOrderTypeInput():
+        return 'WorkOrderTypeInput';
     }
     className = _iais.Protocol().getClassNameForObject(data);
     if (className != null) {
@@ -810,6 +939,30 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     }
     if (dataClassName == 'TenantSummary') {
       return deserialize<_i9uizrsf.TenantSummary>(data['data']);
+    }
+    if (dataClassName == 'WorkOrder') {
+      return deserialize<_i5zaa4b8.WorkOrder>(data['data']);
+    }
+    if (dataClassName == 'WorkOrderChanges') {
+      return deserialize<_ijhvbn0n.WorkOrderChanges>(data['data']);
+    }
+    if (dataClassName == 'WorkOrderDetail') {
+      return deserialize<_idkm2e3p.WorkOrderDetail>(data['data']);
+    }
+    if (dataClassName == 'WorkOrderInput') {
+      return deserialize<_i5u8gc5f.WorkOrderInput>(data['data']);
+    }
+    if (dataClassName == 'WorkOrderPage') {
+      return deserialize<_ixqx063h.WorkOrderPage>(data['data']);
+    }
+    if (dataClassName == 'WorkOrderStatusChange') {
+      return deserialize<_i00stvlt.WorkOrderStatusChange>(data['data']);
+    }
+    if (dataClassName == 'WorkOrderType') {
+      return deserialize<_iduxn53h.WorkOrderType>(data['data']);
+    }
+    if (dataClassName == 'WorkOrderTypeInput') {
+      return deserialize<_iolj0kda.WorkOrderTypeInput>(data['data']);
     }
     if (dataClassName.startsWith('serverpod_auth_idp.')) {
       return _iais.Protocol().deserializeByClassName({

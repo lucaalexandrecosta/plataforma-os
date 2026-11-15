@@ -28,6 +28,13 @@ import 'package:plataforma_os_client/src/protocol/tenancy/models/branch_input.da
 import 'package:plataforma_os_client/src/protocol/tenancy/models/cost_center.dart' as _itoq0gfy;
 import 'package:plataforma_os_client/src/protocol/tenancy/models/cost_center_input.dart' as _iusx5jxf;
 import 'package:plataforma_os_client/src/protocol/tenancy/models/tenant_summary.dart' as _i11upz4e;
+import 'package:plataforma_os_client/src/protocol/work_orders/models/work_order.dart' as _ijkllwf7;
+import 'package:plataforma_os_client/src/protocol/work_orders/models/work_order_changes.dart' as _i9dox7p2;
+import 'package:plataforma_os_client/src/protocol/work_orders/models/work_order_detail.dart' as _i96vhhgb;
+import 'package:plataforma_os_client/src/protocol/work_orders/models/work_order_input.dart' as _ikxgyzb6;
+import 'package:plataforma_os_client/src/protocol/work_orders/models/work_order_page.dart' as _i3z3e08i;
+import 'package:plataforma_os_client/src/protocol/work_orders/models/work_order_type.dart' as _iufozffx;
+import 'package:plataforma_os_client/src/protocol/work_orders/models/work_order_type_input.dart' as _i6v2tjgk;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart' as _iacc;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart' as _iaic;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
@@ -557,6 +564,188 @@ class EndpointCostCenters extends EndpointStaff {
   );
 }
 
+/// `workOrders.*` — ordens de serviço e tipos de OS. Toda mudança recebe a
+/// versão lida (`expectedVersion`). Erros: `FORBIDDEN`, `VALIDATION_FAILED`,
+/// `NOT_FOUND`, `VERSION_MISMATCH`, `INVALID_TRANSITION`,
+/// `WORK_ORDER_FINISHED`, `ASSET_RETIRED`, `ASSET_INACTIVE`, `TAG_NOT_BOUND`,
+/// `TAG_REVOKED`.
+/// {@category Endpoint}
+class EndpointWorkOrders extends EndpointStaff {
+  EndpointWorkOrders(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'workOrders';
+
+  /// [search] procura no número, no patrimônio, na série e na descrição.
+  /// [openOnly] = solicitada, aberta, agendada, em atendimento ou pendente.
+  _ida.Future<_i3z3e08i.WorkOrderPage> list({
+    String? search,
+    List<String>? statuses,
+    bool? openOnly,
+    _isc.UuidValue? assetId,
+    _isc.UuidValue? branchId,
+    _isc.UuidValue? costCenterId,
+    _isc.UuidValue? workOrderTypeId,
+    int? limit,
+    int? offset,
+  }) => caller.callServerEndpoint<_i3z3e08i.WorkOrderPage>(
+    'workOrders',
+    'list',
+    {
+      'search': search,
+      'statuses': statuses,
+      'openOnly': openOnly,
+      'assetId': assetId,
+      'branchId': branchId,
+      'costCenterId': costCenterId,
+      'workOrderTypeId': workOrderTypeId,
+      'limit': limit,
+      'offset': offset,
+    },
+  );
+
+  _ida.Future<_i96vhhgb.WorkOrderDetail> get(_isc.UuidValue id) => caller.callServerEndpoint<_i96vhhgb.WorkOrderDetail>(
+    'workOrders',
+    'get',
+    {'id': id},
+  );
+
+  /// Abre a OS já aberta (`open`). A resposta traz as outras OS em aberto do
+  /// mesmo bem, para o aviso de chamado duplicado.
+  _ida.Future<_i96vhhgb.WorkOrderDetail> open(_ikxgyzb6.WorkOrderInput input) =>
+      caller.callServerEndpoint<_i96vhhgb.WorkOrderDetail>(
+        'workOrders',
+        'open',
+        {'input': input},
+      );
+
+  _ida.Future<_ijkllwf7.WorkOrder> update(
+    _isc.UuidValue id,
+    int expectedVersion,
+    _i9dox7p2.WorkOrderChanges changes,
+  ) => caller.callServerEndpoint<_ijkllwf7.WorkOrder>(
+    'workOrders',
+    'update',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+      'changes': changes,
+    },
+  );
+
+  _ida.Future<_ijkllwf7.WorkOrder> start(
+    _isc.UuidValue id,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_ijkllwf7.WorkOrder>(
+    'workOrders',
+    'start',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  _ida.Future<_ijkllwf7.WorkOrder> hold(
+    _isc.UuidValue id,
+    int expectedVersion,
+    String holdReason, {
+    String? note,
+  }) => caller.callServerEndpoint<_ijkllwf7.WorkOrder>(
+    'workOrders',
+    'hold',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+      'holdReason': holdReason,
+      'note': note,
+    },
+  );
+
+  _ida.Future<_ijkllwf7.WorkOrder> complete(
+    _isc.UuidValue id,
+    int expectedVersion,
+    String resolutionNotes,
+  ) => caller.callServerEndpoint<_ijkllwf7.WorkOrder>(
+    'workOrders',
+    'complete',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+      'resolutionNotes': resolutionNotes,
+    },
+  );
+
+  _ida.Future<_ijkllwf7.WorkOrder> close(
+    _isc.UuidValue id,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_ijkllwf7.WorkOrder>(
+    'workOrders',
+    'close',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  _ida.Future<_ijkllwf7.WorkOrder> cancel(
+    _isc.UuidValue id,
+    int expectedVersion,
+    String reason, {
+    String? note,
+  }) => caller.callServerEndpoint<_ijkllwf7.WorkOrder>(
+    'workOrders',
+    'cancel',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+      'reason': reason,
+      'note': note,
+    },
+  );
+
+  _ida.Future<_ijkllwf7.WorkOrder> reopen(
+    _isc.UuidValue id,
+    int expectedVersion,
+    String reason,
+  ) => caller.callServerEndpoint<_ijkllwf7.WorkOrder>(
+    'workOrders',
+    'reopen',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+      'reason': reason,
+    },
+  );
+
+  _ida.Future<List<_iufozffx.WorkOrderType>> types({bool? includeInactive}) =>
+      caller.callServerEndpoint<List<_iufozffx.WorkOrderType>>(
+        'workOrders',
+        'types',
+        {'includeInactive': includeInactive},
+      );
+
+  _ida.Future<_iufozffx.WorkOrderType> createType(_i6v2tjgk.WorkOrderTypeInput input) =>
+      caller.callServerEndpoint<_iufozffx.WorkOrderType>(
+        'workOrders',
+        'createType',
+        {'input': input},
+      );
+
+  _ida.Future<_iufozffx.WorkOrderType> updateType(
+    _isc.UuidValue id,
+    int expectedVersion,
+    _i6v2tjgk.WorkOrderTypeInput input,
+  ) => caller.callServerEndpoint<_iufozffx.WorkOrderType>(
+    'workOrders',
+    'updateType',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+      'input': input,
+    },
+  );
+}
+
 class Modules {
   Modules(Client client) {
     serverpod_auth_idp = _iaic.Caller(client);
@@ -604,6 +793,7 @@ class Client extends _isc.ServerpodClientShared {
     users = EndpointUsers(this);
     branches = EndpointBranches(this);
     costCenters = EndpointCostCenters(this);
+    workOrders = EndpointWorkOrders(this);
     modules = Modules(this);
   }
 
@@ -627,6 +817,8 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointCostCenters costCenters;
 
+  late final EndpointWorkOrders workOrders;
+
   late final Modules modules;
 
   @override
@@ -641,6 +833,7 @@ class Client extends _isc.ServerpodClientShared {
     'users': users,
     'branches': branches,
     'costCenters': costCenters,
+    'workOrders': workOrders,
   };
 
   @override

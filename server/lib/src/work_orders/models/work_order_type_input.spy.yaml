@@ -1,0 +1,9 @@
+# Dados editáveis do tipo de OS (workOrders.createType e updateType).
+class: WorkOrderTypeInput
+fields:
+  code: String
+  name: String
+  category: String
+  defaultPriority: String
+  requiresAsset: bool
+  isActive: bool

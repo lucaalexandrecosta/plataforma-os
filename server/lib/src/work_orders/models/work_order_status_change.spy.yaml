@@ -1,0 +1,9 @@
+# Linha do histórico de status (app.work_order_status_history).
+class: WorkOrderStatusChange
+fields:
+  fromStatus: String?
+  toStatus: String
+  holdReason: String?
+  reason: String?
+  changedAt: DateTime
+  changedByName: String?

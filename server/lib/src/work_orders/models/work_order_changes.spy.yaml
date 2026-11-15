@@ -1,0 +1,8 @@
+# Dados editáveis da OS (workOrders.update) enquanto ela não terminou.
+class: WorkOrderChanges
+fields:
+  workOrderTypeId: UuidValue
+  priority: String
+  problemDescription: String?
+  requesterName: String?
+  requesterPhone: String?

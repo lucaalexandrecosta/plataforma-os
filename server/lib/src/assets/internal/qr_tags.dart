@@ -180,6 +180,15 @@ abstract final class QrTags {
     return (await _findById(session, tagId))!;
   }
 
+  /// Etiqueta lida ou digitada, sem checar permissão (quem chama já conferiu
+  /// a dele), e se veio pelo código curto (digitado) ou pelo token (QR lido).
+  static Future<({QrTag tag, bool typedCode})?> findByScan(Session session, String scanned) async {
+    final tag = await _findByScan(session, scanned);
+    if (tag == null) return null;
+    final typed = QrCodes.parseShortCode(scanned.trim()) != null && !scanned.contains('/q/');
+    return (tag: tag, typedCode: typed);
+  }
+
   // ------------------------------------------------------------------ internos
 
   static Future<QrTag?> _findByScan(Session session, String scanned) async {

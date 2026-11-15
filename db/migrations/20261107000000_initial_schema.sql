@@ -1,7 +1,7 @@
 -- migrate:up transaction:false
 -- =============================================================================
 -- Migração inicial — GERADA por tool/db/build_initial_migration.mjs. Não editar.
--- Origem: db/schema.sql (sha256 4919548d1b22679c4b69466d9909450f98e3bc8abe8eefeb28c8b94acc2116fc)
+-- Origem: db/schema.sql (sha256 2bfea6fb45ac0e7fdeb4a828c32c41132eee72559be0edbf4dae68dabcad9114)
 -- Precisa de um papel administrativo (superusuário em dev/CI; o admin do RDS
 -- em homologação e produção), porque cria papéis-grupo e extensões.
 -- =============================================================================
@@ -2076,8 +2076,9 @@ CREATE TABLE app.work_orders (
   escalation_policy_id        uuid,
   service_provider_id         uuid,
   maintenance_plan_asset_id   uuid,
-  customer_id                 uuid NOT NULL,
-  customer_site_id            uuid NOT NULL,
+  customer_id                 uuid,
+  customer_site_id            uuid,
+  cost_center_id              uuid,
   asset_id                    uuid,
   requested_by_contact_id     uuid,
   requester_name              text,
@@ -2149,10 +2150,12 @@ CREATE TABLE app.work_orders (
   FOREIGN KEY (tenant_id, resolution_code_id) REFERENCES app.resolution_codes (tenant_id, id),
   FOREIGN KEY (tenant_id, completed_by_technician_id) REFERENCES app.technicians (tenant_id, id),
   FOREIGN KEY (tenant_id, branch_id) REFERENCES app.branches (tenant_id, id),
+  FOREIGN KEY (tenant_id, cost_center_id) REFERENCES app.cost_centers (tenant_id, id),
   FOREIGN KEY (tenant_id, escalation_policy_id) REFERENCES app.escalation_policies (tenant_id, id),
   FOREIGN KEY (tenant_id, service_provider_id) REFERENCES app.service_providers (tenant_id, id),
   -- Técnico atribuído pertence ao prestador atribuído (verificada só com os dois preenchidos).
   FOREIGN KEY (tenant_id, service_provider_id, assigned_technician_id) REFERENCES app.technicians (tenant_id, service_provider_id, id),
+  CHECK ((customer_id IS NULL) = (customer_site_id IS NULL)),
   CHECK ((acknowledged_at IS NULL) = (acknowledged_by IS NULL)),
   CHECK (escalation_level = 0 OR escalation_policy_id IS NOT NULL),
   CHECK (resolution_mode <> 'remote' OR status NOT IN ('completed', 'closed') OR resolution_notes IS NOT NULL),
@@ -2185,6 +2188,7 @@ CREATE INDEX work_orders_completed_by_idx ON app.work_orders (tenant_id, complet
 CREATE INDEX work_orders_failure_cause_idx ON app.work_orders (tenant_id, failure_cause_id, completed_at)
   WHERE failure_cause_id IS NOT NULL;
 CREATE INDEX work_orders_branch_idx ON app.work_orders (tenant_id, branch_id, created_at DESC) WHERE branch_id IS NOT NULL;
+CREATE INDEX work_orders_cost_center_idx ON app.work_orders (tenant_id, cost_center_id, created_at DESC) WHERE cost_center_id IS NOT NULL;
 CREATE INDEX work_orders_escalation_policy_idx ON app.work_orders (tenant_id, escalation_policy_id) WHERE escalation_policy_id IS NOT NULL;
 CREATE INDEX work_orders_provider_idx ON app.work_orders (tenant_id, service_provider_id, assigned_technician_id, status) WHERE service_provider_id IS NOT NULL;
 -- Fila do job de escalonamento (a cada minuto): OS ainda sem "assumi".
@@ -2195,7 +2199,8 @@ CREATE INDEX work_orders_resolution_mode_idx ON app.work_orders (tenant_id, reso
 -- sem consulta frequente por esse filtro): reported_symptom_id, sla_policy_id,
 -- resolution_code_id e tenant_membership_roles.role_code. Criar quando um
 -- relatório passar a filtrar por eles.
-COMMENT ON TABLE app.work_orders IS 'Ordem de Serviço (entidade única; chamado do cliente nasce requested). customer_id/customer_site_id são gravados na abertura e não mudam se o ativo for transferido.';
+COMMENT ON TABLE app.work_orders IS 'Ordem de Serviço (entidade única; chamado do cliente nasce requested). customer_id/customer_site_id são gravados na abertura e não mudam se o ativo for transferido. MVP patrimonial (15/11/2026): OS interna de bem do próprio tenant (sem alocação em cliente) fica com cliente e unidade nulos; o local é a filial e o centro de custo.';
+COMMENT ON COLUMN app.work_orders.cost_center_id IS 'MVP patrimonial (15/11/2026). Centro de custo da OS, herdado do bem na abertura (custos de manutenção por centro de custo). Não muda se o bem for reclassificado depois.';
 COMMENT ON COLUMN app.work_orders.number IS 'Número legível por tenant (ex.: 2026-000123), atribuído pelo trigger trg_number via tenant_sequences.';
 COMMENT ON COLUMN app.work_orders.erp_sync_status IS 'Integração com ERP, separada do status operacional (D9).';
 COMMENT ON COLUMN app.work_orders.flag_unverified_requester IS 'Sinalização de triagem: solicitante não cadastrado/aprovado (docs/05).';

@@ -14,6 +14,9 @@ import 'package:plataforma_os_server/src/generated/assets/models/asset_input.dar
 import 'package:plataforma_os_server/src/generated/catalog/models/product_input.dart' as _iku7g2we;
 import 'package:plataforma_os_server/src/generated/tenancy/models/branch_input.dart' as _i6djw631;
 import 'package:plataforma_os_server/src/generated/tenancy/models/cost_center_input.dart' as _irkypkua;
+import 'package:plataforma_os_server/src/generated/work_orders/models/work_order_changes.dart' as _im8hf6je;
+import 'package:plataforma_os_server/src/generated/work_orders/models/work_order_input.dart' as _is40rk4d;
+import 'package:plataforma_os_server/src/generated/work_orders/models/work_order_type_input.dart' as _i56uux5g;
 import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart' as _iacs;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart' as _iais;
@@ -27,6 +30,7 @@ import '../identity_access/endpoints/refresh_jwt_tokens_endpoint.dart' as _inemd
 import '../identity_access/endpoints/users_endpoint.dart' as _if041dc0;
 import '../tenancy/endpoints/branches_endpoint.dart' as _i9d4u5j9;
 import '../tenancy/endpoints/cost_centers_endpoint.dart' as _inwd0tmb;
+import '../work_orders/endpoints/work_orders_endpoint.dart' as _i452a764;
 
 class Endpoints extends _is.EndpointDispatch {
   @override
@@ -90,6 +94,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'costCenters',
+          null,
+        ),
+      'workOrders': _i452a764.WorkOrdersEndpoint()
+        ..initialize(
+          server,
+          'workOrders',
           null,
         ),
     };
@@ -943,6 +953,390 @@ class Endpoints extends _is.EndpointDispatch {
                 _is.Session session,
                 Map<String, dynamic> params,
               ) async => (endpoints['costCenters'] as _inwd0tmb.CostCentersEndpoint).update(
+                session,
+                params['id'],
+                params['expectedVersion'],
+                params['input'],
+              ),
+        ),
+      },
+    );
+    connectors['workOrders'] = _is.EndpointConnector(
+      name: 'workOrders',
+      endpoint: endpoints['workOrders']!,
+      methodConnectors: {
+        'list': _is.MethodConnector(
+          name: 'list',
+          params: {
+            'search': _is.ParameterDescription(
+              name: 'search',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'statuses': _is.ParameterDescription(
+              name: 'statuses',
+              type: _is.getType<List<String>?>(),
+              nullable: true,
+            ),
+            'openOnly': _is.ParameterDescription(
+              name: 'openOnly',
+              type: _is.getType<bool?>(),
+              nullable: true,
+            ),
+            'assetId': _is.ParameterDescription(
+              name: 'assetId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+            'branchId': _is.ParameterDescription(
+              name: 'branchId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+            'costCenterId': _is.ParameterDescription(
+              name: 'costCenterId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+            'workOrderTypeId': _is.ParameterDescription(
+              name: 'workOrderTypeId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+            'limit': _is.ParameterDescription(
+              name: 'limit',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+            'offset': _is.ParameterDescription(
+              name: 'offset',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['workOrders'] as _i452a764.WorkOrdersEndpoint).list(
+                session,
+                search: params['search'],
+                statuses: params['statuses'],
+                openOnly: params['openOnly'],
+                assetId: params['assetId'],
+                branchId: params['branchId'],
+                costCenterId: params['costCenterId'],
+                workOrderTypeId: params['workOrderTypeId'],
+                limit: params['limit'],
+                offset: params['offset'],
+              ),
+        ),
+        'get': _is.MethodConnector(
+          name: 'get',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['workOrders'] as _i452a764.WorkOrdersEndpoint).get(
+                session,
+                params['id'],
+              ),
+        ),
+        'open': _is.MethodConnector(
+          name: 'open',
+          params: {
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_is40rk4d.WorkOrderInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['workOrders'] as _i452a764.WorkOrdersEndpoint).open(
+                session,
+                params['input'],
+              ),
+        ),
+        'update': _is.MethodConnector(
+          name: 'update',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'changes': _is.ParameterDescription(
+              name: 'changes',
+              type: _is.getType<_im8hf6je.WorkOrderChanges>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['workOrders'] as _i452a764.WorkOrdersEndpoint).update(
+                session,
+                params['id'],
+                params['expectedVersion'],
+                params['changes'],
+              ),
+        ),
+        'start': _is.MethodConnector(
+          name: 'start',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['workOrders'] as _i452a764.WorkOrdersEndpoint).start(
+                session,
+                params['id'],
+                params['expectedVersion'],
+              ),
+        ),
+        'hold': _is.MethodConnector(
+          name: 'hold',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'holdReason': _is.ParameterDescription(
+              name: 'holdReason',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'note': _is.ParameterDescription(
+              name: 'note',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['workOrders'] as _i452a764.WorkOrdersEndpoint).hold(
+                session,
+                params['id'],
+                params['expectedVersion'],
+                params['holdReason'],
+                note: params['note'],
+              ),
+        ),
+        'complete': _is.MethodConnector(
+          name: 'complete',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'resolutionNotes': _is.ParameterDescription(
+              name: 'resolutionNotes',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['workOrders'] as _i452a764.WorkOrdersEndpoint).complete(
+                session,
+                params['id'],
+                params['expectedVersion'],
+                params['resolutionNotes'],
+              ),
+        ),
+        'close': _is.MethodConnector(
+          name: 'close',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['workOrders'] as _i452a764.WorkOrdersEndpoint).close(
+                session,
+                params['id'],
+                params['expectedVersion'],
+              ),
+        ),
+        'cancel': _is.MethodConnector(
+          name: 'cancel',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'reason': _is.ParameterDescription(
+              name: 'reason',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+            'note': _is.ParameterDescription(
+              name: 'note',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['workOrders'] as _i452a764.WorkOrdersEndpoint).cancel(
+                session,
+                params['id'],
+                params['expectedVersion'],
+                params['reason'],
+                note: params['note'],
+              ),
+        ),
+        'reopen': _is.MethodConnector(
+          name: 'reopen',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'reason': _is.ParameterDescription(
+              name: 'reason',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['workOrders'] as _i452a764.WorkOrdersEndpoint).reopen(
+                session,
+                params['id'],
+                params['expectedVersion'],
+                params['reason'],
+              ),
+        ),
+        'types': _is.MethodConnector(
+          name: 'types',
+          params: {
+            'includeInactive': _is.ParameterDescription(
+              name: 'includeInactive',
+              type: _is.getType<bool?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['workOrders'] as _i452a764.WorkOrdersEndpoint).types(
+                session,
+                includeInactive: params['includeInactive'],
+              ),
+        ),
+        'createType': _is.MethodConnector(
+          name: 'createType',
+          params: {
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_i56uux5g.WorkOrderTypeInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['workOrders'] as _i452a764.WorkOrdersEndpoint).createType(
+                session,
+                params['input'],
+              ),
+        ),
+        'updateType': _is.MethodConnector(
+          name: 'updateType',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_i56uux5g.WorkOrderTypeInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['workOrders'] as _i452a764.WorkOrdersEndpoint).updateType(
                 session,
                 params['id'],
                 params['expectedVersion'],

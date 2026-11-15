@@ -1,0 +1,46 @@
+# Ordem de serviço (app.work_orders) com os nomes já resolvidos para a tela.
+# Filial, centro de custo e cliente vêm do bem na abertura e não mudam depois.
+class: WorkOrder
+fields:
+  id: UuidValue
+  # Número legível por empresa (ex.: 2026-000123).
+  number: String
+  workOrderTypeId: UuidValue
+  workOrderTypeName: String
+  # requested, open, scheduled, in_progress, on_hold, completed, closed, cancelled.
+  status: String
+  # low, normal, high, urgent.
+  priority: String
+  # backoffice ou technician_app.
+  origin: String
+  # qr_token, short_code, asset_list ou backoffice.
+  entryMethod: String
+  assetId: UuidValue?
+  # Patrimônio (ou série) e produto do bem.
+  assetLabel: String?
+  productName: String?
+  branchId: UuidValue?
+  branchName: String?
+  costCenterId: UuidValue?
+  costCenterName: String?
+  # Nulos em OS interna (bem do próprio tenant, sem alocação em cliente).
+  customerId: UuidValue?
+  customerName: String?
+  problemDescription: String?
+  requesterName: String?
+  requesterPhone: String?
+  # awaiting_part, awaiting_customer, needs_return, awaiting_approval, other.
+  holdReason: String?
+  statusReason: String?
+  resolutionNotes: String?
+  # rejected_in_triage, duplicate, customer_cancelled, created_in_error, other.
+  cancellationReason: String?
+  cancellationNote: String?
+  reopenedCount: int
+  createdAt: DateTime
+  statusChangedAt: DateTime
+  startedAt: DateTime?
+  completedAt: DateTime?
+  closedAt: DateTime?
+  cancelledAt: DateTime?
+  version: int

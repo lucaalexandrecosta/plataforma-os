@@ -1,0 +1,14 @@
+# Tipo de OS (app.work_order_types): corretiva, preventiva, instalação...
+class: WorkOrderType
+fields:
+  id: UuidValue
+  code: String
+  name: String
+  # corrective, preventive, installation, removal, inspection, refurbishment, teardown, other.
+  category: String
+  # low, normal, high, urgent.
+  defaultPriority: String
+  # Exige bem na abertura.
+  requiresAsset: bool
+  isActive: bool
+  version: int
