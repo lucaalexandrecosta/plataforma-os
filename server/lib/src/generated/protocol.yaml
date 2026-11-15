@@ -1,3 +1,11 @@
+assets:
+  - list:
+  - get:
+  - create:
+  - update:
+products:
+  - list:
+  - create:
 auth:
   - selectTenant:
 emailIdp:
@@ -22,3 +30,11 @@ users:
   - suspend:
   - reactivate:
   - remove:
+branches:
+  - list:
+  - create:
+  - update:
+costCenters:
+  - list:
+  - create:
+  - update:

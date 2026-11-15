@@ -1,0 +1,28 @@
+# Bem (app.assets): unidade física de um produto, com filial, centro de custo
+# e dados de aquisição. status e alocação mudam por movimentação, não aqui.
+class: Asset
+fields:
+  id: UuidValue
+  productId: UuidValue
+  productName: String
+  serialNumber: String?
+  # Número de patrimônio.
+  assetTag: String?
+  # in_stock, installed, in_workshop, retired.
+  status: String
+  # tenant_loan, tenant_rental, customer_owned.
+  ownershipType: String
+  branchId: UuidValue?
+  costCenterId: UuidValue?
+  locationNote: String?
+  warrantyUntil: DateTime?
+  acquisitionDate: DateTime?
+  # Centavos (R$ 5.000,00 = 500000).
+  acquisitionCost: int?
+  supplierName: String?
+  acquisitionDocument: String?
+  notes: String?
+  isActive: bool
+  # local ou erp (campos mestres do ERP são só leitura).
+  source: String
+  version: int
