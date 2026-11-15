@@ -1,0 +1,15 @@
+# Filial do tenant (app.branches). Leitura e retorno de branches.*.
+class: Branch
+fields:
+  id: UuidValue
+  code: String
+  legalName: String
+  tradeName: String?
+  # CNPJ, só dígitos.
+  documentNumber: String?
+  city: String?
+  state: String?
+  erpBranchCode: String?
+  isDefault: bool
+  isActive: bool
+  version: int

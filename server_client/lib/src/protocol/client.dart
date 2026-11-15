@@ -12,15 +12,105 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'dart:async' as _ida;
 import 'package:http/http.dart' as _i85jenna;
+import 'package:plataforma_os_client/src/protocol/assets/models/asset.dart' as _i1flw1j6;
+import 'package:plataforma_os_client/src/protocol/assets/models/asset_input.dart' as _i3bfa7rs;
+import 'package:plataforma_os_client/src/protocol/assets/models/asset_page.dart' as _ih5rjonj;
+import 'package:plataforma_os_client/src/protocol/catalog/models/product_input.dart' as _i2gecgw3;
+import 'package:plataforma_os_client/src/protocol/catalog/models/product_summary.dart' as _ihgw7zuo;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/assignable_role.dart' as _i2g1699a;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/me_info.dart' as _i8cz5om6;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/tenant_token.dart' as _ii663qav;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/tenant_user.dart' as _i8ihd43z;
+import 'package:plataforma_os_client/src/protocol/tenancy/models/branch.dart' as _ied3wtyg;
+import 'package:plataforma_os_client/src/protocol/tenancy/models/branch_input.dart' as _il2pvpfo;
+import 'package:plataforma_os_client/src/protocol/tenancy/models/cost_center.dart' as _itoq0gfy;
+import 'package:plataforma_os_client/src/protocol/tenancy/models/cost_center_input.dart' as _iusx5jxf;
 import 'package:plataforma_os_client/src/protocol/tenancy/models/tenant_summary.dart' as _i11upz4e;
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart' as _iacc;
 import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart' as _iaic;
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 import 'protocol.dart' as _il2as5qe;
+
+/// `assets.*` — cadastro de bens. Erros: `FORBIDDEN`, `VALIDATION_FAILED`,
+/// `NOT_FOUND`, `VERSION_MISMATCH`, `ERP_MASTER_READ_ONLY`.
+/// {@category Endpoint}
+class EndpointAssets extends EndpointStaff {
+  EndpointAssets(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'assets';
+
+  /// [search] procura no patrimônio, na série e no nome do produto.
+  _ida.Future<_ih5rjonj.AssetPage> list({
+    String? search,
+    _isc.UuidValue? branchId,
+    _isc.UuidValue? costCenterId,
+    bool? includeInactive,
+    int? limit,
+    int? offset,
+  }) => caller.callServerEndpoint<_ih5rjonj.AssetPage>(
+    'assets',
+    'list',
+    {
+      'search': search,
+      'branchId': branchId,
+      'costCenterId': costCenterId,
+      'includeInactive': includeInactive,
+      'limit': limit,
+      'offset': offset,
+    },
+  );
+
+  _ida.Future<_i1flw1j6.Asset> get(_isc.UuidValue id) => caller.callServerEndpoint<_i1flw1j6.Asset>(
+    'assets',
+    'get',
+    {'id': id},
+  );
+
+  _ida.Future<_i1flw1j6.Asset> create(_i3bfa7rs.AssetInput input) => caller.callServerEndpoint<_i1flw1j6.Asset>(
+    'assets',
+    'create',
+    {'input': input},
+  );
+
+  _ida.Future<_i1flw1j6.Asset> update(
+    _isc.UuidValue id,
+    int expectedVersion,
+    _i3bfa7rs.AssetInput input,
+  ) => caller.callServerEndpoint<_i1flw1j6.Asset>(
+    'assets',
+    'update',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+      'input': input,
+    },
+  );
+}
+
+/// `products.*` — modelos de equipamento para o cadastro de bens.
+/// {@category Endpoint}
+class EndpointProducts extends EndpointStaff {
+  EndpointProducts(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'products';
+
+  /// Equipamentos ativos; [search] procura no código e no nome.
+  _ida.Future<List<_ihgw7zuo.ProductSummary>> list({String? search}) =>
+      caller.callServerEndpoint<List<_ihgw7zuo.ProductSummary>>(
+        'products',
+        'list',
+        {'search': search},
+      );
+
+  _ida.Future<_ihgw7zuo.ProductSummary> create(_i2gecgw3.ProductInput input) =>
+      caller.callServerEndpoint<_ihgw7zuo.ProductSummary>(
+        'products',
+        'create',
+        {'input': input},
+      );
+}
 
 /// `auth.*` — escolha do tenant depois do login por e-mail e senha.
 ///
@@ -298,6 +388,87 @@ abstract class EndpointPublic extends _isc.EndpointRef {
   EndpointPublic(_isc.EndpointCaller caller) : super(caller);
 }
 
+/// `branches.*` — filiais. Leitura para a equipe; alteração com
+/// `settings.manage` (administrador). Erros: `FORBIDDEN`, `VALIDATION_FAILED`,
+/// `NOT_FOUND`, `VERSION_MISMATCH`, `DEFAULT_BRANCH_REQUIRED`.
+/// {@category Endpoint}
+class EndpointBranches extends EndpointStaff {
+  EndpointBranches(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'branches';
+
+  _ida.Future<List<_ied3wtyg.Branch>> list({bool? includeInactive}) =>
+      caller.callServerEndpoint<List<_ied3wtyg.Branch>>(
+        'branches',
+        'list',
+        {'includeInactive': includeInactive},
+      );
+
+  _ida.Future<_ied3wtyg.Branch> create(_il2pvpfo.BranchInput input) => caller.callServerEndpoint<_ied3wtyg.Branch>(
+    'branches',
+    'create',
+    {'input': input},
+  );
+
+  _ida.Future<_ied3wtyg.Branch> update(
+    _isc.UuidValue id,
+    int expectedVersion,
+    _il2pvpfo.BranchInput input,
+  ) => caller.callServerEndpoint<_ied3wtyg.Branch>(
+    'branches',
+    'update',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+      'input': input,
+    },
+  );
+}
+
+/// `costCenters.*` — centros de custo. Leitura para a equipe (com [branchId],
+/// os da filial e os que valem para todas); alteração com `settings.manage`.
+/// {@category Endpoint}
+class EndpointCostCenters extends EndpointStaff {
+  EndpointCostCenters(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'costCenters';
+
+  _ida.Future<List<_itoq0gfy.CostCenter>> list({
+    _isc.UuidValue? branchId,
+    bool? includeInactive,
+  }) => caller.callServerEndpoint<List<_itoq0gfy.CostCenter>>(
+    'costCenters',
+    'list',
+    {
+      'branchId': branchId,
+      'includeInactive': includeInactive,
+    },
+  );
+
+  _ida.Future<_itoq0gfy.CostCenter> create(_iusx5jxf.CostCenterInput input) =>
+      caller.callServerEndpoint<_itoq0gfy.CostCenter>(
+        'costCenters',
+        'create',
+        {'input': input},
+      );
+
+  _ida.Future<_itoq0gfy.CostCenter> update(
+    _isc.UuidValue id,
+    int expectedVersion,
+    _iusx5jxf.CostCenterInput input,
+  ) => caller.callServerEndpoint<_itoq0gfy.CostCenter>(
+    'costCenters',
+    'update',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+      'input': input,
+    },
+  );
+}
+
 class Modules {
   Modules(Client client) {
     serverpod_auth_idp = _iaic.Caller(client);
@@ -335,13 +506,21 @@ class Client extends _isc.ServerpodClientShared {
          disconnectStreamsOnLostInternetConnection: disconnectStreamsOnLostInternetConnection,
          httpClientOverride: httpClientOverride,
        ) {
+    assets = EndpointAssets(this);
+    products = EndpointProducts(this);
     auth = EndpointAuth(this);
     emailIdp = EndpointEmailIdp(this);
     me = EndpointMe(this);
     refreshJwtTokens = EndpointRefreshJwtTokens(this);
     users = EndpointUsers(this);
+    branches = EndpointBranches(this);
+    costCenters = EndpointCostCenters(this);
     modules = Modules(this);
   }
+
+  late final EndpointAssets assets;
+
+  late final EndpointProducts products;
 
   late final EndpointAuth auth;
 
@@ -353,15 +532,23 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointUsers users;
 
+  late final EndpointBranches branches;
+
+  late final EndpointCostCenters costCenters;
+
   late final Modules modules;
 
   @override
   Map<String, _isc.EndpointRef> get endpointRefLookup => {
+    'assets': assets,
+    'products': products,
     'auth': auth,
     'emailIdp': emailIdp,
     'me': me,
     'refreshJwtTokens': refreshJwtTokens,
     'users': users,
+    'branches': branches,
+    'costCenters': costCenters,
   };
 
   @override

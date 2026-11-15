@@ -10,19 +10,39 @@
 // ignore_for_file: invalid_use_of_internal_member
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:plataforma_os_server/src/generated/assets/models/asset_input.dart' as _i58orcz5;
+import 'package:plataforma_os_server/src/generated/catalog/models/product_input.dart' as _iku7g2we;
+import 'package:plataforma_os_server/src/generated/tenancy/models/branch_input.dart' as _i6djw631;
+import 'package:plataforma_os_server/src/generated/tenancy/models/cost_center_input.dart' as _irkypkua;
 import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart' as _iacs;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart' as _iais;
+import '../assets/endpoints/assets_endpoint.dart' as _i8oyhoxt;
+import '../catalog/endpoints/products_endpoint.dart' as _i87w2mxb;
 import '../identity_access/endpoints/auth_endpoint.dart' as _i077kp7v;
 import '../identity_access/endpoints/email_idp_endpoint.dart' as _iq8d1u02;
 import '../identity_access/endpoints/me_endpoint.dart' as _i2zd8mbu;
 import '../identity_access/endpoints/refresh_jwt_tokens_endpoint.dart' as _inemdtdo;
 import '../identity_access/endpoints/users_endpoint.dart' as _if041dc0;
+import '../tenancy/endpoints/branches_endpoint.dart' as _i9d4u5j9;
+import '../tenancy/endpoints/cost_centers_endpoint.dart' as _inwd0tmb;
 
 class Endpoints extends _is.EndpointDispatch {
   @override
   void initializeEndpoints(_is.Server server) {
     var endpoints = <String, _is.Endpoint>{
+      'assets': _i8oyhoxt.AssetsEndpoint()
+        ..initialize(
+          server,
+          'assets',
+          null,
+        ),
+      'products': _i87w2mxb.ProductsEndpoint()
+        ..initialize(
+          server,
+          'products',
+          null,
+        ),
       'auth': _i077kp7v.AuthEndpoint()
         ..initialize(
           server,
@@ -53,7 +73,181 @@ class Endpoints extends _is.EndpointDispatch {
           'users',
           null,
         ),
+      'branches': _i9d4u5j9.BranchesEndpoint()
+        ..initialize(
+          server,
+          'branches',
+          null,
+        ),
+      'costCenters': _inwd0tmb.CostCentersEndpoint()
+        ..initialize(
+          server,
+          'costCenters',
+          null,
+        ),
     };
+    connectors['assets'] = _is.EndpointConnector(
+      name: 'assets',
+      endpoint: endpoints['assets']!,
+      methodConnectors: {
+        'list': _is.MethodConnector(
+          name: 'list',
+          params: {
+            'search': _is.ParameterDescription(
+              name: 'search',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'branchId': _is.ParameterDescription(
+              name: 'branchId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+            'costCenterId': _is.ParameterDescription(
+              name: 'costCenterId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+            'includeInactive': _is.ParameterDescription(
+              name: 'includeInactive',
+              type: _is.getType<bool?>(),
+              nullable: true,
+            ),
+            'limit': _is.ParameterDescription(
+              name: 'limit',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+            'offset': _is.ParameterDescription(
+              name: 'offset',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['assets'] as _i8oyhoxt.AssetsEndpoint).list(
+                session,
+                search: params['search'],
+                branchId: params['branchId'],
+                costCenterId: params['costCenterId'],
+                includeInactive: params['includeInactive'],
+                limit: params['limit'],
+                offset: params['offset'],
+              ),
+        ),
+        'get': _is.MethodConnector(
+          name: 'get',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['assets'] as _i8oyhoxt.AssetsEndpoint).get(
+                session,
+                params['id'],
+              ),
+        ),
+        'create': _is.MethodConnector(
+          name: 'create',
+          params: {
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_i58orcz5.AssetInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['assets'] as _i8oyhoxt.AssetsEndpoint).create(
+                session,
+                params['input'],
+              ),
+        ),
+        'update': _is.MethodConnector(
+          name: 'update',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_i58orcz5.AssetInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['assets'] as _i8oyhoxt.AssetsEndpoint).update(
+                session,
+                params['id'],
+                params['expectedVersion'],
+                params['input'],
+              ),
+        ),
+      },
+    );
+    connectors['products'] = _is.EndpointConnector(
+      name: 'products',
+      endpoint: endpoints['products']!,
+      methodConnectors: {
+        'list': _is.MethodConnector(
+          name: 'list',
+          params: {
+            'search': _is.ParameterDescription(
+              name: 'search',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['products'] as _i87w2mxb.ProductsEndpoint).list(
+                session,
+                search: params['search'],
+              ),
+        ),
+        'create': _is.MethodConnector(
+          name: 'create',
+          params: {
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_iku7g2we.ProductInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['products'] as _i87w2mxb.ProductsEndpoint).create(
+                session,
+                params['input'],
+              ),
+        ),
+      },
+    );
     connectors['auth'] = _is.EndpointConnector(
       name: 'auth',
       endpoint: endpoints['auth']!,
@@ -431,6 +625,156 @@ class Endpoints extends _is.EndpointDispatch {
               ) async => (endpoints['users'] as _if041dc0.UsersEndpoint).remove(
                 session,
                 params['membershipId'],
+              ),
+        ),
+      },
+    );
+    connectors['branches'] = _is.EndpointConnector(
+      name: 'branches',
+      endpoint: endpoints['branches']!,
+      methodConnectors: {
+        'list': _is.MethodConnector(
+          name: 'list',
+          params: {
+            'includeInactive': _is.ParameterDescription(
+              name: 'includeInactive',
+              type: _is.getType<bool?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['branches'] as _i9d4u5j9.BranchesEndpoint).list(
+                session,
+                includeInactive: params['includeInactive'],
+              ),
+        ),
+        'create': _is.MethodConnector(
+          name: 'create',
+          params: {
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_i6djw631.BranchInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['branches'] as _i9d4u5j9.BranchesEndpoint).create(
+                session,
+                params['input'],
+              ),
+        ),
+        'update': _is.MethodConnector(
+          name: 'update',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_i6djw631.BranchInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['branches'] as _i9d4u5j9.BranchesEndpoint).update(
+                session,
+                params['id'],
+                params['expectedVersion'],
+                params['input'],
+              ),
+        ),
+      },
+    );
+    connectors['costCenters'] = _is.EndpointConnector(
+      name: 'costCenters',
+      endpoint: endpoints['costCenters']!,
+      methodConnectors: {
+        'list': _is.MethodConnector(
+          name: 'list',
+          params: {
+            'branchId': _is.ParameterDescription(
+              name: 'branchId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+            'includeInactive': _is.ParameterDescription(
+              name: 'includeInactive',
+              type: _is.getType<bool?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['costCenters'] as _inwd0tmb.CostCentersEndpoint).list(
+                session,
+                branchId: params['branchId'],
+                includeInactive: params['includeInactive'],
+              ),
+        ),
+        'create': _is.MethodConnector(
+          name: 'create',
+          params: {
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_irkypkua.CostCenterInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['costCenters'] as _inwd0tmb.CostCentersEndpoint).create(
+                session,
+                params['input'],
+              ),
+        ),
+        'update': _is.MethodConnector(
+          name: 'update',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_irkypkua.CostCenterInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['costCenters'] as _inwd0tmb.CostCentersEndpoint).update(
+                session,
+                params['id'],
+                params['expectedVersion'],
+                params['input'],
               ),
         ),
       },

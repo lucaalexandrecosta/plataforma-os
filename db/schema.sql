@@ -533,6 +533,31 @@ CREATE UNIQUE INDEX branches_erp_code_key ON app.branches (tenant_id, erp_branch
 COMMENT ON TABLE app.branches IS 'v0.2 (MVP, módulo tenancy). Filial do tenant (CNPJ, IE, endereço, código no ERP). Define a filial do pedido no ERP (fonte principal, no lugar do mapeamento service_area_branch) e permite limitar o escopo de usuários a filiais. Uma filial padrão por tenant.';
 COMMENT ON COLUMN app.branches.erp_branch_code IS 'Código da filial no ERP (Senior: código da filial/empresa), usado no pedido de serviço, na requisição de materiais e no fechamento de prestadores.';
 
+-- Centro de custo (15/11/2026, MVP patrimonial): o bem pertence a um centro de
+-- custo, e a OS herda o centro de custo e a filial do bem, para manutenção e
+-- depreciação aparecerem juntas no mesmo relatório.
+CREATE TABLE app.cost_centers (
+  id             uuid NOT NULL DEFAULT app.uuid_v7() PRIMARY KEY,
+  tenant_id      uuid NOT NULL REFERENCES app.tenants (id),
+  code           text NOT NULL CHECK (btrim(code) <> ''),
+  name           text NOT NULL CHECK (btrim(name) <> ''),
+  branch_id      uuid,
+  erp_code       text,
+  is_active      boolean NOT NULL DEFAULT true,
+  created_at     timestamptz NOT NULL DEFAULT now(),
+  updated_at     timestamptz NOT NULL DEFAULT now(),
+  created_by     uuid,
+  updated_by     uuid,
+  version        integer NOT NULL DEFAULT 1,
+  UNIQUE (tenant_id, id),
+  UNIQUE (tenant_id, code),
+  FOREIGN KEY (tenant_id, branch_id) REFERENCES app.branches (tenant_id, id)
+);
+CREATE INDEX cost_centers_branch_idx ON app.cost_centers (tenant_id, branch_id) WHERE branch_id IS NOT NULL;
+CREATE UNIQUE INDEX cost_centers_erp_code_key ON app.cost_centers (tenant_id, erp_code) WHERE erp_code IS NOT NULL;
+COMMENT ON TABLE app.cost_centers IS 'MVP patrimonial (15/11/2026, módulo tenancy). Centro de custo do tenant; opcionalmente restrito a uma filial (nulo = vale para todas). O bem aponta para ele (assets.cost_center_id) e a OS herda.';
+COMMENT ON COLUMN app.cost_centers.erp_code IS 'Código do centro de custo no ERP, para a integração futura (bens e depreciação pela API do ERP X).';
+
 -- =============================================================================
 -- 7. Identidade e acesso — tabelas base (módulo identity_access)
 -- =============================================================================
@@ -1655,6 +1680,7 @@ CREATE TABLE app.assets (
   location_note            text,
   warranty_until           date,
   branch_id                uuid,
+  cost_center_id           uuid,
   parent_asset_id          uuid,
   acquisition_date         date,
   acquisition_cost         bigint CHECK (acquisition_cost >= 0),
@@ -1684,6 +1710,7 @@ CREATE TABLE app.assets (
   FOREIGN KEY (tenant_id, product_id) REFERENCES app.products (tenant_id, id),
   FOREIGN KEY (tenant_id, current_customer_id, current_customer_site_id) REFERENCES app.customer_sites (tenant_id, customer_id, id),
   FOREIGN KEY (tenant_id, branch_id) REFERENCES app.branches (tenant_id, id),
+  FOREIGN KEY (tenant_id, cost_center_id) REFERENCES app.cost_centers (tenant_id, id),
   FOREIGN KEY (tenant_id, parent_asset_id) REFERENCES app.assets (tenant_id, id),
   CHECK (serial_number IS NOT NULL OR asset_tag IS NOT NULL),
   CHECK ((current_customer_id IS NULL) = (current_customer_site_id IS NULL)),
@@ -1693,6 +1720,7 @@ CREATE TABLE app.assets (
   CHECK (parent_asset_id IS NULL OR parent_asset_id <> id)
 );
 CREATE INDEX assets_branch_idx ON app.assets (tenant_id, branch_id) WHERE branch_id IS NOT NULL;
+CREATE INDEX assets_cost_center_idx ON app.assets (tenant_id, cost_center_id) WHERE cost_center_id IS NOT NULL;
 CREATE INDEX assets_parent_idx ON app.assets (tenant_id, parent_asset_id) WHERE parent_asset_id IS NOT NULL;
 CREATE UNIQUE INDEX assets_serial_key ON app.assets (tenant_id, product_id, serial_number) WHERE serial_number IS NOT NULL;
 CREATE UNIQUE INDEX assets_tag_key ON app.assets (tenant_id, asset_tag) WHERE asset_tag IS NOT NULL;
@@ -1708,6 +1736,7 @@ COMMENT ON COLUMN app.assets.source IS 'v0.2: o ativo passa a ser cadastro mestr
 COMMENT ON COLUMN app.assets.missing_since IS 'v0.2 (F2). Primeira varredura completa do ERP em que o bem não veio. Volta a nulo se reaparecer; inativação só na segunda ausência consecutiva (docs/07).';
 COMMENT ON COLUMN app.assets.acquisition_date IS 'v0.2 (MVP). Data de aquisição (substitui o antigo acquired_at). Com acquisition_cost, supplier_name e acquisition_document (número da NF de entrada) compõe os dados de aquisição mostrados com a garantia na abertura da OS e usados na rentabilidade do comodato (F3).';
 COMMENT ON COLUMN app.assets.acquisition_cost IS 'v0.2 (MVP). Valor de aquisição do bem em centavos (bigint, não negativo; R$ 5.000,00 = 500000). v0.3: era numeric(14,2); o adaptador do ERP converte do decimal.';
+COMMENT ON COLUMN app.assets.cost_center_id IS 'MVP patrimonial (15/11/2026). Centro de custo dono do bem; a OS herda. Nulo = ainda não classificado.';
 COMMENT ON COLUMN app.assets.branch_id IS 'v0.2 (MVP). Filial dona do bem (define a filial do pedido no ERP); nulo = filial padrão.';
 COMMENT ON COLUMN app.assets.parent_asset_id IS 'v0.2 (F3). Ativo pai de um componente rastreado (ex.: o motor de um forno), com histórico de OS por componente. Não pode apontar para si mesmo; ciclos maiores são barrados pela aplicação.';
 COMMENT ON COLUMN app.assets.retirement_reason IS 'Motivo da baixa (texto livre controlado pela aplicação). v0.2 (F3): cannibalized = desmontado para peças ao concluir uma OS teardown.';
@@ -3786,7 +3815,7 @@ BEGIN
       'sync_review_items', 'support_sessions',
       'integration_connections', 'integration_mappings',
       -- v0.2 (meter_readings e customer_sales_summaries ficam fora: volume alto e origem automática)
-      'branches', 'sales_reps', 'service_providers', 'provider_rates', 'on_call_assignments', 'escalation_policies',
+      'branches', 'cost_centers', 'sales_reps', 'service_providers', 'provider_rates', 'on_call_assignments', 'escalation_policies',
       'work_order_costs', 'provider_settlements', 'maintenance_plans', 'maintenance_plan_assets', 'asset_meters',
       'iot_devices', 'telemetry_alert_rules']) AS relname
   LOOP

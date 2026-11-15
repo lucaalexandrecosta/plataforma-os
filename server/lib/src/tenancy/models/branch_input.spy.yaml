@@ -1,0 +1,12 @@
+# Dados editáveis da filial (branches.create e branches.update).
+class: BranchInput
+fields:
+  code: String
+  legalName: String
+  tradeName: String?
+  documentNumber: String?
+  city: String?
+  state: String?
+  erpBranchCode: String?
+  isDefault: bool
+  isActive: bool

@@ -18,4 +18,22 @@ abstract final class Authorization {
     if (!permissions.contains(permission)) throw ApiErrors.forbidden(session);
     return membership;
   }
+
+  /// Como [require], aceitando qualquer uma das [permissions].
+  static Future<TenantMembership> requireAny(Session session, Set<String> permissions) async {
+    final ctx = session.context;
+    final membership = await Memberships.activeFor(session, userId: ctx.userId!, tenantId: ctx.tenantId!);
+    if (membership == null) throw ApiErrors.forbidden(session, 'Seu acesso a esta empresa foi removido.');
+    final granted = await Memberships.permissionsOf(session, membership.id);
+    if (!granted.any(permissions.contains)) throw ApiErrors.forbidden(session);
+    return membership;
+  }
+
+  /// Só exige vínculo ativo (leituras de apoio, como listas de filiais).
+  static Future<TenantMembership> requireMember(Session session) async {
+    final ctx = session.context;
+    final membership = await Memberships.activeFor(session, userId: ctx.userId!, tenantId: ctx.tenantId!);
+    if (membership == null) throw ApiErrors.forbidden(session, 'Seu acesso a esta empresa foi removido.');
+    return membership;
+  }
 }

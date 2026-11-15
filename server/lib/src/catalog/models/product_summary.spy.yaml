@@ -1,0 +1,7 @@
+# Produto do catálogo (modelo do equipamento), resumido para escolher no bem.
+class: ProductSummary
+fields:
+  id: UuidValue
+  code: String
+  name: String
+  isActive: bool
