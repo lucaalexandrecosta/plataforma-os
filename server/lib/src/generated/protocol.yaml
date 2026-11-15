@@ -14,3 +14,11 @@ me:
   - tenants:
 refreshJwtTokens:
   - refreshAccessToken:
+users:
+  - roles:
+  - list:
+  - invite:
+  - setRoles:
+  - suspend:
+  - reactivate:
+  - remove:
