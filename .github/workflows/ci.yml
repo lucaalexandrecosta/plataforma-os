@@ -48,6 +48,7 @@ jobs:
       - run: dart format --output=none --set-exit-if-changed packages server/lib/server.dart server/bin server/test/unit server/test/e2e server/lib/src/platform server/lib/src/tenancy server/lib/src/identity_access
       - run: dart analyze --fatal-infos packages server server_client
       - run: dart test packages/core
+      - run: dart test packages/depreciation
       - run: dart test test/unit
         working-directory: server
 
