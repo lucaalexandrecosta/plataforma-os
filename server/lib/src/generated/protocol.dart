@@ -11,6 +11,8 @@
 // ignore_for_file: dead_code, unnecessary_type_check
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:plataforma_os_server/src/generated/assets/models/qr_tag.dart' as _idzaz83i;
+import 'package:plataforma_os_server/src/generated/assets/models/qr_tag_batch.dart' as _i07n19u6;
 import 'package:plataforma_os_server/src/generated/catalog/models/product_summary.dart' as _ico54ik3;
 import 'package:plataforma_os_server/src/generated/identity_access/models/assignable_role.dart' as _iur1xixc;
 import 'package:plataforma_os_server/src/generated/identity_access/models/tenant_user.dart' as _iqhozu6i;
@@ -24,6 +26,8 @@ import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart' as _ia
 import 'assets/models/asset.dart' as _ib3mptol;
 import 'assets/models/asset_input.dart' as _i6icgsi8;
 import 'assets/models/asset_page.dart' as _is3mug9m;
+import 'assets/models/qr_tag.dart' as _i760nubs;
+import 'assets/models/qr_tag_batch.dart' as _ikikcay0;
 import 'catalog/models/product_input.dart' as _iuumnsch;
 import 'catalog/models/product_summary.dart' as _i4geouqi;
 import 'identity_access/models/app_user.dart' as _i5wnkftg;
@@ -47,6 +51,8 @@ import 'tenancy/models/tenant_summary.dart' as _i9uizrsf;
 export 'assets/models/asset.dart';
 export 'assets/models/asset_input.dart';
 export 'assets/models/asset_page.dart';
+export 'assets/models/qr_tag.dart';
+export 'assets/models/qr_tag_batch.dart';
 export 'catalog/models/product_input.dart';
 export 'catalog/models/product_summary.dart';
 export 'identity_access/models/app_user.dart';
@@ -82,6 +88,8 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<_ib3mptol.Asset>,
       _is.getType<_i6icgsi8.AssetInput>,
       _is.getType<_is3mug9m.AssetPage>,
+      _is.getType<_i760nubs.QrTag>,
+      _is.getType<_ikikcay0.QrTagBatch>,
       _is.getType<_iuumnsch.ProductInput>,
       _is.getType<_i4geouqi.ProductSummary>,
       _is.getType<_i5wnkftg.AppUser>,
@@ -105,6 +113,8 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<_ib3mptol.Asset?>,
       _is.getType<_i6icgsi8.AssetInput?>,
       _is.getType<_is3mug9m.AssetPage?>,
+      _is.getType<_i760nubs.QrTag?>,
+      _is.getType<_ikikcay0.QrTagBatch?>,
       _is.getType<_iuumnsch.ProductInput?>,
       _is.getType<_i4geouqi.ProductSummary?>,
       _is.getType<_i5wnkftg.AppUser?>,
@@ -131,6 +141,8 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<List<_i3z3bgdl.FieldError>?>,
       _is.getType<Map<String, String>>,
       _is.getType<Map<String, String>?>,
+      _is.getType<List<_i07n19u6.QrTagBatch>>,
+      _is.getType<List<_idzaz83i.QrTag>>,
       _is.getType<List<_ico54ik3.ProductSummary>>,
       _is.getType<List<_inphvrgt.TenantSummary>>,
       _is.getType<List<_iur1xixc.AssignableRole>>,
@@ -148,6 +160,8 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       'Asset',
       'AssetInput',
       'AssetPage',
+      'QrTag',
+      'QrTagBatch',
       'ProductInput',
       'ProductSummary',
       'AppUser',
@@ -407,6 +421,12 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == _is3mug9m.AssetPage) {
       return _is3mug9m.AssetPage.fromJson(data) as T;
     }
+    if (t == _i760nubs.QrTag) {
+      return _i760nubs.QrTag.fromJson(data) as T;
+    }
+    if (t == _ikikcay0.QrTagBatch) {
+      return _ikikcay0.QrTagBatch.fromJson(data) as T;
+    }
     if (t == _iuumnsch.ProductInput) {
       return _iuumnsch.ProductInput.fromJson(data) as T;
     }
@@ -475,6 +495,12 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     }
     if (t == _is.getType<_is3mug9m.AssetPage?>()) {
       return (data != null ? _is3mug9m.AssetPage.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i760nubs.QrTag?>()) {
+      return (data != null ? _i760nubs.QrTag.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ikikcay0.QrTagBatch?>()) {
+      return (data != null ? _ikikcay0.QrTagBatch.fromJson(data) : null) as T;
     }
     if (t == _is.getType<_iuumnsch.ProductInput?>()) {
       return (data != null ? _iuumnsch.ProductInput.fromJson(data) : null) as T;
@@ -557,6 +583,12 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
               : null)
           as T;
     }
+    if (t == List<_i07n19u6.QrTagBatch>) {
+      return (data as List).map((e) => deserialize<_i07n19u6.QrTagBatch>(e)).toList() as T;
+    }
+    if (t == List<_idzaz83i.QrTag>) {
+      return (data as List).map((e) => deserialize<_idzaz83i.QrTag>(e)).toList() as T;
+    }
     if (t == List<_ico54ik3.ProductSummary>) {
       return (data as List).map((e) => deserialize<_ico54ik3.ProductSummary>(e)).toList() as T;
     }
@@ -596,6 +628,8 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _ib3mptol.Asset => 'Asset',
       _i6icgsi8.AssetInput => 'AssetInput',
       _is3mug9m.AssetPage => 'AssetPage',
+      _i760nubs.QrTag => 'QrTag',
+      _ikikcay0.QrTagBatch => 'QrTagBatch',
       _iuumnsch.ProductInput => 'ProductInput',
       _i4geouqi.ProductSummary => 'ProductSummary',
       _i5wnkftg.AppUser => 'AppUser',
@@ -636,6 +670,10 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
         return 'AssetInput';
       case _is3mug9m.AssetPage():
         return 'AssetPage';
+      case _i760nubs.QrTag():
+        return 'QrTag';
+      case _ikikcay0.QrTagBatch():
+        return 'QrTagBatch';
       case _iuumnsch.ProductInput():
         return 'ProductInput';
       case _i4geouqi.ProductSummary():
@@ -706,6 +744,12 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     }
     if (dataClassName == 'AssetPage') {
       return deserialize<_is3mug9m.AssetPage>(data['data']);
+    }
+    if (dataClassName == 'QrTag') {
+      return deserialize<_i760nubs.QrTag>(data['data']);
+    }
+    if (dataClassName == 'QrTagBatch') {
+      return deserialize<_ikikcay0.QrTagBatch>(data['data']);
     }
     if (dataClassName == 'ProductInput') {
       return deserialize<_iuumnsch.ProductInput>(data['data']);

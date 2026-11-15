@@ -1,0 +1,15 @@
+# Etiqueta QR (app.qr_tags). shortCode vem formatado (XXXX-XXXX); url é o
+# endereço gravado no QR (/q/<token>).
+class: QrTag
+fields:
+  id: UuidValue
+  shortCode: String
+  url: String
+  # generated, printed, bound, revoked.
+  status: String
+  batchId: UuidValue?
+  assetId: UuidValue?
+  # Patrimônio ou série do bem vinculado, para a tela.
+  assetLabel: String?
+  printCount: int
+  revokedReason: String?

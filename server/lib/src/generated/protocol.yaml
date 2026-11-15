@@ -3,6 +3,15 @@ assets:
   - get:
   - create:
   - update:
+qrTags:
+  - generateBatch:
+  - listBatches:
+  - batchTags:
+  - markBatchPrinted:
+  - resolve:
+  - bind:
+  - unbind:
+  - revoke:
 products:
   - list:
   - create:

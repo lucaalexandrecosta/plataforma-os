@@ -15,6 +15,8 @@ import 'package:http/http.dart' as _i85jenna;
 import 'package:plataforma_os_client/src/protocol/assets/models/asset.dart' as _i1flw1j6;
 import 'package:plataforma_os_client/src/protocol/assets/models/asset_input.dart' as _i3bfa7rs;
 import 'package:plataforma_os_client/src/protocol/assets/models/asset_page.dart' as _ih5rjonj;
+import 'package:plataforma_os_client/src/protocol/assets/models/qr_tag.dart' as _ix23buzf;
+import 'package:plataforma_os_client/src/protocol/assets/models/qr_tag_batch.dart' as _ic9pb02v;
 import 'package:plataforma_os_client/src/protocol/catalog/models/product_input.dart' as _i2gecgw3;
 import 'package:plataforma_os_client/src/protocol/catalog/models/product_summary.dart' as _ihgw7zuo;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/assignable_role.dart' as _i2g1699a;
@@ -84,6 +86,92 @@ class EndpointAssets extends EndpointStaff {
       'id': id,
       'expectedVersion': expectedVersion,
       'input': input,
+    },
+  );
+}
+
+/// `qrTags.*` — etiquetas QR (permissão `qr_tags.manage`; desfazer vínculo
+/// exige `qr_tags.unbind`). Erros: `FORBIDDEN`, `VALIDATION_FAILED`,
+/// `NOT_FOUND`, `TAG_ALREADY_BOUND`, `TAG_ALREADY_ON_ASSET`, `TAG_REVOKED`,
+/// `TAG_NOT_BOUND`, `ASSET_ALREADY_TAGGED`, `ASSET_RETIRED`.
+/// {@category Endpoint}
+class EndpointQrTags extends EndpointStaff {
+  EndpointQrTags(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'qrTags';
+
+  /// Gera um lote de 1 a 500 etiquetas para imprimir.
+  _ida.Future<_ic9pb02v.QrTagBatch> generateBatch(
+    int quantity, {
+    String? notes,
+  }) => caller.callServerEndpoint<_ic9pb02v.QrTagBatch>(
+    'qrTags',
+    'generateBatch',
+    {
+      'quantity': quantity,
+      'notes': notes,
+    },
+  );
+
+  _ida.Future<List<_ic9pb02v.QrTagBatch>> listBatches() => caller.callServerEndpoint<List<_ic9pb02v.QrTagBatch>>(
+    'qrTags',
+    'listBatches',
+    {},
+  );
+
+  /// Etiquetas do lote, com código curto e URL para montar o PDF de impressão.
+  _ida.Future<List<_ix23buzf.QrTag>> batchTags(_isc.UuidValue batchId) =>
+      caller.callServerEndpoint<List<_ix23buzf.QrTag>>(
+        'qrTags',
+        'batchTags',
+        {'batchId': batchId},
+      );
+
+  _ida.Future<_ic9pb02v.QrTagBatch> markBatchPrinted(_isc.UuidValue batchId) =>
+      caller.callServerEndpoint<_ic9pb02v.QrTagBatch>(
+        'qrTags',
+        'markBatchPrinted',
+        {'batchId': batchId},
+      );
+
+  /// Etiqueta pelo que foi lido ou digitado: código curto, token ou URL.
+  _ida.Future<_ix23buzf.QrTag> resolve(String scanned) => caller.callServerEndpoint<_ix23buzf.QrTag>(
+    'qrTags',
+    'resolve',
+    {'scanned': scanned},
+  );
+
+  _ida.Future<_ix23buzf.QrTag> bind(
+    String scanned,
+    _isc.UuidValue assetId,
+  ) => caller.callServerEndpoint<_ix23buzf.QrTag>(
+    'qrTags',
+    'bind',
+    {
+      'scanned': scanned,
+      'assetId': assetId,
+    },
+  );
+
+  _ida.Future<_ix23buzf.QrTag> unbind(_isc.UuidValue tagId) => caller.callServerEndpoint<_ix23buzf.QrTag>(
+    'qrTags',
+    'unbind',
+    {'tagId': tagId},
+  );
+
+  /// [reason]: damaged, lost, replaced, asset_retired, misprint, security ou other.
+  _ida.Future<_ix23buzf.QrTag> revoke(
+    _isc.UuidValue tagId,
+    String reason, {
+    String? note,
+  }) => caller.callServerEndpoint<_ix23buzf.QrTag>(
+    'qrTags',
+    'revoke',
+    {
+      'tagId': tagId,
+      'reason': reason,
+      'note': note,
     },
   );
 }
@@ -507,6 +595,7 @@ class Client extends _isc.ServerpodClientShared {
          httpClientOverride: httpClientOverride,
        ) {
     assets = EndpointAssets(this);
+    qrTags = EndpointQrTags(this);
     products = EndpointProducts(this);
     auth = EndpointAuth(this);
     emailIdp = EndpointEmailIdp(this);
@@ -519,6 +608,8 @@ class Client extends _isc.ServerpodClientShared {
   }
 
   late final EndpointAssets assets;
+
+  late final EndpointQrTags qrTags;
 
   late final EndpointProducts products;
 
@@ -541,6 +632,7 @@ class Client extends _isc.ServerpodClientShared {
   @override
   Map<String, _isc.EndpointRef> get endpointRefLookup => {
     'assets': assets,
+    'qrTags': qrTags,
     'products': products,
     'auth': auth,
     'emailIdp': emailIdp,
