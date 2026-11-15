@@ -1,0 +1,10 @@
+# Finalização da visita (visits.finish). outcome: resolved (exige notes),
+# needs_return (holdReason awaiting_part ou needs_return), customer_absent ou
+# not_executed.
+class: VisitFinish
+fields:
+  outcome: String
+  notes: String?
+  holdReason: String?
+  latitude: double?
+  longitude: double?

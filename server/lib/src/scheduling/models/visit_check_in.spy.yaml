@@ -1,0 +1,11 @@
+# Check-in na visita (visits.checkIn). method: qr (scannedCode da etiqueta do
+# bem da OS), gps (latitude e longitude) ou manual (justification). Quando o
+# QR é exigido, GPS também precisa de justificativa.
+class: VisitCheckIn
+fields:
+  method: String
+  scannedCode: String?
+  latitude: double?
+  longitude: double?
+  accuracyM: double?
+  justification: String?

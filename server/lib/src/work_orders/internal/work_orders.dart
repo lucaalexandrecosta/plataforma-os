@@ -274,6 +274,7 @@ abstract final class WorkOrders {
     if (notes == null) {
       throw ApiErrors.fieldError(session, 'resolutionNotes', 'REQUIRED', 'Descreva o que foi feito.');
     }
+    await _ensureNoActiveVisit(session, id);
     return _transition(
       session,
       id,
@@ -312,7 +313,8 @@ abstract final class WorkOrders {
     if (reason == 'other' && cleanText(note) == null) {
       throw ApiErrors.fieldError(session, 'note', 'REQUIRED', 'Descreva o motivo do cancelamento.');
     }
-    return _transition(
+    await _ensureNoActiveVisit(session, id);
+    final cancelled = await _transition(
       session,
       id,
       expectedVersion,
@@ -324,6 +326,29 @@ abstract final class WorkOrders {
           'cancellation_note = @note',
       params: {'reason': reason, 'note': cleanText(note)},
     );
+    // Visitas ainda agendadas caem junto com a OS.
+    await session.db.unsafeExecute(
+      "UPDATE app.work_order_visits SET status = 'cancelled', cancelled_at = now(), "
+      "       cancellation_reason = 'OS cancelada' "
+      " WHERE work_order_id = @id::uuid AND status = 'scheduled'",
+      parameters: QueryParameters.named({'id': id.uuid}),
+    );
+    return cancelled;
+  }
+
+  static Future<void> _ensureNoActiveVisit(Session session, UuidValue id) async {
+    final rows = await session.db.unsafeQuery(
+      'SELECT 1 FROM app.work_order_visits WHERE work_order_id = @id::uuid '
+      "   AND status IN ('en_route', 'on_site', 'paused') LIMIT 1",
+      parameters: QueryParameters.named({'id': id.uuid}),
+    );
+    if (rows.isNotEmpty) {
+      throw ApiErrors.businessRule(
+        session,
+        'VISIT_IN_PROGRESS',
+        'Há uma visita em andamento nesta OS; o técnico precisa finalizá-la antes.',
+      );
+    }
   }
 
   /// Devolução ou reabertura: `completed`/`closed`/`cancelled` → `open`, com
@@ -345,6 +370,142 @@ abstract final class WorkOrders {
           'completed_at = NULL, closed_at = NULL, closed_by = NULL, cancelled_at = NULL, cancelled_by = NULL, '
           'cancellation_reason = NULL, cancellation_note = NULL',
     );
+  }
+
+  // ------------------------------------------------------------------ visitas
+
+  // Efeitos das visitas na OS (docs/03 §6.2, "Como a visita move a OS"),
+  // chamados pelo módulo scheduling na mesma transação da visita. Quem chama
+  // já conferiu a permissão; aqui não há versão esperada (é efeito do sistema).
+
+  /// OS para a visita (sem checar permissão), com o que o check-in precisa.
+  static Future<WorkOrderForVisit?> findForVisit(Session session, UuidValue id, {Transaction? transaction}) async {
+    final rows = await session.db.unsafeQuery(
+      'SELECT w.id, w.number, w.status, w.asset_id, s.latitude, s.longitude, '
+      '       coalesce(t.require_qr_check_in, ts.require_qr_check_in, false) '
+      '  FROM app.work_orders w '
+      '  JOIN app.work_order_types t ON t.tenant_id = w.tenant_id AND t.id = w.work_order_type_id '
+      '  LEFT JOIN app.tenant_settings ts ON ts.tenant_id = w.tenant_id '
+      '  LEFT JOIN app.customer_sites s ON s.tenant_id = w.tenant_id AND s.id = w.customer_site_id '
+      ' WHERE w.id = @id::uuid',
+      parameters: QueryParameters.named({'id': id.uuid}),
+      transaction: transaction,
+    );
+    if (rows.isEmpty) return null;
+    final r = rows.first;
+    return WorkOrderForVisit(
+      id: sqlUuid(r[0]),
+      number: r[1] as String,
+      status: r[2] as String,
+      assetId: sqlUuidOrNull(r[3]),
+      siteLatitude: r[4] as double?,
+      siteLongitude: r[5] as double?,
+      requireQrCheckIn: r[6] as bool,
+    );
+  }
+
+  /// Visita agendada: `open`/`on_hold` → `scheduled`; o técnico vira o
+  /// atribuído da OS.
+  static Future<void> onVisitScheduled(Session session, UuidValue id, UuidValue technicianId, Transaction tx) =>
+      session.db.unsafeExecute(
+        'UPDATE app.work_orders SET assigned_technician_id = @tech::uuid, '
+        "       status = CASE WHEN status IN ('open', 'on_hold') THEN 'scheduled' ELSE status END, "
+        "       status_reason = CASE WHEN status IN ('open', 'on_hold') THEN NULL ELSE status_reason END "
+        ' WHERE id = @id::uuid',
+        parameters: QueryParameters.named({'id': id.uuid, 'tech': technicianId.uuid}),
+        transaction: tx,
+      );
+
+  /// Deslocamento ou check-in: `open`/`scheduled`/`on_hold` → `in_progress`.
+  /// O check-in marca o primeiro atendimento (SLA); [offSite] sinaliza a OS.
+  static Future<void> onVisitStarted(
+    Session session,
+    UuidValue id,
+    Transaction tx, {
+    required bool checkedIn,
+    bool offSite = false,
+  }) => session.db.unsafeExecute(
+    "UPDATE app.work_orders SET status = CASE WHEN status IN ('open', 'scheduled', 'on_hold') THEN 'in_progress' ELSE status END, "
+    '       status_reason = NULL, started_at = coalesce(started_at, now()), '
+    '       first_response_at = CASE WHEN @checkedIn THEN coalesce(first_response_at, now()) ELSE first_response_at END, '
+    '       flag_off_site = flag_off_site OR @offSite '
+    ' WHERE id = @id::uuid',
+    parameters: QueryParameters.named({'id': id.uuid, 'checkedIn': checkedIn, 'offSite': offSite}),
+    transaction: tx,
+  );
+
+  /// Visita finalizada. Se ainda houver outra visita ativa da OS, a OS fica
+  /// como está. `resolved` conclui (e encerra direto se o tenant dispensa a
+  /// conferência); `needs_return` e `customer_absent` deixam pendente;
+  /// `not_executed` devolve à fila.
+  static Future<void> onVisitFinished(
+    Session session,
+    UuidValue id,
+    Transaction tx, {
+    required String outcome,
+    required UuidValue technicianId,
+    String? notes,
+    String? holdReason,
+  }) async {
+    if (await _hasActiveVisit(session, id, tx)) return;
+    // O driver recusa parâmetro que a SQL não usa: cada caso monta os seus.
+    final params = <String, Object?>{'id': id.uuid, 'notes': notes};
+    final String set;
+    switch (outcome) {
+      case 'resolved':
+        set =
+            "status = 'completed', completed_at = now(), completed_by_technician_id = @tech::uuid, "
+            'resolution_notes = coalesce(@notes, resolution_notes), status_reason = NULL';
+        params['tech'] = technicianId.uuid;
+      case 'needs_return':
+        set = "status = 'on_hold', hold_reason = @hold, status_reason = @notes";
+        params['hold'] = holdReason ?? 'needs_return';
+      case 'customer_absent':
+        set = "status = 'on_hold', hold_reason = 'awaiting_customer', status_reason = @notes";
+      default:
+        set = "status = 'open', status_reason = @notes";
+    }
+    await session.db.unsafeExecute(
+      'UPDATE app.work_orders SET $set WHERE id = @id::uuid',
+      parameters: QueryParameters.named(params),
+      transaction: tx,
+    );
+    if (outcome == 'resolved') {
+      await session.db.unsafeExecute(
+        "UPDATE app.work_orders SET status = 'closed', closed_at = now(), status_reason = 'Encerrada sem conferência' "
+        ' WHERE id = @id::uuid AND EXISTS (SELECT 1 FROM app.tenant_settings s '
+        '                                  WHERE s.tenant_id = app.current_tenant_id() AND NOT s.require_backoffice_review)',
+        parameters: QueryParameters.named({'id': id.uuid}),
+        transaction: tx,
+      );
+    }
+  }
+
+  /// Visita cancelada: se a OS estava `scheduled` e não sobrou visita
+  /// agendada ou ativa, volta para `open`.
+  static Future<void> onVisitCancelled(Session session, UuidValue id, Transaction tx) async {
+    final remaining = await session.db.unsafeQuery(
+      'SELECT 1 FROM app.work_order_visits WHERE work_order_id = @id::uuid '
+      "   AND status IN ('scheduled', 'en_route', 'on_site', 'paused') LIMIT 1",
+      parameters: QueryParameters.named({'id': id.uuid}),
+      transaction: tx,
+    );
+    if (remaining.isNotEmpty) return;
+    await session.db.unsafeExecute(
+      "UPDATE app.work_orders SET status = 'open', status_reason = NULL WHERE id = @id::uuid AND status = 'scheduled'",
+      parameters: QueryParameters.named({'id': id.uuid}),
+      transaction: tx,
+    );
+  }
+
+  static Future<bool> _hasActiveVisit(Session session, UuidValue id, Transaction tx) async {
+    final rows = await session.db.unsafeQuery(
+      'SELECT 1 FROM app.work_order_visits WHERE work_order_id = @id::uuid '
+      "   AND status IN ('en_route', 'on_site', 'paused') LIMIT 1",
+      parameters: QueryParameters.named({'id': id.uuid}),
+      transaction: tx,
+    );
+    return rows.isNotEmpty;
   }
 
   // ------------------------------------------------------------------ tipos
@@ -499,10 +660,11 @@ abstract final class WorkOrders {
     );
   }
 
-  static Future<WorkOrder?> _find(Session session, UuidValue id) async {
+  static Future<WorkOrder?> _find(Session session, UuidValue id, {Transaction? transaction}) async {
     final rows = await session.db.unsafeQuery(
       '$_select WHERE w.id = @id::uuid',
       parameters: QueryParameters.named({'id': id.uuid}),
+      transaction: transaction,
     );
     return rows.isEmpty ? null : _map(rows.first);
   }
@@ -605,4 +767,29 @@ abstract final class WorkOrders {
     cancelledAt: r[31] as DateTime?,
     version: r[32] as int,
   );
+}
+
+/// O que a visita precisa saber da OS (agendar e check-in).
+final class WorkOrderForVisit {
+  const WorkOrderForVisit({
+    required this.id,
+    required this.number,
+    required this.status,
+    required this.assetId,
+    required this.siteLatitude,
+    required this.siteLongitude,
+    required this.requireQrCheckIn,
+  });
+
+  final UuidValue id;
+  final String number;
+  final String status;
+  final UuidValue? assetId;
+
+  /// Coordenada da unidade do cliente (nula em OS interna ou sem cadastro).
+  final double? siteLatitude;
+  final double? siteLongitude;
+
+  /// Exige QR no check-in (tipo de OS, senão configuração do tenant).
+  final bool requireQrCheckIn;
 }

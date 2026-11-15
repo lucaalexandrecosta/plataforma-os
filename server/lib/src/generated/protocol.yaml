@@ -39,6 +39,24 @@ users:
   - suspend:
   - reactivate:
   - remove:
+technicians:
+  - list:
+  - mine:
+  - create:
+  - update:
+visits:
+  - agenda:
+  - mine:
+  - ofWorkOrder:
+  - get:
+  - schedule:
+  - reschedule:
+  - cancel:
+  - startTravel:
+  - checkIn:
+  - pause:
+  - resume:
+  - finish:
 branches:
   - list:
   - create:

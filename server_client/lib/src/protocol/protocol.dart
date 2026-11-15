@@ -16,6 +16,8 @@ import 'package:plataforma_os_client/src/protocol/assets/models/qr_tag_batch.dar
 import 'package:plataforma_os_client/src/protocol/catalog/models/product_summary.dart' as _ihgw7zuo;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/assignable_role.dart' as _i2g1699a;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/tenant_user.dart' as _i8ihd43z;
+import 'package:plataforma_os_client/src/protocol/scheduling/models/technician.dart' as _ikjr2b9x;
+import 'package:plataforma_os_client/src/protocol/scheduling/models/visit.dart' as _isvtjvq7;
 import 'package:plataforma_os_client/src/protocol/tenancy/models/branch.dart' as _ied3wtyg;
 import 'package:plataforma_os_client/src/protocol/tenancy/models/cost_center.dart' as _itoq0gfy;
 import 'package:plataforma_os_client/src/protocol/tenancy/models/tenant_summary.dart' as _i11upz4e;
@@ -41,6 +43,12 @@ import 'identity_access/models/tenant_user.dart' as _i6x1gv4d;
 import 'platform/errors/models/api_exception.dart' as _i147o0qx;
 import 'platform/errors/models/error_category.dart' as _i0p9y4c3;
 import 'platform/errors/models/field_error.dart' as _i3z3bgdl;
+import 'scheduling/models/technician.dart' as _isgl9bus;
+import 'scheduling/models/technician_input.dart' as _inntwrv0;
+import 'scheduling/models/visit.dart' as _i3v1yqab;
+import 'scheduling/models/visit_check_in.dart' as _iz6dmpx4;
+import 'scheduling/models/visit_finish.dart' as _iemqddjv;
+import 'scheduling/models/visit_input.dart' as _iqwjilz9;
 import 'tenancy/models/branch.dart' as _iou7eiap;
 import 'tenancy/models/branch_input.dart' as _iptw6tnd;
 import 'tenancy/models/cost_center.dart' as _iehhesp7;
@@ -74,6 +82,12 @@ export 'identity_access/models/tenant_user.dart';
 export 'platform/errors/models/api_exception.dart';
 export 'platform/errors/models/error_category.dart';
 export 'platform/errors/models/field_error.dart';
+export 'scheduling/models/technician.dart';
+export 'scheduling/models/technician_input.dart';
+export 'scheduling/models/visit.dart';
+export 'scheduling/models/visit_check_in.dart';
+export 'scheduling/models/visit_finish.dart';
+export 'scheduling/models/visit_input.dart';
 export 'tenancy/models/branch.dart';
 export 'tenancy/models/branch_input.dart';
 export 'tenancy/models/cost_center.dart';
@@ -120,6 +134,12 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<_i147o0qx.ApiException>,
       _isc.getType<_i0p9y4c3.ErrorCategory>,
       _isc.getType<_i3z3bgdl.FieldError>,
+      _isc.getType<_isgl9bus.Technician>,
+      _isc.getType<_inntwrv0.TechnicianInput>,
+      _isc.getType<_i3v1yqab.Visit>,
+      _isc.getType<_iz6dmpx4.VisitCheckIn>,
+      _isc.getType<_iemqddjv.VisitFinish>,
+      _isc.getType<_iqwjilz9.VisitInput>,
       _isc.getType<_iou7eiap.Branch>,
       _isc.getType<_iptw6tnd.BranchInput>,
       _isc.getType<_iehhesp7.CostCenter>,
@@ -153,6 +173,12 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<_i147o0qx.ApiException?>,
       _isc.getType<_i0p9y4c3.ErrorCategory?>,
       _isc.getType<_i3z3bgdl.FieldError?>,
+      _isc.getType<_isgl9bus.Technician?>,
+      _isc.getType<_inntwrv0.TechnicianInput?>,
+      _isc.getType<_i3v1yqab.Visit?>,
+      _isc.getType<_iz6dmpx4.VisitCheckIn?>,
+      _isc.getType<_iemqddjv.VisitFinish?>,
+      _isc.getType<_iqwjilz9.VisitInput?>,
       _isc.getType<_iou7eiap.Branch?>,
       _isc.getType<_iptw6tnd.BranchInput?>,
       _isc.getType<_iehhesp7.CostCenter?>,
@@ -183,6 +209,8 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<List<_i2g1699a.AssignableRole>>,
       _isc.getType<List<_i8ihd43z.TenantUser>>,
       _isc.getType<List<String>>,
+      _isc.getType<List<_ikjr2b9x.Technician>>,
+      _isc.getType<List<_isvtjvq7.Visit>>,
       _isc.getType<List<_ied3wtyg.Branch>>,
       _isc.getType<List<_itoq0gfy.CostCenter>>,
       _isc.getType<List<String>?>,
@@ -211,6 +239,12 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       'ApiException',
       'ErrorCategory',
       'FieldError',
+      'Technician',
+      'TechnicianInput',
+      'Visit',
+      'VisitCheckIn',
+      'VisitFinish',
+      'VisitInput',
       'Branch',
       'BranchInput',
       'CostCenter',
@@ -305,6 +339,24 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     }
     if (t == _i3z3bgdl.FieldError) {
       return _i3z3bgdl.FieldError.fromJson(data) as T;
+    }
+    if (t == _isgl9bus.Technician) {
+      return _isgl9bus.Technician.fromJson(data) as T;
+    }
+    if (t == _inntwrv0.TechnicianInput) {
+      return _inntwrv0.TechnicianInput.fromJson(data) as T;
+    }
+    if (t == _i3v1yqab.Visit) {
+      return _i3v1yqab.Visit.fromJson(data) as T;
+    }
+    if (t == _iz6dmpx4.VisitCheckIn) {
+      return _iz6dmpx4.VisitCheckIn.fromJson(data) as T;
+    }
+    if (t == _iemqddjv.VisitFinish) {
+      return _iemqddjv.VisitFinish.fromJson(data) as T;
+    }
+    if (t == _iqwjilz9.VisitInput) {
+      return _iqwjilz9.VisitInput.fromJson(data) as T;
     }
     if (t == _iou7eiap.Branch) {
       return _iou7eiap.Branch.fromJson(data) as T;
@@ -405,6 +457,24 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     if (t == _isc.getType<_i3z3bgdl.FieldError?>()) {
       return (data != null ? _i3z3bgdl.FieldError.fromJson(data) : null) as T;
     }
+    if (t == _isc.getType<_isgl9bus.Technician?>()) {
+      return (data != null ? _isgl9bus.Technician.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_inntwrv0.TechnicianInput?>()) {
+      return (data != null ? _inntwrv0.TechnicianInput.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i3v1yqab.Visit?>()) {
+      return (data != null ? _i3v1yqab.Visit.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iz6dmpx4.VisitCheckIn?>()) {
+      return (data != null ? _iz6dmpx4.VisitCheckIn.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iemqddjv.VisitFinish?>()) {
+      return (data != null ? _iemqddjv.VisitFinish.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iqwjilz9.VisitInput?>()) {
+      return (data != null ? _iqwjilz9.VisitInput.fromJson(data) : null) as T;
+    }
     if (t == _isc.getType<_iou7eiap.Branch?>()) {
       return (data != null ? _iou7eiap.Branch.fromJson(data) : null) as T;
     }
@@ -498,6 +568,12 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
+    if (t == List<_ikjr2b9x.Technician>) {
+      return (data as List).map((e) => deserialize<_ikjr2b9x.Technician>(e)).toList() as T;
+    }
+    if (t == List<_isvtjvq7.Visit>) {
+      return (data as List).map((e) => deserialize<_isvtjvq7.Visit>(e)).toList() as T;
+    }
     if (t == List<_ied3wtyg.Branch>) {
       return (data as List).map((e) => deserialize<_ied3wtyg.Branch>(e)).toList() as T;
     }
@@ -543,6 +619,12 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _i147o0qx.ApiException => 'ApiException',
       _i0p9y4c3.ErrorCategory => 'ErrorCategory',
       _i3z3bgdl.FieldError => 'FieldError',
+      _isgl9bus.Technician => 'Technician',
+      _inntwrv0.TechnicianInput => 'TechnicianInput',
+      _i3v1yqab.Visit => 'Visit',
+      _iz6dmpx4.VisitCheckIn => 'VisitCheckIn',
+      _iemqddjv.VisitFinish => 'VisitFinish',
+      _iqwjilz9.VisitInput => 'VisitInput',
       _iou7eiap.Branch => 'Branch',
       _iptw6tnd.BranchInput => 'BranchInput',
       _iehhesp7.CostCenter => 'CostCenter',
@@ -608,6 +690,18 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
         return 'ErrorCategory';
       case _i3z3bgdl.FieldError():
         return 'FieldError';
+      case _isgl9bus.Technician():
+        return 'Technician';
+      case _inntwrv0.TechnicianInput():
+        return 'TechnicianInput';
+      case _i3v1yqab.Visit():
+        return 'Visit';
+      case _iz6dmpx4.VisitCheckIn():
+        return 'VisitCheckIn';
+      case _iemqddjv.VisitFinish():
+        return 'VisitFinish';
+      case _iqwjilz9.VisitInput():
+        return 'VisitInput';
       case _iou7eiap.Branch():
         return 'Branch';
       case _iptw6tnd.BranchInput():
@@ -709,6 +803,24 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     }
     if (dataClassName == 'FieldError') {
       return deserialize<_i3z3bgdl.FieldError>(data['data']);
+    }
+    if (dataClassName == 'Technician') {
+      return deserialize<_isgl9bus.Technician>(data['data']);
+    }
+    if (dataClassName == 'TechnicianInput') {
+      return deserialize<_inntwrv0.TechnicianInput>(data['data']);
+    }
+    if (dataClassName == 'Visit') {
+      return deserialize<_i3v1yqab.Visit>(data['data']);
+    }
+    if (dataClassName == 'VisitCheckIn') {
+      return deserialize<_iz6dmpx4.VisitCheckIn>(data['data']);
+    }
+    if (dataClassName == 'VisitFinish') {
+      return deserialize<_iemqddjv.VisitFinish>(data['data']);
+    }
+    if (dataClassName == 'VisitInput') {
+      return deserialize<_iqwjilz9.VisitInput>(data['data']);
     }
     if (dataClassName == 'Branch') {
       return deserialize<_iou7eiap.Branch>(data['data']);
