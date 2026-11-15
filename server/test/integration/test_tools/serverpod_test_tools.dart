@@ -24,6 +24,11 @@ import 'package:plataforma_os_server/src/generated/identity_access/models/assign
 import 'package:plataforma_os_server/src/generated/identity_access/models/me_info.dart' as _i70n7l3r;
 import 'package:plataforma_os_server/src/generated/identity_access/models/tenant_token.dart' as _inkkpwsp;
 import 'package:plataforma_os_server/src/generated/identity_access/models/tenant_user.dart' as _iqhozu6i;
+import 'package:plataforma_os_server/src/generated/patrimony/models/asset_depreciation.dart' as _ic6r3pi5;
+import 'package:plataforma_os_server/src/generated/patrimony/models/depreciation_closing.dart' as _ip56mlnh;
+import 'package:plataforma_os_server/src/generated/patrimony/models/depreciation_position.dart' as _ijwc67wv;
+import 'package:plataforma_os_server/src/generated/patrimony/models/depreciation_profile.dart' as _idh96kkc;
+import 'package:plataforma_os_server/src/generated/patrimony/models/depreciation_profile_input.dart' as _ims07aom;
 import 'package:plataforma_os_server/src/generated/tenancy/models/branch.dart' as _i7vupwwc;
 import 'package:plataforma_os_server/src/generated/tenancy/models/branch_input.dart' as _i6djw631;
 import 'package:plataforma_os_server/src/generated/tenancy/models/cost_center.dart' as _islkyssd;
@@ -188,6 +193,8 @@ class TestEndpoints {
 
   late final _UsersEndpoint users;
 
+  late final _DepreciationEndpoint depreciation;
+
   late final _BranchesEndpoint branches;
 
   late final _CostCentersEndpoint costCenters;
@@ -230,6 +237,10 @@ class _InternalTestEndpoints extends TestEndpoints implements _ist.InternalTestE
       serializationManager,
     );
     users = _UsersEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    depreciation = _DepreciationEndpoint(
       endpoints,
       serializationManager,
     );
@@ -1366,6 +1377,248 @@ class _UsersEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<_iqhozu6i.TenantUser>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
+class _DepreciationEndpoint {
+  _DepreciationEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _is.EndpointDispatch _endpointDispatch;
+
+  final _is.SerializationManager _serializationManager;
+
+  _ida.Future<_idh96kkc.DepreciationProfile?> profile(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue assetId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'depreciation',
+        method: 'profile',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'depreciation',
+          methodName: 'profile',
+          parameters: _ist.testObjectToJson({'assetId': assetId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_idh96kkc.DepreciationProfile?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_idh96kkc.DepreciationProfile> saveProfile(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue assetId,
+    int? expectedVersion,
+    _ims07aom.DepreciationProfileInput input,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'depreciation',
+        method: 'saveProfile',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'depreciation',
+          methodName: 'saveProfile',
+          parameters: _ist.testObjectToJson({
+            'assetId': assetId,
+            'expectedVersion': expectedVersion,
+            'input': input,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_idh96kkc.DepreciationProfile>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_ic6r3pi5.AssetDepreciation> schedule(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue assetId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'depreciation',
+        method: 'schedule',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'depreciation',
+          methodName: 'schedule',
+          parameters: _ist.testObjectToJson({'assetId': assetId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_ic6r3pi5.AssetDepreciation>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_ijwc67wv.DepreciationPosition> position(
+    _ist.TestSessionBuilder sessionBuilder,
+    int year,
+    int month, {
+    _is.UuidValue? branchId,
+    _is.UuidValue? costCenterId,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'depreciation',
+        method: 'position',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'depreciation',
+          methodName: 'position',
+          parameters: _ist.testObjectToJson({
+            'year': year,
+            'month': month,
+            'branchId': branchId,
+            'costCenterId': costCenterId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_ijwc67wv.DepreciationPosition>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_ip56mlnh.DepreciationClosing>> closings(_ist.TestSessionBuilder sessionBuilder) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'depreciation',
+        method: 'closings',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'depreciation',
+          methodName: 'closings',
+          parameters: _ist.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_ip56mlnh.DepreciationClosing>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_ip56mlnh.DepreciationClosing> close(
+    _ist.TestSessionBuilder sessionBuilder,
+    int year,
+    int month,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'depreciation',
+        method: 'close',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'depreciation',
+          methodName: 'close',
+          parameters: _ist.testObjectToJson({
+            'year': year,
+            'month': month,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_ip56mlnh.DepreciationClosing>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_ip56mlnh.DepreciationClosing> reopen(
+    _ist.TestSessionBuilder sessionBuilder,
+    int year,
+    int month,
+    String reason,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'depreciation',
+        method: 'reopen',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'depreciation',
+          methodName: 'reopen',
+          parameters: _ist.testObjectToJson({
+            'year': year,
+            'month': month,
+            'reason': reason,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_ip56mlnh.DepreciationClosing>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

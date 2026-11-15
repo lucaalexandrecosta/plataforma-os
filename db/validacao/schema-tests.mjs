@@ -546,6 +546,24 @@ export async function run({ db, q, t }) {
       /foreign key/, 'OS do tenant A com centro de custo do B')
   })
 
+  await t('patrimonial: ficha por bem, CHECKs do método e um fechamento vigente por competência', async () => {
+    const f = await mkTenant()
+    await setTenant(f.tenant)
+    const ins = (method, rate, cap = null, prod = null) => q(`insert into app.asset_depreciation_profiles (tenant_id, asset_id, method, annual_rate, start_date, total_capacity, monthly_production)
+                                                        values ($1, $2, $3, $4, '2026-01-10', $5, $6)`, [f.tenant, f.asset, method, rate, cap, prod])
+    await fails(() => ins('straight_line', 0), /check constraint/, 'linear sem taxa')
+    await fails(() => ins('units_of_production', 0), /check constraint/, 'unidades sem capacidade')
+    await ins('straight_line', 100000)
+    await fails(() => ins('straight_line', 100000), /asset_id/, 'segunda ficha do mesmo bem')
+    const c1 = await one(`insert into app.depreciation_closings (tenant_id, period_year, period_month) values ($1, 2026, 10) returning id`, [f.tenant])
+    await fails(() => q(`insert into app.depreciation_closings (tenant_id, period_year, period_month) values ($1, 2026, 10)`, [f.tenant]),
+      /depreciation_closings_period_key/, 'segundo fechamento vigente da competência')
+    await fails(() => q(`update app.depreciation_closings set status = 'reopened', reopened_at = now() where id = $1`, [c1.id]),
+      /check constraint/, 'reabrir sem motivo')
+    await q(`update app.depreciation_closings set status = 'reopened', reopened_at = now(), reopen_reason = 'Taxa errada' where id = $1`, [c1.id])
+    await q(`insert into app.depreciation_closings (tenant_id, period_year, period_month) values ($1, 2026, 10)`, [f.tenant])
+  })
+
   await t('v0.2 escalonamento: aceite exige quem; nível > 0 exige política', async () => {
     const f = await mkTenant()
     const w = await mkWorkOrder(f)

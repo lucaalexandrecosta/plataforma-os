@@ -39,6 +39,14 @@ users:
   - suspend:
   - reactivate:
   - remove:
+depreciation:
+  - profile:
+  - saveProfile:
+  - schedule:
+  - position:
+  - closings:
+  - close:
+  - reopen:
 branches:
   - list:
   - create:

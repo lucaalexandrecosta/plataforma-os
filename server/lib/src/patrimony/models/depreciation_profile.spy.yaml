@@ -1,0 +1,23 @@
+# Ficha patrimonial do bem (app.asset_depreciation_profiles): parâmetros da
+# depreciação gerencial. Valores em centavos; taxa e produção em texto decimal
+# ("10", "12,5") para não perder casas.
+class: DepreciationProfile
+fields:
+  assetId: UuidValue
+  # straight_line, sum_of_years_digits, double_declining_balance, units_of_production.
+  method: String
+  # Taxa anual em %, até 4 casas.
+  annualRate: String
+  startDate: DateTime
+  # pro_rata_days, full_month, next_month.
+  startRule: String
+  # Base própria em centavos; nulo = valor de aquisição do bem.
+  depreciableCost: int?
+  # Base usada no cálculo (depreciableCost ou aquisição), em centavos.
+  effectiveCost: int?
+  residualValue: int
+  # Só em units_of_production, até 3 casas.
+  totalCapacity: String?
+  monthlyProduction: String?
+  notes: String?
+  version: int

@@ -1,7 +1,7 @@
 -- migrate:up transaction:false
 -- =============================================================================
 -- Migração inicial — GERADA por tool/db/build_initial_migration.mjs. Não editar.
--- Origem: db/schema.sql (sha256 2bfea6fb45ac0e7fdeb4a828c32c41132eee72559be0edbf4dae68dabcad9114)
+-- Origem: db/schema.sql (sha256 c18f0023e10888030b33a5c7627ed879e995f68713548b5a64c4093b2c57db95)
 -- Precisa de um papel administrativo (superusuário em dev/CI; o admin do RDS
 -- em homologação e produção), porque cria papéis-grupo e extensões.
 -- =============================================================================
@@ -1872,6 +1872,94 @@ CREATE INDEX qr_tags_replaced_by_idx ON app.qr_tags (tenant_id, replaced_by_tag_
 COMMENT ON TABLE app.qr_tags IS 'Etiqueta QR: token opaco de 128 bits (URL /q/<token>) e short code de 8 caracteres (7 aleatórios + verificador Luhn mod 32), ambos globalmente únicos. No máximo uma etiqueta bound por ativo.';
 COMMENT ON COLUMN app.qr_tags.asset_id IS 'Preenchido somente quando status = bound. last_bound_asset_id preserva o último ativo após desvínculo/revogação.';
 COMMENT ON COLUMN app.qr_tags.unbind_count IS 'Quantas vezes houve "desfazer vínculo" (bound -> printed), exceção auditada só para tenant_admin.';
+
+-- -----------------------------------------------------------------------------
+-- 13.1 Ficha patrimonial e depreciação gerencial (15/11/2026, módulo patrimony)
+-- O cálculo é do motor packages/depreciation (Dart, conferido com a F670 do
+-- Senior); o banco guarda os parâmetros e as competências fechadas. Valores em
+-- centavos, taxa em décimos de milésimo de ponto percentual e produção em
+-- milésimos, todos inteiros (sem numeric nem double, como o resto do schema v0.3).
+-- -----------------------------------------------------------------------------
+CREATE TABLE app.asset_depreciation_profiles (
+  id                 uuid NOT NULL DEFAULT app.uuid_v7() PRIMARY KEY,
+  tenant_id          uuid NOT NULL REFERENCES app.tenants (id),
+  asset_id           uuid NOT NULL,
+  method             text NOT NULL DEFAULT 'straight_line'
+                     CHECK (method IN ('straight_line', 'sum_of_years_digits', 'double_declining_balance', 'units_of_production')),
+  annual_rate        integer NOT NULL DEFAULT 0 CHECK (annual_rate BETWEEN 0 AND 1000000),
+  start_date         date NOT NULL,
+  start_rule         text NOT NULL DEFAULT 'pro_rata_days' CHECK (start_rule IN ('pro_rata_days', 'full_month', 'next_month')),
+  depreciable_cost   bigint CHECK (depreciable_cost >= 0),
+  residual_value     bigint NOT NULL DEFAULT 0 CHECK (residual_value >= 0),
+  total_capacity     bigint CHECK (total_capacity > 0),
+  monthly_production bigint CHECK (monthly_production >= 0),
+  notes              text,
+  created_at         timestamptz NOT NULL DEFAULT now(),
+  updated_at         timestamptz NOT NULL DEFAULT now(),
+  created_by         uuid,
+  updated_by         uuid,
+  version            integer NOT NULL DEFAULT 1,
+  UNIQUE (tenant_id, id),
+  UNIQUE (tenant_id, asset_id),
+  FOREIGN KEY (tenant_id, asset_id) REFERENCES app.assets (tenant_id, id),
+  CHECK (method <> 'units_of_production' OR (total_capacity IS NOT NULL AND monthly_production IS NOT NULL)),
+  CHECK (method = 'units_of_production' OR annual_rate > 0)
+);
+COMMENT ON TABLE app.asset_depreciation_profiles IS 'MVP patrimonial (15/11/2026). Ficha de depreciação gerencial do bem (uma por bem): método, taxa anual em %, início, regra do primeiro mês e valor residual. O livro fiscal continua no ERP (Senior); a integração pela API do ERP X virá depois.';
+COMMENT ON COLUMN app.asset_depreciation_profiles.depreciable_cost IS 'Base de depreciação em centavos. Nulo = assets.acquisition_cost.';
+COMMENT ON COLUMN app.asset_depreciation_profiles.annual_rate IS 'Taxa gerencial anual em % com 4 casas, guardada como inteiro x 10000 (10% a.a. = 100000; vida útil = 100 / taxa). Zero só no método por unidades produzidas.';
+COMMENT ON COLUMN app.asset_depreciation_profiles.total_capacity IS 'Unidades por produção: capacidade total em milésimos (como work_order_items.quantity). monthly_production idem, produção média do mês.';
+
+CREATE TABLE app.depreciation_closings (
+  id            uuid NOT NULL DEFAULT app.uuid_v7() PRIMARY KEY,
+  tenant_id     uuid NOT NULL REFERENCES app.tenants (id),
+  period_year   smallint NOT NULL CHECK (period_year BETWEEN 1990 AND 2200),
+  period_month  smallint NOT NULL CHECK (period_month BETWEEN 1 AND 12),
+  status        text NOT NULL DEFAULT 'closed' CHECK (status IN ('closed', 'reopened')),
+  asset_count   integer NOT NULL DEFAULT 0 CHECK (asset_count >= 0),
+  total_amount  bigint NOT NULL DEFAULT 0 CHECK (total_amount >= 0),
+  closed_at     timestamptz NOT NULL DEFAULT now(),
+  closed_by     uuid,
+  reopened_at   timestamptz,
+  reopened_by   uuid,
+  reopen_reason text,
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  updated_at    timestamptz NOT NULL DEFAULT now(),
+  created_by    uuid,
+  updated_by    uuid,
+  version       integer NOT NULL DEFAULT 1,
+  UNIQUE (tenant_id, id),
+  CHECK ((status = 'reopened') = (reopened_at IS NOT NULL)),
+  CHECK (status = 'closed' OR reopen_reason IS NOT NULL)
+);
+CREATE UNIQUE INDEX depreciation_closings_period_key ON app.depreciation_closings (tenant_id, period_year, period_month)
+  WHERE status = 'closed';
+COMMENT ON TABLE app.depreciation_closings IS 'MVP patrimonial (15/11/2026). Fechamento da competência da depreciação gerencial: fotografa a linha do mês de cada bem em depreciation_entries. Reabrir marca reopened (não apaga) e permite fechar de novo.';
+
+CREATE TABLE app.depreciation_entries (
+  id               uuid NOT NULL DEFAULT app.uuid_v7() PRIMARY KEY,
+  tenant_id        uuid NOT NULL REFERENCES app.tenants (id),
+  closing_id       uuid NOT NULL,
+  asset_id         uuid NOT NULL,
+  branch_id        uuid,
+  cost_center_id   uuid,
+  depreciable_cost bigint NOT NULL CHECK (depreciable_cost >= 0),
+  monthly_amount   bigint NOT NULL CHECK (monthly_amount >= 0),
+  accumulated      bigint NOT NULL CHECK (accumulated >= 0),
+  net_book_value   bigint NOT NULL,
+  created_at       timestamptz NOT NULL DEFAULT now(),
+  created_by       uuid,
+  UNIQUE (tenant_id, id),
+  UNIQUE (tenant_id, closing_id, asset_id),
+  FOREIGN KEY (tenant_id, closing_id) REFERENCES app.depreciation_closings (tenant_id, id),
+  FOREIGN KEY (tenant_id, asset_id) REFERENCES app.assets (tenant_id, id),
+  FOREIGN KEY (tenant_id, branch_id) REFERENCES app.branches (tenant_id, id),
+  FOREIGN KEY (tenant_id, cost_center_id) REFERENCES app.cost_centers (tenant_id, id)
+);
+CREATE INDEX depreciation_entries_asset_idx ON app.depreciation_entries (tenant_id, asset_id);
+CREATE INDEX depreciation_entries_cost_center_idx ON app.depreciation_entries (tenant_id, cost_center_id) WHERE cost_center_id IS NOT NULL;
+CREATE INDEX depreciation_entries_branch_idx ON app.depreciation_entries (tenant_id, branch_id) WHERE branch_id IS NOT NULL;
+COMMENT ON TABLE app.depreciation_entries IS 'MVP patrimonial (15/11/2026). Linha do mês de cada bem num fechamento (centavos), com a filial e o centro de custo do bem na data do fechamento. Append-only.';
 
 -- =============================================================================
 -- 14. Identidade e acesso — tabelas que dependem de contatos/técnicos/QR
@@ -3827,7 +3915,7 @@ BEGIN
       'sync_review_items', 'support_sessions',
       'integration_connections', 'integration_mappings',
       -- v0.2 (meter_readings e customer_sales_summaries ficam fora: volume alto e origem automática)
-      'branches', 'cost_centers', 'sales_reps', 'service_providers', 'provider_rates', 'on_call_assignments', 'escalation_policies',
+      'branches', 'cost_centers', 'asset_depreciation_profiles', 'depreciation_closings', 'sales_reps', 'service_providers', 'provider_rates', 'on_call_assignments', 'escalation_policies',
       'work_order_costs', 'provider_settlements', 'maintenance_plans', 'maintenance_plan_assets', 'asset_meters',
       'iot_devices', 'telemetry_alert_rules']) AS relname
   LOOP
@@ -3935,7 +4023,7 @@ GRANT SELECT, INSERT, UPDATE ON ALL TABLES IN SCHEMA app TO app_runtime;
 -- Catálogos globais: somente leitura em runtime (mudam por migração/seed).
 REVOKE INSERT, UPDATE ON app.plans, app.roles, app.permissions, app.role_permissions FROM app_runtime;
 -- Append-only.
-REVOKE UPDATE ON app.audit_logs, app.work_order_status_history, app.sync_tombstones, app.sync_mutations FROM app_runtime;
+REVOKE UPDATE ON app.audit_logs, app.work_order_status_history, app.sync_tombstones, app.sync_mutations, app.depreciation_entries FROM app_runtime;
 -- Partições: acesso só pela tabela-mãe.
 REVOKE ALL ON app.audit_logs_default FROM app_runtime;
 -- Exclusão física só onde é legítima (associações, preferências e expurgos técnicos).
@@ -4278,7 +4366,11 @@ INSERT INTO app.permissions (code, module, description) VALUES
   ('work_order_costs.review',  'field_execution', 'Lançar e conferir custos da OS'),
   ('provider_settlements.manage', 'field_execution', 'Montar, aprovar e enviar fechamentos de prestadores (F2)'),
   ('maintenance_plans.manage', 'maintenance',     'Manter planos de manutenção e medidores (F2)'),
-  ('telemetry.manage',         'telemetry',       'Manter dispositivos IoT e regras de alerta (F3)');
+  ('telemetry.manage',         'telemetry',       'Manter dispositivos IoT e regras de alerta (F3)'),
+  -- MVP patrimonial (15/11/2026)
+  ('depreciation.read',        'patrimony',       'Consultar ficha patrimonial, memória e posição da depreciação'),
+  ('depreciation.manage',      'patrimony',       'Manter a ficha patrimonial (parâmetros de depreciação)'),
+  ('depreciation.close',       'patrimony',       'Fechar e reabrir a competência da depreciação');
 
 INSERT INTO app.role_permissions (role_id, permission_id)
 SELECT r.id, p.id
@@ -4306,7 +4398,11 @@ SELECT r.id, p.id
     ('technician',       ARRAY['work_orders.acknowledge']),
     ('sales_rep',        ARRAY['work_orders.read', 'work_orders.create', 'work_orders.triage', 'work_orders.resolve_remotely',
                                'work_orders.acknowledge', 'reports.read']),
-    ('provider_admin',   ARRAY['work_orders.read', 'work_orders.acknowledge', 'visits.schedule', 'reports.read'])
+    ('provider_admin',   ARRAY['work_orders.read', 'work_orders.acknowledge', 'visits.schedule', 'reports.read']),
+    -- MVP patrimonial (15/11/2026)
+    ('tenant_admin',     ARRAY['depreciation.read', 'depreciation.manage', 'depreciation.close']),
+    ('backoffice_agent', ARRAY['depreciation.read', 'depreciation.manage']),
+    ('manager',          ARRAY['depreciation.read'])
   ) AS m(role_code, perms)
   JOIN app.roles r ON r.code = m.role_code
   CROSS JOIN LATERAL unnest(m.perms) AS pc(code)

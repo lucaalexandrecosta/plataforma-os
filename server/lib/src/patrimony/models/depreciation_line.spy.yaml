@@ -1,0 +1,12 @@
+# Uma competência da memória de cálculo gerencial (centavos).
+class: DepreciationLine
+fields:
+  year: int
+  month: int
+  amount: int
+  accumulated: int
+  netBookValue: int
+  # Como a cota foi obtida (ex.: "linear", "ano 2: 4/15").
+  rule: String
+  # Mês da baixa do bem (pró-rata até o dia).
+  disposed: bool

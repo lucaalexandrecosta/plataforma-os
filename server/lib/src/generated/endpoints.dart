@@ -12,6 +12,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:plataforma_os_server/src/generated/assets/models/asset_input.dart' as _i58orcz5;
 import 'package:plataforma_os_server/src/generated/catalog/models/product_input.dart' as _iku7g2we;
+import 'package:plataforma_os_server/src/generated/patrimony/models/depreciation_profile_input.dart' as _ims07aom;
 import 'package:plataforma_os_server/src/generated/tenancy/models/branch_input.dart' as _i6djw631;
 import 'package:plataforma_os_server/src/generated/tenancy/models/cost_center_input.dart' as _irkypkua;
 import 'package:plataforma_os_server/src/generated/work_orders/models/work_order_changes.dart' as _im8hf6je;
@@ -28,6 +29,7 @@ import '../identity_access/endpoints/email_idp_endpoint.dart' as _iq8d1u02;
 import '../identity_access/endpoints/me_endpoint.dart' as _i2zd8mbu;
 import '../identity_access/endpoints/refresh_jwt_tokens_endpoint.dart' as _inemdtdo;
 import '../identity_access/endpoints/users_endpoint.dart' as _if041dc0;
+import '../patrimony/endpoints/depreciation_endpoint.dart' as _ik1wssz1;
 import '../tenancy/endpoints/branches_endpoint.dart' as _i9d4u5j9;
 import '../tenancy/endpoints/cost_centers_endpoint.dart' as _inwd0tmb;
 import '../work_orders/endpoints/work_orders_endpoint.dart' as _i452a764;
@@ -82,6 +84,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'users',
+          null,
+        ),
+      'depreciation': _ik1wssz1.DepreciationEndpoint()
+        ..initialize(
+          server,
+          'depreciation',
           null,
         ),
       'branches': _i9d4u5j9.BranchesEndpoint()
@@ -807,6 +815,177 @@ class Endpoints extends _is.EndpointDispatch {
               ) async => (endpoints['users'] as _if041dc0.UsersEndpoint).remove(
                 session,
                 params['membershipId'],
+              ),
+        ),
+      },
+    );
+    connectors['depreciation'] = _is.EndpointConnector(
+      name: 'depreciation',
+      endpoint: endpoints['depreciation']!,
+      methodConnectors: {
+        'profile': _is.MethodConnector(
+          name: 'profile',
+          params: {
+            'assetId': _is.ParameterDescription(
+              name: 'assetId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['depreciation'] as _ik1wssz1.DepreciationEndpoint).profile(
+                session,
+                params['assetId'],
+              ),
+        ),
+        'saveProfile': _is.MethodConnector(
+          name: 'saveProfile',
+          params: {
+            'assetId': _is.ParameterDescription(
+              name: 'assetId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_ims07aom.DepreciationProfileInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['depreciation'] as _ik1wssz1.DepreciationEndpoint).saveProfile(
+                session,
+                params['assetId'],
+                params['expectedVersion'],
+                params['input'],
+              ),
+        ),
+        'schedule': _is.MethodConnector(
+          name: 'schedule',
+          params: {
+            'assetId': _is.ParameterDescription(
+              name: 'assetId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['depreciation'] as _ik1wssz1.DepreciationEndpoint).schedule(
+                session,
+                params['assetId'],
+              ),
+        ),
+        'position': _is.MethodConnector(
+          name: 'position',
+          params: {
+            'year': _is.ParameterDescription(
+              name: 'year',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'month': _is.ParameterDescription(
+              name: 'month',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'branchId': _is.ParameterDescription(
+              name: 'branchId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+            'costCenterId': _is.ParameterDescription(
+              name: 'costCenterId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['depreciation'] as _ik1wssz1.DepreciationEndpoint).position(
+                session,
+                params['year'],
+                params['month'],
+                branchId: params['branchId'],
+                costCenterId: params['costCenterId'],
+              ),
+        ),
+        'closings': _is.MethodConnector(
+          name: 'closings',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['depreciation'] as _ik1wssz1.DepreciationEndpoint).closings(session),
+        ),
+        'close': _is.MethodConnector(
+          name: 'close',
+          params: {
+            'year': _is.ParameterDescription(
+              name: 'year',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'month': _is.ParameterDescription(
+              name: 'month',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['depreciation'] as _ik1wssz1.DepreciationEndpoint).close(
+                session,
+                params['year'],
+                params['month'],
+              ),
+        ),
+        'reopen': _is.MethodConnector(
+          name: 'reopen',
+          params: {
+            'year': _is.ParameterDescription(
+              name: 'year',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'month': _is.ParameterDescription(
+              name: 'month',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'reason': _is.ParameterDescription(
+              name: 'reason',
+              type: _is.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['depreciation'] as _ik1wssz1.DepreciationEndpoint).reopen(
+                session,
+                params['year'],
+                params['month'],
+                params['reason'],
               ),
         ),
       },
