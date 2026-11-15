@@ -5,7 +5,7 @@
 // Pré-requisitos (ver server/README.md, "Testes de ponta a ponta"):
 //   1. banco de teste com db/migrations + infra/local/postgres + migrações do
 //      Serverpod + db/seeds/dev_seed.sql;
-//   2. servidor rodando: dart bin/main.dart --mode test --role monolith
+//   2. servidor rodando: dart run bin/main.dart --mode test --role monolith
 // Uso: dart test test/e2e   (API_URL=http://localhost:9080/ por padrão)
 @Tags(['e2e'])
 library;
@@ -136,9 +136,20 @@ void main() {
     await expectLater(client.me.get(), throwsA(isA<ServerpodClientException>()));
   });
 
-  test('auth.exchangeIdpToken recusa token de IdP inválido sem revelar nada', () async {
+  test('auth.selectTenant exige a sessão de login (sem ela, ou com token de tenant, recusa)', () async {
+    await expectLater(Client(apiUrl).auth.selectTenant('frio-sul'), throwsA(isA<ServerpodClientException>()));
+
+    final tenantToken = tokens.issue(
+      kind: TokenKind.staff,
+      userId: ana,
+      tenantId: tenantA,
+      actorType: ActorType.user,
+      sessionId: 'e2e-select',
+      membershipId: anaMembership,
+    );
+    final client = Client(apiUrl)..authKeyProvider = _Bearer(tenantToken.token);
     await expectLater(
-      Client(apiUrl).auth.exchangeIdpToken('nao-e-um-jwt', 'frio-sul'),
+      client.auth.selectTenant('frio-sul'),
       throwsA(isA<ApiException>().having((e) => e.code, 'code', 'UNAUTHENTICATED')),
     );
   });

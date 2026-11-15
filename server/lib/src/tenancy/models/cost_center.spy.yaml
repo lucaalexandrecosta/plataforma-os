@@ -1,0 +1,10 @@
+# Centro de custo (app.cost_centers). branchId nulo = vale para todas as filiais.
+class: CostCenter
+fields:
+  id: UuidValue
+  code: String
+  name: String
+  branchId: UuidValue?
+  erpCode: String?
+  isActive: bool
+  version: int

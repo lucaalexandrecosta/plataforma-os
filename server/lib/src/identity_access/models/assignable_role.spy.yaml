@@ -1,0 +1,6 @@
+# Perfil que o administrador pode atribuir no tenant (users.roles).
+class: AssignableRole
+fields:
+  code: String
+  name: String
+  description: String?

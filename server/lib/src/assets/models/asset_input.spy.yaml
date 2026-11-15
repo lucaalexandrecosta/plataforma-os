@@ -1,0 +1,17 @@
+# Dados editáveis do bem (assets.create e assets.update). Datas valem só pelo dia.
+class: AssetInput
+fields:
+  productId: UuidValue
+  serialNumber: String?
+  assetTag: String?
+  ownershipType: String?
+  branchId: UuidValue?
+  costCenterId: UuidValue?
+  locationNote: String?
+  warrantyUntil: DateTime?
+  acquisitionDate: DateTime?
+  acquisitionCost: int?
+  supplierName: String?
+  acquisitionDocument: String?
+  notes: String?
+  isActive: bool

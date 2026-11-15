@@ -27,4 +27,24 @@ abstract final class ApiErrors {
     traceId: session.sessionId.uuid,
     fieldErrors: fieldErrors,
   );
+
+  /// Já existe (ex.: pessoa já tem acesso à empresa).
+  static ApiException conflict(Session session, String code, String detail) =>
+      _make(session, code, ErrorCategory.conflict, detail);
+
+  /// Regra de negócio impede a ação (ex.: tirar o último administrador).
+  static ApiException businessRule(Session session, String code, String detail) =>
+      _make(session, code, ErrorCategory.businessRule, detail);
+
+  /// Concorrência otimista (docs/02 §5.5): o registro mudou desde a leitura.
+  static ApiException versionMismatch(Session session, int currentVersion) => ApiException(
+    code: 'VERSION_MISMATCH',
+    category: ErrorCategory.versionMismatch,
+    detail: 'Este registro foi alterado por outra pessoa. Recarregue e tente de novo.',
+    traceId: session.sessionId.uuid,
+    currentVersion: currentVersion,
+  );
+
+  static ApiException fieldError(Session session, String path, String code, String message) =>
+      validation(session, [FieldError(path: path, code: code, message: message)]);
 }

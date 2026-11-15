@@ -424,7 +424,7 @@ CREATE TABLE app.tenants (
 );
 CREATE INDEX tenants_plan_id_idx ON app.tenants (plan_id);
 COMMENT ON TABLE app.tenants IS 'Empresa assinante (global; o próprio id é o tenant_id). Catálogo de tenants e caminho para silo.';
-COMMENT ON COLUMN app.tenants.idp_organization_id IS 'Id da Organization no Keycloak (equipe interna).';
+COMMENT ON COLUMN app.tenants.idp_organization_id IS 'Reservado: id da organização num IdP externo (não usado; login próprio desde 15/11/2026).';
 COMMENT ON COLUMN app.tenants.deployment_cell IS 'shared (banco compartilhado) ou identificador do banco dedicado (silo, fase 3).';
 
 CREATE TABLE app.tenant_settings (
@@ -533,6 +533,31 @@ CREATE UNIQUE INDEX branches_erp_code_key ON app.branches (tenant_id, erp_branch
 COMMENT ON TABLE app.branches IS 'v0.2 (MVP, módulo tenancy). Filial do tenant (CNPJ, IE, endereço, código no ERP). Define a filial do pedido no ERP (fonte principal, no lugar do mapeamento service_area_branch) e permite limitar o escopo de usuários a filiais. Uma filial padrão por tenant.';
 COMMENT ON COLUMN app.branches.erp_branch_code IS 'Código da filial no ERP (Senior: código da filial/empresa), usado no pedido de serviço, na requisição de materiais e no fechamento de prestadores.';
 
+-- Centro de custo (15/11/2026, MVP patrimonial): o bem pertence a um centro de
+-- custo, e a OS herda o centro de custo e a filial do bem, para manutenção e
+-- depreciação aparecerem juntas no mesmo relatório.
+CREATE TABLE app.cost_centers (
+  id             uuid NOT NULL DEFAULT app.uuid_v7() PRIMARY KEY,
+  tenant_id      uuid NOT NULL REFERENCES app.tenants (id),
+  code           text NOT NULL CHECK (btrim(code) <> ''),
+  name           text NOT NULL CHECK (btrim(name) <> ''),
+  branch_id      uuid,
+  erp_code       text,
+  is_active      boolean NOT NULL DEFAULT true,
+  created_at     timestamptz NOT NULL DEFAULT now(),
+  updated_at     timestamptz NOT NULL DEFAULT now(),
+  created_by     uuid,
+  updated_by     uuid,
+  version        integer NOT NULL DEFAULT 1,
+  UNIQUE (tenant_id, id),
+  UNIQUE (tenant_id, code),
+  FOREIGN KEY (tenant_id, branch_id) REFERENCES app.branches (tenant_id, id)
+);
+CREATE INDEX cost_centers_branch_idx ON app.cost_centers (tenant_id, branch_id) WHERE branch_id IS NOT NULL;
+CREATE UNIQUE INDEX cost_centers_erp_code_key ON app.cost_centers (tenant_id, erp_code) WHERE erp_code IS NOT NULL;
+COMMENT ON TABLE app.cost_centers IS 'MVP patrimonial (15/11/2026, módulo tenancy). Centro de custo do tenant; opcionalmente restrito a uma filial (nulo = vale para todas). O bem aponta para ele (assets.cost_center_id) e a OS herda.';
+COMMENT ON COLUMN app.cost_centers.erp_code IS 'Código do centro de custo no ERP, para a integração futura (bens e depreciação pela API do ERP X).';
+
 -- =============================================================================
 -- 7. Identidade e acesso — tabelas base (módulo identity_access)
 -- =============================================================================
@@ -560,7 +585,7 @@ CREATE TABLE app.users (
 );
 CREATE UNIQUE INDEX users_staff_email_key ON app.users (lower(email)) WHERE user_type = 'staff' AND email IS NOT NULL;
 CREATE INDEX users_phone_idx ON app.users (phone_e164) WHERE phone_e164 IS NOT NULL;
-COMMENT ON TABLE app.users IS 'Identidade global (uma pessoa pode estar em vários tenants). Senhas nunca ficam aqui: equipe autentica no IdP (idp_subject); contatos, por OTP.';
+COMMENT ON TABLE app.users IS 'Identidade global (uma pessoa pode estar em vários tenants). Senhas nunca ficam aqui: a equipe entra pelo módulo de e-mail e senha do Serverpod (tabelas em public; idp_subject = id do usuário do módulo); contatos, por OTP.';
 
 CREATE TABLE app.roles (
   id          uuid NOT NULL DEFAULT app.uuid_v7() PRIMARY KEY,
@@ -1541,7 +1566,7 @@ CREATE UNIQUE INDEX technicians_user_key ON app.technicians (tenant_id, user_id)
 CREATE INDEX technicians_user_id_idx ON app.technicians (user_id) WHERE user_id IS NOT NULL;
 CREATE INDEX technicians_service_area_idx ON app.technicians (tenant_id, home_service_area_id);
 CREATE INDEX technicians_row_version_idx ON app.technicians (tenant_id, row_version);
-COMMENT ON TABLE app.technicians IS 'Operador/técnico de campo. user_id liga ao login (Keycloak) com papel technician no tenant; pode existir antes do convite.';
+COMMENT ON TABLE app.technicians IS 'Operador/técnico de campo. user_id liga ao login da plataforma com papel technician no tenant; pode existir antes do convite.';
 COMMENT ON COLUMN app.technicians.kind IS 'v0.2 (MVP). employee (colaborador próprio) ou contractor (técnico de prestador). contractor exige service_provider_id e employee não pode ter (CHECK). Os dois usam o mesmo app.';
 COMMENT ON COLUMN app.technicians.service_provider_id IS 'v0.2 (MVP). Prestador do técnico terceirizado. UNIQUE (tenant_id, service_provider_id, id) permite FKs compostas que garantem "técnico pertence ao prestador" em work_orders e work_order_visits.';
 COMMENT ON COLUMN app.technicians.branch_id IS 'v0.2 (MVP). Filial do técnico (escopo e relatórios); nulo = filial padrão.';
@@ -1655,6 +1680,7 @@ CREATE TABLE app.assets (
   location_note            text,
   warranty_until           date,
   branch_id                uuid,
+  cost_center_id           uuid,
   parent_asset_id          uuid,
   acquisition_date         date,
   acquisition_cost         bigint CHECK (acquisition_cost >= 0),
@@ -1684,6 +1710,7 @@ CREATE TABLE app.assets (
   FOREIGN KEY (tenant_id, product_id) REFERENCES app.products (tenant_id, id),
   FOREIGN KEY (tenant_id, current_customer_id, current_customer_site_id) REFERENCES app.customer_sites (tenant_id, customer_id, id),
   FOREIGN KEY (tenant_id, branch_id) REFERENCES app.branches (tenant_id, id),
+  FOREIGN KEY (tenant_id, cost_center_id) REFERENCES app.cost_centers (tenant_id, id),
   FOREIGN KEY (tenant_id, parent_asset_id) REFERENCES app.assets (tenant_id, id),
   CHECK (serial_number IS NOT NULL OR asset_tag IS NOT NULL),
   CHECK ((current_customer_id IS NULL) = (current_customer_site_id IS NULL)),
@@ -1693,6 +1720,7 @@ CREATE TABLE app.assets (
   CHECK (parent_asset_id IS NULL OR parent_asset_id <> id)
 );
 CREATE INDEX assets_branch_idx ON app.assets (tenant_id, branch_id) WHERE branch_id IS NOT NULL;
+CREATE INDEX assets_cost_center_idx ON app.assets (tenant_id, cost_center_id) WHERE cost_center_id IS NOT NULL;
 CREATE INDEX assets_parent_idx ON app.assets (tenant_id, parent_asset_id) WHERE parent_asset_id IS NOT NULL;
 CREATE UNIQUE INDEX assets_serial_key ON app.assets (tenant_id, product_id, serial_number) WHERE serial_number IS NOT NULL;
 CREATE UNIQUE INDEX assets_tag_key ON app.assets (tenant_id, asset_tag) WHERE asset_tag IS NOT NULL;
@@ -1708,6 +1736,7 @@ COMMENT ON COLUMN app.assets.source IS 'v0.2: o ativo passa a ser cadastro mestr
 COMMENT ON COLUMN app.assets.missing_since IS 'v0.2 (F2). Primeira varredura completa do ERP em que o bem não veio. Volta a nulo se reaparecer; inativação só na segunda ausência consecutiva (docs/07).';
 COMMENT ON COLUMN app.assets.acquisition_date IS 'v0.2 (MVP). Data de aquisição (substitui o antigo acquired_at). Com acquisition_cost, supplier_name e acquisition_document (número da NF de entrada) compõe os dados de aquisição mostrados com a garantia na abertura da OS e usados na rentabilidade do comodato (F3).';
 COMMENT ON COLUMN app.assets.acquisition_cost IS 'v0.2 (MVP). Valor de aquisição do bem em centavos (bigint, não negativo; R$ 5.000,00 = 500000). v0.3: era numeric(14,2); o adaptador do ERP converte do decimal.';
+COMMENT ON COLUMN app.assets.cost_center_id IS 'MVP patrimonial (15/11/2026). Centro de custo dono do bem; a OS herda. Nulo = ainda não classificado.';
 COMMENT ON COLUMN app.assets.branch_id IS 'v0.2 (MVP). Filial dona do bem (define a filial do pedido no ERP); nulo = filial padrão.';
 COMMENT ON COLUMN app.assets.parent_asset_id IS 'v0.2 (F3). Ativo pai de um componente rastreado (ex.: o motor de um forno), com histórico de OS por componente. Não pode apontar para si mesmo; ciclos maiores são barrados pela aplicação.';
 COMMENT ON COLUMN app.assets.retirement_reason IS 'Motivo da baixa (texto livre controlado pela aplicação). v0.2 (F3): cannibalized = desmontado para peças ao concluir uma OS teardown.';
@@ -2040,8 +2069,9 @@ CREATE TABLE app.work_orders (
   escalation_policy_id        uuid,
   service_provider_id         uuid,
   maintenance_plan_asset_id   uuid,
-  customer_id                 uuid NOT NULL,
-  customer_site_id            uuid NOT NULL,
+  customer_id                 uuid,
+  customer_site_id            uuid,
+  cost_center_id              uuid,
   asset_id                    uuid,
   requested_by_contact_id     uuid,
   requester_name              text,
@@ -2113,10 +2143,12 @@ CREATE TABLE app.work_orders (
   FOREIGN KEY (tenant_id, resolution_code_id) REFERENCES app.resolution_codes (tenant_id, id),
   FOREIGN KEY (tenant_id, completed_by_technician_id) REFERENCES app.technicians (tenant_id, id),
   FOREIGN KEY (tenant_id, branch_id) REFERENCES app.branches (tenant_id, id),
+  FOREIGN KEY (tenant_id, cost_center_id) REFERENCES app.cost_centers (tenant_id, id),
   FOREIGN KEY (tenant_id, escalation_policy_id) REFERENCES app.escalation_policies (tenant_id, id),
   FOREIGN KEY (tenant_id, service_provider_id) REFERENCES app.service_providers (tenant_id, id),
   -- Técnico atribuído pertence ao prestador atribuído (verificada só com os dois preenchidos).
   FOREIGN KEY (tenant_id, service_provider_id, assigned_technician_id) REFERENCES app.technicians (tenant_id, service_provider_id, id),
+  CHECK ((customer_id IS NULL) = (customer_site_id IS NULL)),
   CHECK ((acknowledged_at IS NULL) = (acknowledged_by IS NULL)),
   CHECK (escalation_level = 0 OR escalation_policy_id IS NOT NULL),
   CHECK (resolution_mode <> 'remote' OR status NOT IN ('completed', 'closed') OR resolution_notes IS NOT NULL),
@@ -2149,6 +2181,7 @@ CREATE INDEX work_orders_completed_by_idx ON app.work_orders (tenant_id, complet
 CREATE INDEX work_orders_failure_cause_idx ON app.work_orders (tenant_id, failure_cause_id, completed_at)
   WHERE failure_cause_id IS NOT NULL;
 CREATE INDEX work_orders_branch_idx ON app.work_orders (tenant_id, branch_id, created_at DESC) WHERE branch_id IS NOT NULL;
+CREATE INDEX work_orders_cost_center_idx ON app.work_orders (tenant_id, cost_center_id, created_at DESC) WHERE cost_center_id IS NOT NULL;
 CREATE INDEX work_orders_escalation_policy_idx ON app.work_orders (tenant_id, escalation_policy_id) WHERE escalation_policy_id IS NOT NULL;
 CREATE INDEX work_orders_provider_idx ON app.work_orders (tenant_id, service_provider_id, assigned_technician_id, status) WHERE service_provider_id IS NOT NULL;
 -- Fila do job de escalonamento (a cada minuto): OS ainda sem "assumi".
@@ -2159,7 +2192,8 @@ CREATE INDEX work_orders_resolution_mode_idx ON app.work_orders (tenant_id, reso
 -- sem consulta frequente por esse filtro): reported_symptom_id, sla_policy_id,
 -- resolution_code_id e tenant_membership_roles.role_code. Criar quando um
 -- relatório passar a filtrar por eles.
-COMMENT ON TABLE app.work_orders IS 'Ordem de Serviço (entidade única; chamado do cliente nasce requested). customer_id/customer_site_id são gravados na abertura e não mudam se o ativo for transferido.';
+COMMENT ON TABLE app.work_orders IS 'Ordem de Serviço (entidade única; chamado do cliente nasce requested). customer_id/customer_site_id são gravados na abertura e não mudam se o ativo for transferido. MVP patrimonial (15/11/2026): OS interna de bem do próprio tenant (sem alocação em cliente) fica com cliente e unidade nulos; o local é a filial e o centro de custo.';
+COMMENT ON COLUMN app.work_orders.cost_center_id IS 'MVP patrimonial (15/11/2026). Centro de custo da OS, herdado do bem na abertura (custos de manutenção por centro de custo). Não muda se o bem for reclassificado depois.';
 COMMENT ON COLUMN app.work_orders.number IS 'Número legível por tenant (ex.: 2026-000123), atribuído pelo trigger trg_number via tenant_sequences.';
 COMMENT ON COLUMN app.work_orders.erp_sync_status IS 'Integração com ERP, separada do status operacional (D9).';
 COMMENT ON COLUMN app.work_orders.flag_unverified_requester IS 'Sinalização de triagem: solicitante não cadastrado/aprovado (docs/05).';
@@ -3786,7 +3820,7 @@ BEGIN
       'sync_review_items', 'support_sessions',
       'integration_connections', 'integration_mappings',
       -- v0.2 (meter_readings e customer_sales_summaries ficam fora: volume alto e origem automática)
-      'branches', 'sales_reps', 'service_providers', 'provider_rates', 'on_call_assignments', 'escalation_policies',
+      'branches', 'cost_centers', 'sales_reps', 'service_providers', 'provider_rates', 'on_call_assignments', 'escalation_policies',
       'work_order_costs', 'provider_settlements', 'maintenance_plans', 'maintenance_plan_assets', 'asset_meters',
       'iot_devices', 'telemetry_alert_rules']) AS relname
   LOOP
@@ -3882,6 +3916,10 @@ CREATE POLICY system_access ON app.outbox_messages   FOR ALL    TO app_system US
 CREATE POLICY system_access ON app.integration_jobs  FOR ALL    TO app_system USING (true) WITH CHECK (true);
 CREATE POLICY system_access ON app.background_jobs   FOR ALL    TO app_system USING (true) WITH CHECK (true);
 CREATE POLICY system_access ON app.display_tokens    FOR SELECT TO app_system USING (true);
+-- Login próprio (staff_email_is_invited, link_staff_user_by_email): confere o
+-- convite e grava idp_subject no primeiro login.
+CREATE POLICY system_link ON app.users              FOR UPDATE TO app_system USING (user_type = 'staff') WITH CHECK (user_type = 'staff');
+CREATE POLICY system_access ON app.tenant_memberships FOR SELECT TO app_system USING (true);
 
 -- =============================================================================
 -- 23. Grants
@@ -3906,6 +3944,8 @@ GRANT USAGE ON SEQUENCE app.sync_row_version_seq TO app_runtime, app_system;
 GRANT SELECT ON app.tenants, app.users, app.qr_tags, app.customer_contacts, app.auth_sessions TO app_system;
 GRANT SELECT, UPDATE ON app.outbox_messages, app.integration_jobs, app.background_jobs TO app_system;
 GRANT SELECT ON app.display_tokens TO app_system;
+GRANT UPDATE (idp_subject, updated_at, version) ON app.users TO app_system;
+GRANT SELECT ON app.tenant_memberships TO app_system;
 
 ALTER DEFAULT PRIVILEGES FOR ROLE app_owner IN SCHEMA app GRANT SELECT, INSERT, UPDATE ON TABLES TO app_runtime;
 ALTER DEFAULT PRIVILEGES FOR ROLE app_owner IN SCHEMA app GRANT USAGE ON SEQUENCES TO app_runtime;
@@ -4018,7 +4058,7 @@ AS $$
 $$;
 COMMENT ON FUNCTION app.find_auth_session_by_refresh_hash(bytea) IS 'Localiza a sessão pelo hash do refresh token (rotação e detecção de reuso).';
 
--- Login da equipe: idp_subject (sub do Keycloak) -> users.id, antes de existir app.user_id.
+-- Login da equipe: idp_subject (id do usuário no módulo de autenticação) -> users.id, antes de existir app.user_id.
 CREATE FUNCTION app.find_user_by_idp_subject(p_subject text)
 RETURNS TABLE (user_id uuid, status text, is_platform_admin boolean)
 LANGUAGE sql STABLE SECURITY DEFINER
@@ -4027,6 +4067,63 @@ AS $$
   SELECT u.id, u.status, u.is_platform_admin FROM app.users u WHERE u.idp_subject = p_subject
 $$;
 COMMENT ON FUNCTION app.find_user_by_idp_subject(text) IS 'Mapeia o sub do IdP para users.id (início da requisição autenticada).';
+
+-- Login próprio (módulo de e-mail do Serverpod, 15/11/2026): o cadastro só é
+-- aberto para e-mails convidados, e o primeiro login liga a conta de e-mail
+-- (id do usuário do módulo, em idp_subject) ao usuário da equipe.
+CREATE FUNCTION app.staff_email_is_invited(p_email text)
+RETURNS boolean
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = pg_catalog, pg_temp
+AS $$
+  SELECT EXISTS (
+    SELECT 1
+      FROM app.users u
+      JOIN app.tenant_memberships m ON m.user_id = u.id
+     WHERE u.user_type = 'staff'
+       AND u.status = 'active'
+       AND lower(u.email) = lower(p_email)
+       AND m.status IN ('invited', 'active')
+  )
+$$;
+COMMENT ON FUNCTION app.staff_email_is_invited(text) IS 'Login próprio: o cadastro por e-mail só é aceito para quem tem usuário ativo da equipe com vínculo convidado ou ativo em algum tenant.';
+
+CREATE FUNCTION app.link_staff_user_by_email(p_subject text, p_email text)
+RETURNS TABLE (user_id uuid, status text, is_platform_admin boolean)
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+SET search_path = pg_catalog, pg_temp
+AS $$
+DECLARE
+  v_user app.users%ROWTYPE;
+BEGIN
+  SELECT * INTO v_user
+    FROM app.users u
+   WHERE u.user_type = 'staff'
+     AND u.idp_subject IS NULL
+     AND lower(u.email) = lower(p_email)
+   FOR UPDATE;
+  IF NOT FOUND THEN
+    RETURN;
+  END IF;
+  UPDATE app.users u SET idp_subject = p_subject, updated_at = now(), version = u.version + 1
+   WHERE u.id = v_user.id;
+  RETURN QUERY SELECT v_user.id, v_user.status, v_user.is_platform_admin;
+END
+$$;
+COMMENT ON FUNCTION app.link_staff_user_by_email(text, text) IS 'Login próprio: no primeiro login, liga a conta de e-mail verificada (p_subject = id do usuário no módulo de autenticação) ao usuário da equipe com o mesmo e-mail. Só liga usuário ainda sem idp_subject. O aceite do convite (vínculo invited → active) é feito pela api no contexto do tenant, para passar pela RLS e pela auditoria.';
+
+-- Controle de usuários (15/11/2026): o convite precisa achar a pessoa pelo
+-- e-mail mesmo quando ela só existe em outro tenant (a RLS de users esconde).
+-- Devolve só o id: nenhum dado da pessoa vaza para o tenant que convida.
+CREATE FUNCTION app.staff_user_id_by_email(p_email text)
+RETURNS uuid
+LANGUAGE sql STABLE SECURITY DEFINER
+SET search_path = pg_catalog, pg_temp
+AS $$
+  SELECT u.id FROM app.users u
+   WHERE u.user_type = 'staff' AND lower(u.email) = lower(btrim(p_email))
+$$;
+COMMENT ON FUNCTION app.staff_user_id_by_email(text) IS 'Controle de usuários: id do usuário da equipe com o e-mail (de qualquer tenant), para o convite reaproveitar a mesma pessoa. Só o id, sem outros dados.';
 
 -- Relay do outbox: reserva um lote entre tenants (SKIP LOCKED, lease). O worker
 -- processa cada mensagem com SET LOCAL app.tenant_id = <tenant da mensagem>.
@@ -4115,11 +4212,13 @@ GRANT EXECUTE ON FUNCTION app.find_display_token_by_hash(bytea) TO app_runtime;
 
 REVOKE ALL ON FUNCTION public.resolve_qr_token(text), public.resolve_qr_short_code(text),
   app.find_contact_logins(text, text), app.find_auth_session_by_refresh_hash(bytea),
-  app.find_user_by_idp_subject(text), app.claim_outbox_messages(integer, text, integer),
+  app.find_user_by_idp_subject(text), app.staff_email_is_invited(text),
+  app.link_staff_user_by_email(text, text), app.staff_user_id_by_email(text), app.claim_outbox_messages(integer, text, integer),
   app.claim_integration_jobs(integer, text, integer), app.claim_background_jobs(integer, text, integer) FROM PUBLIC;
 GRANT EXECUTE ON FUNCTION public.resolve_qr_token(text), public.resolve_qr_short_code(text),
   app.find_contact_logins(text, text), app.find_auth_session_by_refresh_hash(bytea),
-  app.find_user_by_idp_subject(text), app.claim_outbox_messages(integer, text, integer),
+  app.find_user_by_idp_subject(text), app.staff_email_is_invited(text),
+  app.link_staff_user_by_email(text, text), app.staff_user_id_by_email(text), app.claim_outbox_messages(integer, text, integer),
   app.claim_integration_jobs(integer, text, integer), app.claim_background_jobs(integer, text, integer) TO app_runtime;
 
 -- =============================================================================

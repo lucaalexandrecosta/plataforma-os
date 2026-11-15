@@ -1,6 +1,6 @@
 // Gera server/config/passwords.yaml para desenvolvimento e testes locais:
 // senha dos usuários do banco local ("dev"), chave ES256 de assinatura dos
-// tokens próprios e os emissores (api e Keycloak local).
+// tokens próprios, o emissor da api e os segredos do login por e-mail e senha.
 //
 // O arquivo é ignorado pelo Git (.gitignore). Em homologação e produção os
 // mesmos nomes vêm do cofre como variáveis SERVERPOD_PASSWORD_<nome>.
@@ -34,7 +34,10 @@ shared:
 ${indent(priv)}
   tokenSigningPublicKey: |
 ${indent(pub)}
-  keycloakStaffIssuer: 'http://localhost:8180/realms/staff'
+  # Login por e-mail e senha (módulo serverpod_auth_idp).
+  emailSecretHashPepper: '${secret()}'
+  jwtRefreshTokenHashPepper: '${secret()}'
+  jwtHmacSha512PrivateKey: '${crypto.randomBytes(64).toString('base64url')}'
 
 development:
   database: 'dev'

@@ -1,0 +1,6 @@
+# Cadastro rápido de modelo de equipamento (products.create).
+class: ProductInput
+fields:
+  code: String
+  name: String
+  description: String?

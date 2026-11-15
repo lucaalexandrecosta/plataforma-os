@@ -1,0 +1,8 @@
+# Dados editáveis do centro de custo (costCenters.create e costCenters.update).
+class: CostCenterInput
+fields:
+  code: String
+  name: String
+  branchId: UuidValue?
+  erpCode: String?
+  isActive: bool

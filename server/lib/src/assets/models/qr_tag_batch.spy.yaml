@@ -1,0 +1,10 @@
+# Lote de etiquetas pré-impressas (app.qr_tag_batches).
+class: QrTagBatch
+fields:
+  id: UuidValue
+  code: String
+  quantity: int
+  notes: String?
+  printedAt: DateTime?
+  boundCount: int
+  createdAt: DateTime

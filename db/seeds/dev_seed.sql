@@ -5,8 +5,9 @@
 --   frio-sul     Frio Sul Refrigeração        plano professional
 --   forno-norte  Forno Norte Equipamentos     plano starter
 --
--- Usuários da equipe (idp_subject = id do usuário no realm "staff" do Keycloak
--- local, infra/local/keycloak/realm-staff.json; senha local: "dev"):
+-- Usuários da equipe (login próprio por e-mail e senha: cada um cria a senha
+-- no primeiro acesso, com o código enviado por e-mail; no modo de teste o
+-- código é sempre 000000 — server/lib/src/identity_access/login_config.dart):
 --   ana.admin@frio-sul.test       tenant_admin  em frio-sul
 --   bruno.despacho@frio-sul.test  dispatcher    em frio-sul
 --   carla.admin@forno-norte.test  tenant_admin  em forno-norte
@@ -33,10 +34,10 @@ ON CONFLICT (id) DO NOTHING;
 
 -- ---------------------------------------------------------------- usuários (globais)
 INSERT INTO app.users (id, user_type, idp_subject, full_name, email, email_verified_at, status) VALUES
-  ('0197f000-0100-7000-8000-000000000001', 'staff', '7d0a0001-0000-4000-8000-000000000001', 'Ana Admin',      'ana.admin@frio-sul.test',      now(), 'active'),
-  ('0197f000-0100-7000-8000-000000000002', 'staff', '7d0a0001-0000-4000-8000-000000000002', 'Bruno Despacho', 'bruno.despacho@frio-sul.test', now(), 'active'),
-  ('0197f000-0100-7000-8000-000000000003', 'staff', '7d0a0001-0000-4000-8000-000000000003', 'Carla Admin',    'carla.admin@forno-norte.test', now(), 'active'),
-  ('0197f000-0100-7000-8000-000000000004', 'staff', '7d0a0001-0000-4000-8000-000000000004', 'Davi Consultor', 'davi.consultor@dev.test',      now(), 'active')
+  ('0197f000-0100-7000-8000-000000000001', 'staff', NULL, 'Ana Admin',      'ana.admin@frio-sul.test',      now(), 'active'),
+  ('0197f000-0100-7000-8000-000000000002', 'staff', NULL, 'Bruno Despacho', 'bruno.despacho@frio-sul.test', now(), 'active'),
+  ('0197f000-0100-7000-8000-000000000003', 'staff', NULL, 'Carla Admin',    'carla.admin@forno-norte.test', now(), 'active'),
+  ('0197f000-0100-7000-8000-000000000004', 'staff', NULL, 'Davi Consultor', 'davi.consultor@dev.test',      now(), 'active')
 ON CONFLICT (id) DO NOTHING;
 
 -- =============================================================== tenant A: frio-sul
@@ -49,6 +50,11 @@ ON CONFLICT (tenant_id) DO NOTHING;
 INSERT INTO app.branches (id, tenant_id, code, legal_name, trade_name, document_number, city, state, is_default)
 VALUES ('0197f000-0001-7100-8000-000000000001', '0197f000-0001-7000-8000-000000000001',
         'MATRIZ', 'Frio Sul Refrigeração Ltda', 'Frio Sul', '11222333000181', 'Porto Alegre', 'RS', true)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO app.cost_centers (id, tenant_id, code, name, branch_id) VALUES
+  ('0197f000-0001-7110-8000-000000000001', '0197f000-0001-7000-8000-000000000001', '1.01', 'Produção', '0197f000-0001-7100-8000-000000000001'),
+  ('0197f000-0001-7110-8000-000000000002', '0197f000-0001-7000-8000-000000000001', '2.01', 'Comodato', NULL)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO app.tenant_memberships (id, tenant_id, user_id, status, joined_at) VALUES

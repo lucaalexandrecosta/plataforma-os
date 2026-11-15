@@ -12,6 +12,7 @@ dependencies:
   # Serverpod fixado: a API da camada de banco pode mudar numa minor
   # (docs/12 §4.3). Atualização só planejada, com a suíte de isolamento.
   serverpod: 4.1.1
+  serverpod_auth_idp_server: 4.1.1
   dart_jsonwebtoken: ^3.4.1
   http: ^1.5.0
   plataforma_os_core: any

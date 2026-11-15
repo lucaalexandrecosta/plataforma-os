@@ -1,5 +1,63 @@
+assets:
+  - list:
+  - get:
+  - create:
+  - update:
+qrTags:
+  - generateBatch:
+  - listBatches:
+  - batchTags:
+  - markBatchPrinted:
+  - resolve:
+  - bind:
+  - unbind:
+  - revoke:
+products:
+  - list:
+  - create:
 auth:
-  - exchangeIdpToken:
+  - selectTenant:
+emailIdp:
+  - login:
+  - startRegistration:
+  - verifyRegistrationCode:
+  - finishRegistration:
+  - startPasswordReset:
+  - verifyPasswordResetCode:
+  - finishPasswordReset:
+  - hasAccount:
 me:
   - get:
   - tenants:
+refreshJwtTokens:
+  - refreshAccessToken:
+users:
+  - roles:
+  - list:
+  - invite:
+  - setRoles:
+  - suspend:
+  - reactivate:
+  - remove:
+branches:
+  - list:
+  - create:
+  - update:
+costCenters:
+  - list:
+  - create:
+  - update:
+workOrders:
+  - list:
+  - get:
+  - open:
+  - update:
+  - start:
+  - hold:
+  - complete:
+  - close:
+  - cancel:
+  - reopen:
+  - types:
+  - createType:
+  - updateType:

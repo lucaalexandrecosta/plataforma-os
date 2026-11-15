@@ -1,0 +1,5 @@
+# Página de workOrders.list (mais recentes primeiro, cursor por offset).
+class: WorkOrderPage
+fields:
+  items: List<WorkOrder>
+  total: int

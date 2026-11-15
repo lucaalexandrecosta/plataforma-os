@@ -2,7 +2,6 @@ import 'package:serverpod/serverpod.dart';
 
 import '../context/request_context.dart';
 import 'access_token_service.dart';
-import 'idp_token_verifier.dart';
 
 /// Lista de revogação por `sid`/`did` (docs/04 §4.7). No MVP fica no Valkey;
 /// esta interface permite trocar a implementação (memória em dev e testes).
@@ -27,25 +26,23 @@ final class InMemoryRevocationList implements RevocationList {
   }
 }
 
-/// Serviços de autenticação configurados na inicialização (server.dart).
-final class AuthServices {
-  AuthServices._(this.accessTokens, this.idpTokens, this.revocations);
+/// Tokens próprios da plataforma configurados na inicialização (server.dart).
+///
+/// Não confundir com o `AuthServices` do módulo de login do Serverpod, que
+/// cuida da conta de e-mail e senha e da sessão de login (JWT HS512).
+final class PlatformAuth {
+  PlatformAuth._(this.accessTokens, this.revocations);
 
-  static AuthServices? _instance;
+  static PlatformAuth? _instance;
 
-  static AuthServices get instance =>
-      _instance ?? (throw StateError('AuthServices não configurado: chame AuthServices.configure() no startup.'));
+  static PlatformAuth get instance =>
+      _instance ?? (throw StateError('PlatformAuth não configurado: chame PlatformAuth.configure() no startup.'));
 
-  static void configure({
-    required AccessTokenService accessTokens,
-    required IdpTokenVerifier idpTokens,
-    RevocationList? revocations,
-  }) {
-    _instance = AuthServices._(accessTokens, idpTokens, revocations ?? InMemoryRevocationList());
+  static void configure({required AccessTokenService accessTokens, RevocationList? revocations}) {
+    _instance = PlatformAuth._(accessTokens, revocations ?? InMemoryRevocationList());
   }
 
   final AccessTokenService accessTokens;
-  final IdpTokenVerifier idpTokens;
   final RevocationList revocations;
 }
 
@@ -53,7 +50,7 @@ final class AuthServices {
 /// próprios ES256, consulta a revogação e anexa o [RequestContext] à sessão,
 /// que o interceptor de banco usa para aplicar o tenant.
 Future<AuthenticationInfo?> tokenAuthenticationHandler(Session session, String token) async {
-  final services = AuthServices.instance;
+  final services = PlatformAuth.instance;
   final claims = services.accessTokens.verify(token);
   if (claims == null) return null;
   if (await services.revocations.isRevoked(sessionId: claims.sessionId, deviceId: claims.deviceId?.uuid)) {
@@ -66,3 +63,14 @@ Future<AuthenticationInfo?> tokenAuthenticationHandler(Session session, String t
     authId: claims.sessionId,
   );
 }
+
+/// Handler combinado (login próprio, 15/11/2026):
+///
+/// 1. token próprio ES256 do tenant → contexto do tenant (endpoints da equipe);
+/// 2. senão, sessão de login do módulo de e-mail (JWT) → só identifica a conta,
+///    sem contexto; serve apenas para `auth.selectTenant` e para o próprio
+///    módulo. Os endpoints da equipe continuam exigindo o escopo `token:staff`,
+///    que esse JWT não tem.
+AuthenticationHandler platformAuthenticationHandler(AuthenticationHandler loginSessionHandler) =>
+    (session, token) async =>
+        await tokenAuthenticationHandler(session, token) ?? await loginSessionHandler(session, token);

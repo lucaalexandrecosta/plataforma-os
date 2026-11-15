@@ -1,0 +1,13 @@
+# Pessoa da equipe com acesso ao tenant ativo (users.list e demais users.*).
+class: TenantUser
+fields:
+  membershipId: UuidValue
+  userId: UuidValue
+  fullName: String
+  email: String?
+  status: MembershipStatus
+  # Papéis no tenant (códigos de app.roles).
+  roles: List<String>
+  # Já criou a senha (primeiro acesso feito).
+  hasLogin: bool
+  lastAccessAt: DateTime?

@@ -315,6 +315,38 @@ export async function run({ db, q, t }) {
     assert(!seen.some(m => m.tenant_id === b.tenant && m.user_id === uu.id), 'V no contexto do A não vê o vínculo de U no B')
   })
 
+  await t('login próprio: convite e ligação da conta por e-mail', async () => {
+    const a = await mkTenant()
+    const email = 'convite-' + Math.random().toString(36).slice(2) + '@teste.dev'
+    const u = await one(`insert into app.users (user_type, full_name, email) values ('staff', 'Convidada', $1) returning id`, [email])
+    await setTenant(a.tenant)
+    await one(`insert into app.tenant_memberships (tenant_id, user_id, status, invited_at) values ($1, $2, 'invited', now()) returning id`, [a.tenant, u.id])
+    await asRuntime(null, null)
+    assert((await one(`select app.staff_email_is_invited($1) as ok`, [email.toUpperCase()])).ok === true, 'convidada pode se cadastrar (sem diferenciar maiúsculas)')
+    const l = await q(`select user_id from app.link_staff_user_by_email($1, $2)`, ['sub-convite', email])
+    assert(l.length === 1 && l[0].user_id === u.id, 'liga a conta')
+    assert((await q(`select 1 from app.link_staff_user_by_email($1, $2)`, ['sub-2', email])).length === 0, 'não religa')
+    await setTenant(a.tenant)
+    await q(`update app.tenant_memberships set status = 'removed', removed_at = now() where user_id = $1`, [u.id])
+    await asRuntime(null, null)
+    assert((await one(`select app.staff_email_is_invited($1) as ok`, [email])).ok === false, 'vínculo removido não pode se cadastrar')
+  })
+
+  await t('controle de usuários: convite acha a pessoa de outro tenant só pelo id', async () => {
+    const a = await mkTenant(), b = await mkTenant()
+    const email = 'multi-' + Math.random().toString(36).slice(2) + '@teste.dev'
+    const u = await one(`insert into app.users (user_type, full_name, email) values ('staff', 'Pessoa de A', $1) returning id`, [email])
+    await setTenant(a.tenant)
+    await one(`insert into app.tenant_memberships (tenant_id, user_id, status) values ($1, $2, 'active') returning id`, [a.tenant, u.id])
+    await asRuntime(b.tenant, null)
+    assert((await q(`select 1 from app.users where id = $1`, [u.id])).length === 0, 'no tenant B a pessoa de A não é legível')
+    const found = await one(`select app.staff_user_id_by_email($1) as id`, ['  ' + email.toUpperCase() + ' '])
+    assert(found.id === u.id, 'a função devolve o id (sem diferenciar maiúsculas e espaços)')
+    assert((await one(`select app.staff_user_id_by_email('ninguem@teste.dev') as id`)).id === null, 'e-mail desconhecido => nulo')
+    await one(`insert into app.tenant_memberships (tenant_id, user_id, status, invited_at) values ($1, $2, 'invited', now()) returning id`, [b.tenant, u.id])
+    assert((await q(`select full_name from app.users where id = $1`, [u.id])).length === 1, 'depois do convite, B enxerga a pessoa')
+  })
+
   await t('find_user_by_idp_subject e claim_outbox_messages: entre tenants só pela função', async () => {
     const a = await mkTenant(), b = await mkTenant()
     const sub = 'kc-' + Math.random().toString(36).slice(2)
@@ -494,6 +526,24 @@ export async function run({ db, q, t }) {
     const p = await mkProvider(f)
     const a = await q(`select action from app.audit_logs where tenant_id = $1 and entity_id = $2`, [f.tenant, p.id])
     assert(a.some(x => x.action === 'service_providers.insert'), 'service_providers deveria ser auditada')
+  })
+
+  await t('MVP patrimonial: OS interna sem cliente; centro de custo da OS com FK composta', async () => {
+    const a = await mkTenant(), b = await mkTenant()
+    await setTenant(a.tenant)
+    const cc = await one(`insert into app.cost_centers (tenant_id, code, name) values ($1, '1.01', 'Produção') returning id`, [a.tenant])
+    const w = await one(`insert into app.work_orders (tenant_id, work_order_type_id, origin, asset_id, cost_center_id, status)
+                         values ($1, $2, 'backoffice', $3, $4, 'open') returning customer_id, cost_center_id`, [a.tenant, a.type, a.asset, cc.id])
+    assert(w.customer_id === null && w.cost_center_id === cc.id, 'OS interna sem cliente e com centro de custo')
+    await fails(() => q(`insert into app.work_orders (tenant_id, work_order_type_id, origin, customer_id, asset_id)
+                         values ($1, $2, 'backoffice', $3, $4)`, [a.tenant, a.type, a.customer, a.asset]),
+      /check constraint/, 'cliente sem unidade')
+    await setTenant(b.tenant)
+    const ccB = await one(`insert into app.cost_centers (tenant_id, code, name) values ($1, '9.99', 'Outro') returning id`, [b.tenant])
+    await setTenant(a.tenant)
+    await fails(() => q(`insert into app.work_orders (tenant_id, work_order_type_id, origin, asset_id, cost_center_id)
+                         values ($1, $2, 'backoffice', $3, $4)`, [a.tenant, a.type, a.asset, ccB.id]),
+      /foreign key/, 'OS do tenant A com centro de custo do B')
   })
 
   await t('v0.2 escalonamento: aceite exige quem; nível > 0 exige política', async () => {

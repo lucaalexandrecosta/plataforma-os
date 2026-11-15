@@ -1,0 +1,5 @@
+# Página de assets.list (ordenada por patrimônio/série, cursor por offset).
+class: AssetPage
+fields:
+  items: List<Asset>
+  total: int
