@@ -5,7 +5,7 @@
 // Pré-requisitos (ver server/README.md, "Testes de ponta a ponta"):
 //   1. banco de teste com db/migrations + infra/local/postgres + migrações do
 //      Serverpod + db/seeds/dev_seed.sql;
-//   2. servidor rodando: dart bin/main.dart --mode test --role monolith
+//   2. servidor rodando: dart run bin/main.dart --mode test --role monolith
 // Uso: dart test test/e2e   (API_URL=http://localhost:9080/ por padrão)
 @Tags(['e2e'])
 library;

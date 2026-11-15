@@ -46,10 +46,10 @@ node tool/dev/generate_dev_secrets.mjs        # cria config/passwords.yaml (fora
 PSQL="docker compose -f infra/local/compose.yaml exec -T postgres psql -U postgres -d plataforma_os" \
   bash tool/db/apply_pod_migrations.sh development
 cd server
-dart bin/main.dart --role monolith            # api + worker em http://localhost:8080
+dart run bin/main.dart --role monolith            # api + worker em http://localhost:8080
 ```
 
-No Windows, rode o script pelo Git Bash. O código de saída do `--apply-migrations` não serve para conferir a migração neste projeto; o motivo está no cabeçalho do script.
+Use sempre `dart run` (e não `dart bin/main.dart` nem `dart compile exe`): o login usa o Argon2 nativo do Serverpod, que vem por build hook; para a imagem de produção, `dart build cli`. No Windows, rode o script pelo Git Bash. O código de saída do `--apply-migrations` não serve para conferir a migração neste projeto; o motivo está no cabeçalho do script.
 
 Ao subir, o servidor avisa `Database does not match target state` por causa das colunas `timestamptz`. É esperado: o Serverpod 4.1 não conhece esse tipo (achado do S2 no relatório do spike).
 
@@ -58,7 +58,7 @@ Ao subir, o servidor avisa `Database does not match target state` por causa das 
 ```bash
 dart test test/unit                            # sem banco
 # e2e: banco de teste (porta 5433) com migração + seed e o servidor em modo test
-dart bin/main.dart --mode test --role monolith &
+dart run bin/main.dart --mode test --role monolith &
 dart test test/e2e                             # isolamento entre tenants + login por e-mail e senha
 ```
 
