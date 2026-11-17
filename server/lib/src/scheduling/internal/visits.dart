@@ -37,9 +37,12 @@ abstract final class Visits {
       '       coalesce(b.trade_name, b.legal_name), v.visit_number, v.technician_id, te.name, v.status, v.outcome, '
       '       v.outcome_notes, v.scheduled_start, v.scheduled_end, v.travel_started_at, v.checked_in_at, '
       '       v.finished_at, v.cancelled_at, v.cancellation_reason, v.check_in_method, v.check_in_distance_m, '
-      '       v.check_in_off_site, v.check_in_justification, v.version '
+      '       v.check_in_off_site, v.check_in_justification, v.version, '
+      '       coalesce(wt.require_qr_check_in, ts.require_qr_check_in, false) '
       '  FROM app.work_order_visits v '
       '  JOIN app.work_orders w ON w.tenant_id = v.tenant_id AND w.id = v.work_order_id '
+      '  JOIN app.work_order_types wt ON wt.tenant_id = w.tenant_id AND wt.id = w.work_order_type_id '
+      '  LEFT JOIN app.tenant_settings ts ON ts.tenant_id = v.tenant_id '
       '  LEFT JOIN app.assets a ON a.tenant_id = w.tenant_id AND a.id = w.asset_id '
       '  LEFT JOIN app.products p ON p.tenant_id = a.tenant_id AND p.id = a.product_id '
       '  LEFT JOIN app.customers cu ON cu.tenant_id = w.tenant_id AND cu.id = w.customer_id '
@@ -560,5 +563,6 @@ abstract final class Visits {
     checkInOffSite: r[25] as bool,
     checkInJustification: r[26] as String?,
     version: r[27] as int,
+    requireQrCheckIn: r[28] as bool,
   );
 }

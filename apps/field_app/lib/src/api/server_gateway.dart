@@ -132,39 +132,16 @@ class ServerGateway implements Gateway {
     return issued.accessToken;
   }
 
-  // ----------------------------------------------------------- agenda
+  // ----------------------------------------------------------- sync
 
   @override
-  Future<Technician?> myTechnician() => _guard(() => _tenant.technicians.mine());
+  Future<void> registerDevice(DeviceRegistration device) => _guard(() => _tenant.technicianSync.registerDevice(device));
 
   @override
-  Future<List<Visit>> myVisits(DateTime from, DateTime to) =>
-      _guard(() => _tenant.visits.mine(from.toUtc(), to.toUtc()));
+  Future<SyncPullResult> pull(UuidValue deviceId) => _guard(() => _tenant.technicianSync.pull(deviceId));
 
   @override
-  Future<Visit> visit(UuidValue id) => _guard(() => _tenant.visits.get(id));
-
-  @override
-  Future<WorkOrderDetail> workOrder(UuidValue id) => _guard(() => _tenant.workOrders.get(id));
-
-  // ----------------------------------------------------------- execução
-
-  @override
-  Future<Visit> startTravel(Visit visit) => _guard(() => _tenant.visits.startTravel(visit.id, visit.version));
-
-  @override
-  Future<Visit> checkIn(Visit visit, VisitCheckIn input) =>
-      _guard(() => _tenant.visits.checkIn(visit.id, visit.version, input));
-
-  @override
-  Future<Visit> pause(Visit visit) => _guard(() => _tenant.visits.pause(visit.id, visit.version));
-
-  @override
-  Future<Visit> resume(Visit visit) => _guard(() => _tenant.visits.resume(visit.id, visit.version));
-
-  @override
-  Future<Visit> finish(Visit visit, VisitFinish input) =>
-      _guard(() => _tenant.visits.finish(visit.id, visit.version, input));
+  Future<List<SyncMutationResult>> push(SyncPushRequest request) => _guard(() => _tenant.technicianSync.push(request));
 
   // ----------------------------------------------------------- erros
 

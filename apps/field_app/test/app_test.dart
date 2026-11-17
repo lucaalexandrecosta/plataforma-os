@@ -1,11 +1,15 @@
+import 'package:drift/drift.dart' show driftRuntimeOptions;
+import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:meta/meta.dart';
 import 'package:plataforma_os_field/src/api/gateway.dart';
 import 'package:plataforma_os_field/src/app.dart';
 import 'package:plataforma_os_field/src/device/device.dart';
+import 'package:plataforma_os_field/src/local/database.dart';
+import 'package:plataforma_os_field/src/local/providers.dart';
 import 'package:plataforma_os_field/src/session/session.dart';
-import 'package:plataforma_os_field/src/ui/visits/agenda_page.dart';
 
 import 'fake_gateway.dart';
 
@@ -28,7 +32,21 @@ class FakeDevice implements Device {
   Future<String?> scanQr(BuildContext context) async => qr;
 }
 
+/// `testWidgets` que desmonta o app no fim: fecha o banco local e deixa os
+/// timers do drift (fechamento das consultas observadas) rodarem.
+@isTest
+void testApp(String description, Future<void> Function(WidgetTester tester) body) {
+  testWidgets(description, (tester) async {
+    await body(tester);
+    await tester.pumpWidget(const SizedBox());
+    for (var i = 0; i < 5; i++) {
+      await tester.pump(const Duration(milliseconds: 10));
+    }
+  });
+}
+
 Future<void> pumpApp(WidgetTester tester, FakeGateway gateway, {FakeDevice? device}) async {
+  driftRuntimeOptions.dontWarnAboutMultipleDatabases = true;
   tester.view.physicalSize = const Size(420, 900);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
@@ -38,6 +56,8 @@ Future<void> pumpApp(WidgetTester tester, FakeGateway gateway, {FakeDevice? devi
         gatewayProvider.overrideWithValue(gateway),
         deviceProvider.overrideWithValue(device ?? FakeDevice()),
         clockProvider.overrideWithValue(() => now),
+        databaseOpenerProvider.overrideWithValue((_) => FieldDatabase(NativeDatabase.memory())),
+        syncIntervalProvider.overrideWithValue(null),
       ],
       child: const FieldApp(),
     ),
@@ -54,14 +74,14 @@ Future<void> login(WidgetTester tester, {String password = 'certa123'}) async {
 
 void main() {
   group('login', () {
-    testWidgets('senha errada mostra a mensagem e fica no login', (tester) async {
+    testApp('senha errada mostra a mensagem e fica no login', (tester) async {
       await pumpApp(tester, FakeGateway());
       await login(tester, password: 'errada');
       expect(find.text('E-mail ou senha incorretos.'), findsOneWidget);
       expect(find.text('Minha agenda'), findsNothing);
     });
 
-    testWidgets('com uma empresa só, entra direto na agenda', (tester) async {
+    testApp('com uma empresa só, entra direto na agenda', (tester) async {
       final gateway = FakeGateway()..addVisit(1, DateTime(2026, 11, 17, 9));
       await pumpApp(tester, gateway);
       await login(tester);
@@ -71,7 +91,7 @@ void main() {
       expect(find.text('OS 2026-000001'), findsOneWidget);
     });
 
-    testWidgets('acesso sem papel de técnico explica e fica no login', (tester) async {
+    testApp('acesso sem papel de técnico explica e fica no login', (tester) async {
       final gateway = FakeGateway()
         ..failNext['enterTenant'] = const GatewayException('Sem permissão.', code: 'FORBIDDEN');
       await pumpApp(tester, gateway);
@@ -80,7 +100,7 @@ void main() {
       expect(find.text('Minha agenda'), findsNothing);
     });
 
-    testWidgets('com duas empresas, escolhe e depois troca pelo menu', (tester) async {
+    testApp('com duas empresas, escolhe e depois troca pelo menu', (tester) async {
       final gateway = FakeGateway(tenants: [FakeGateway.fornoNorte, FakeGateway.frioSul]);
       await pumpApp(tester, gateway);
       await login(tester);
@@ -96,8 +116,8 @@ void main() {
       expect(find.text('Escolha a empresa'), findsOneWidget);
     });
 
-    testWidgets('sessão vencida volta ao login com aviso', (tester) async {
-      final gateway = FakeGateway()..failNext['myVisits'] = const SessionLost();
+    testApp('sessão vencida volta ao login com aviso', (tester) async {
+      final gateway = FakeGateway()..failNext['pull'] = const SessionLost();
       await pumpApp(tester, gateway);
       await login(tester);
       expect(find.byKey(const Key('login-notice')), findsOneWidget);
@@ -106,7 +126,7 @@ void main() {
   });
 
   group('agenda', () {
-    testWidgets('em andamento, atrasadas e dias, sem canceladas', (tester) async {
+    testApp('em andamento, atrasadas e dias, sem canceladas', (tester) async {
       final gateway = FakeGateway()
         ..addVisit(1, DateTime(2026, 11, 17, 14))
         ..addVisit(2, DateTime(2026, 11, 17, 9), status: 'on_site')
@@ -116,9 +136,7 @@ void main() {
       await pumpApp(tester, gateway);
       await login(tester);
 
-      final (from, to) = gateway.lastRange!;
-      expect(from, DateTime(2026, 11, 15));
-      expect(to, DateTime(2026, 12, 2));
+      expect(gateway.registeredDevices, hasLength(1));
 
       final titles = ['Em andamento', 'Atrasadas', 'Hoje', 'Amanhã'];
       final ys = [for (final t in titles) tester.getTopLeft(find.text(t)).dy];
@@ -128,13 +146,13 @@ void main() {
       expect(find.text('No local'), findsOneWidget);
     });
 
-    testWidgets('acesso sem técnico ligado mostra o aviso', (tester) async {
+    testApp('acesso sem técnico ligado mostra o aviso', (tester) async {
       await pumpApp(tester, FakeGateway(linkedToTechnician: false));
       await login(tester);
       expect(find.textContaining('não está ligado a um técnico'), findsOneWidget);
     });
 
-    testWidgets('sem visitas mostra a agenda vazia', (tester) async {
+    testApp('sem visitas mostra a agenda vazia', (tester) async {
       await pumpApp(tester, FakeGateway());
       await login(tester);
       expect(find.text('Nenhuma visita na sua agenda nos próximos dias.'), findsOneWidget);

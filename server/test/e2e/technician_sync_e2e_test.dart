@@ -104,6 +104,8 @@ void main() {
     expect(page.workOrders.map((w) => w.id), contains(visit.workOrderId));
     expect(page.scopeFrom.isBefore(page.serverTime), isTrue);
     expect(page.visits.every((v) => v.technicianId == t01.id), isTrue);
+    // frio-sul exige o QR no check-in: o app precisa saber antes, offline.
+    expect(page.visits.singleWhere((v) => v.id == visit.id).requireQrCheckIn, isTrue);
   });
 
   test('push em lote aplica na ordem, grava o horário do aparelho e reenvio é duplicate', () async {

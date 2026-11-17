@@ -33,4 +33,7 @@ fields:
   checkInDistanceM: double?
   checkInOffSite: bool
   checkInJustification: String?
+  # A OS pede o QR no check-in (tipo da OS ou empresa); GPS e manual exigem
+  # justificativa.
+  requireQrCheckIn: bool, default=false
   version: int

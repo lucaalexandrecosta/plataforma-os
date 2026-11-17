@@ -1,9 +1,14 @@
+import 'dart:convert';
+
 import 'package:plataforma_os_client/plataforma_os_client.dart';
 import 'package:plataforma_os_field/src/api/gateway.dart';
+import 'package:plataforma_os_field/src/local/visit_rules.dart';
 import 'package:serverpod_client/serverpod_client.dart' show UuidValue;
 
-/// Gateway em memória para os testes de widget. Imita as regras do servidor
-/// que a tela precisa respeitar (transições da visita e efeito na OS).
+/// Servidor em memória para os testes de widget: login, registro do
+/// aparelho, pull do recorte e push com as regras de visita do servidor
+/// (as mesmas de [applyVisitMutation], mais a etiqueta do QR e a
+/// idempotência por `mutationId`).
 class FakeGateway implements Gateway {
   FakeGateway({List<TenantSummary>? tenants, this.linkedToTechnician = true}) : tenants = tenants ?? [frioSul];
 
@@ -20,33 +25,37 @@ class FakeGateway implements Gateway {
     status: TenantStatus.active,
   );
 
-  static final technician = Technician(
-    id: UuidValue.fromString('00000000-0000-4000-8000-0000000000d1'),
-    code: 'T01',
-    name: 'Eduardo Técnico',
-    isActive: true,
-    version: 1,
-  );
+  static final technicianId = UuidValue.fromString('00000000-0000-4000-8000-0000000000d1');
 
   /// Conteúdo do QR da etiqueta do bem das OS de exemplo.
   static const assetQr = 'https://qr.example/q/ABCD-2345';
 
+  static const offlineError = GatewayException('Sem conexão com o servidor. Confira a internet e tente de novo.');
+
   final List<TenantSummary> tenants;
   final bool linkedToTechnician;
   final calls = <String>[];
+
+  /// Estado do servidor.
   final visits = <Visit>[];
   final workOrders = <UuidValue, WorkOrder>{};
 
-  /// Exige justificativa no GPS, como numa OS que pede o QR.
-  var requireQr = false;
+  /// Sem rede: sync falha, ações ficam na fila.
+  var offline = false;
+
+  /// O próximo push volta sem nenhum resultado (lote interrompido no servidor).
+  var nextPushEmpty = false;
+
+  /// O servidor aplica o próximo push, mas a resposta se perde na rede.
+  var dropNextPushResponse = false;
 
   /// Próximo erro a lançar (uma vez) na chamada com esse nome.
   final failNext = <String, GatewayException>{};
 
   String? enteredSlug;
-  VisitCheckIn? lastCheckIn;
-  VisitFinish? lastFinish;
-  (DateTime, DateTime)? lastRange;
+  final registeredDevices = <UuidValue>[];
+  final pushed = <SyncMutation>[];
+  final _results = <UuidValue, SyncMutationResult>{};
 
   void _maybeFail(String call) {
     calls.add(call);
@@ -54,8 +63,21 @@ class FakeGateway implements Gateway {
     if (error != null) throw error;
   }
 
+  void _network() {
+    if (offline) throw offlineError;
+  }
+
+  Visit visitNumber(int n) => visits.singleWhere((v) => v.workOrderNumber.endsWith('$n'));
+
   /// Visita [n] da OS [n], agendada em [start] por 2 horas.
-  void addVisit(int n, DateTime start, {String status = 'scheduled', String priority = 'normal', bool asset = true}) {
+  void addVisit(
+    int n,
+    DateTime start, {
+    String status = 'scheduled',
+    String priority = 'normal',
+    bool asset = true,
+    bool requireQr = false,
+  }) {
     final woId = UuidValue.fromString('00000000-0000-4000-8000-${n.toString().padLeft(12, '0')}');
     final number = '2026-${n.toString().padLeft(6, '0')}';
     workOrders[woId] = WorkOrder(
@@ -73,6 +95,7 @@ class FakeGateway implements Gateway {
       customerName: 'Mercado Bom Preço',
       branchName: 'Loja Centro',
       problemDescription: 'Não gela',
+      requesterName: 'Carlos',
       reopenedCount: 0,
       createdAt: start.subtract(const Duration(days: 1)).toUtc(),
       statusChangedAt: start.subtract(const Duration(days: 1)).toUtc(),
@@ -91,14 +114,25 @@ class FakeGateway implements Gateway {
         customerName: 'Mercado Bom Preço',
         branchName: 'Loja Centro',
         visitNumber: 1,
-        technicianId: technician.id,
-        technicianName: technician.name,
+        technicianId: technicianId,
+        technicianName: 'Eduardo Técnico',
         status: status,
         scheduledStart: start.toUtc(),
         scheduledEnd: start.add(const Duration(hours: 2)).toUtc(),
         checkInOffSite: false,
+        requireQrCheckIn: requireQr,
         version: 1,
       ),
+    );
+  }
+
+  /// O despacho cancela a visita [n] no servidor.
+  void cancelVisit(int n) {
+    final i = visits.indexWhere((v) => v.workOrderNumber.endsWith('$n'));
+    visits[i] = visits[i].copyWith(
+      status: 'cancelled',
+      cancellationReason: 'Cliente remarcou',
+      version: visits[i].version + 1,
     );
   }
 
@@ -143,143 +177,111 @@ class FakeGateway implements Gateway {
   @override
   void signOut() => calls.add('signOut');
 
-  // ----------------------------------------------------------- agenda
-  @override
-  Future<Technician?> myTechnician() async {
-    _maybeFail('myTechnician');
-    return linkedToTechnician ? technician : null;
+  // ----------------------------------------------------------- sync
+  void _technician() {
+    if (!linkedToTechnician) {
+      throw const GatewayException('Seu acesso não está ligado a um técnico desta empresa.', code: 'FORBIDDEN');
+    }
   }
 
   @override
-  Future<List<Visit>> myVisits(DateTime from, DateTime to) async {
-    _maybeFail('myVisits');
-    lastRange = (from, to);
-    return [
+  Future<void> registerDevice(DeviceRegistration device) async {
+    _maybeFail('registerDevice');
+    _network();
+    _technician();
+    registeredDevices.add(device.deviceId);
+  }
+
+  @override
+  Future<SyncPullResult> pull(UuidValue deviceId) async {
+    _maybeFail('pull');
+    _network();
+    _technician();
+    final mine = [
       for (final v in visits)
-        if (!v.scheduledStart.isBefore(from.toUtc()) && v.scheduledStart.isBefore(to.toUtc())) v,
+        if (v.technicianId == technicianId && v.status != 'cancelled') v,
     ];
-  }
-
-  @override
-  Future<Visit> visit(UuidValue id) async {
-    _maybeFail('visit');
-    return visits.singleWhere((v) => v.id == id);
-  }
-
-  @override
-  Future<WorkOrderDetail> workOrder(UuidValue id) async {
-    _maybeFail('workOrder');
-    return WorkOrderDetail(workOrder: workOrders[id]!, history: const [], otherOpenOnAsset: const []);
-  }
-
-  // ----------------------------------------------------------- execução
-  Visit _move(Visit visit, String status, {String? woStatus, Visit Function(Visit)? also}) {
-    final i = visits.indexWhere((v) => v.id == visit.id);
-    final current = visits[i];
-    if (current.version != visit.version) {
-      throw GatewayException('A visita foi alterada.', code: 'VERSION_MISMATCH');
-    }
-    if (woStatus != null) {
-      final wo = workOrders[current.workOrderId]!;
-      workOrders[wo.id] = wo.copyWith(status: woStatus, version: wo.version + 1);
-    }
-    var updated = current.copyWith(
-      status: status,
-      version: current.version + 1,
-      workOrderStatus: workOrders[current.workOrderId]!.status,
-    );
-    if (also != null) updated = also(updated);
-    visits[i] = updated;
-    return updated;
-  }
-
-  void _require(Visit visit, Set<String> allowed) {
-    final current = visits.singleWhere((v) => v.id == visit.id);
-    if (!allowed.contains(current.status)) {
-      throw const GatewayException('Ação não permitida neste status.', code: 'INVALID_TRANSITION');
-    }
-  }
-
-  @override
-  Future<Visit> startTravel(Visit visit) async {
-    _maybeFail('startTravel');
-    _require(visit, {'scheduled'});
-    return _move(
-      visit,
-      'en_route',
-      woStatus: 'in_progress',
-      also: (v) => v.copyWith(travelStartedAt: DateTime.utc(2026, 11, 17, 11)),
+    return SyncPullResult(
+      serverTime: DateTime.now().toUtc(),
+      scopeFrom: DateTime.utc(2026, 11, 15),
+      scopeTo: DateTime.utc(2026, 12, 2),
+      visits: mine,
+      workOrders: [for (final v in mine) workOrders[v.workOrderId]!],
     );
   }
 
   @override
-  Future<Visit> checkIn(Visit visit, VisitCheckIn input) async {
-    _maybeFail('checkIn');
-    _require(visit, {'scheduled', 'en_route'});
-    lastCheckIn = input;
-    switch (input.method) {
-      case 'qr':
-        if (input.scannedCode != assetQr) {
-          throw const GatewayException('A etiqueta lida não é do bem desta OS.', code: 'QR_ASSET_MISMATCH');
-        }
-      case 'gps':
-        if (requireQr && (input.justification ?? '').isEmpty) {
-          throw const GatewayException(
-            'Esta OS pede a leitura do QR; justifique o check-in por GPS.',
-            code: 'VALIDATION_FAILED',
-            fieldErrors: {'justification': 'Esta OS pede a leitura do QR; justifique o check-in por GPS.'},
+  Future<List<SyncMutationResult>> push(SyncPushRequest request) async {
+    _maybeFail('push');
+    _network();
+    _technician();
+    if (nextPushEmpty) {
+      nextPushEmpty = false;
+      return const [];
+    }
+    final failed = <UuidValue>{};
+    final results = <SyncMutationResult>[];
+    for (final m in request.mutations) {
+      pushed.add(m);
+      final previous = _results[m.mutationId];
+      if (previous != null) {
+        results.add(previous.status == 'applied' ? previous.copyWith(status: 'duplicate') : previous);
+        continue;
+      }
+      final i = visits.indexWhere((v) => v.id == m.entityId);
+      final visit = visits[i];
+      SyncMutationResult result;
+      if (failed.contains(m.entityId)) {
+        result = SyncMutationResult(
+          mutationId: m.mutationId,
+          status: 'rejected',
+          errorCode: 'DEPENDENCY_FAILED',
+          errorMessage: 'Uma ação anterior desta visita não foi aceita.',
+          visit: visit,
+        );
+      } else if (visit.status == 'cancelled') {
+        result = SyncMutationResult(
+          mutationId: m.mutationId,
+          status: 'conflict',
+          errorCode: 'VISIT_CANCELLED',
+          errorMessage: 'Esta visita foi cancelada pelo despacho.',
+          visit: visit,
+        );
+      } else {
+        final payload = VisitMutationPayload.fromJson(jsonDecode(m.payload) as Map<String, dynamic>);
+        try {
+          final scanned = payload.checkIn?.scannedCode;
+          if (m.type == VisitMutation.checkIn && payload.checkIn?.method == 'qr' && scanned != assetQr) {
+            throw const GatewayException('A etiqueta lida não é do bem desta OS.', code: 'QR_ASSET_MISMATCH');
+          }
+          final updated = applyVisitMutation(
+            visit,
+            m.type,
+            payload,
+            DateTime.now(),
+          ).copyWith(version: visit.version + 1);
+          visits[i] = updated;
+          final wo = workOrders[visit.workOrderId]!;
+          workOrders[wo.id] = wo.copyWith(status: updated.workOrderStatus, version: wo.version + 1);
+          result = SyncMutationResult(mutationId: m.mutationId, status: 'applied', visit: updated);
+        } on GatewayException catch (e) {
+          result = SyncMutationResult(
+            mutationId: m.mutationId,
+            status: 'rejected',
+            errorCode: e.code,
+            errorMessage: e.message,
+            visit: visit,
           );
         }
-      case 'manual':
-        if ((input.justification ?? '').isEmpty) {
-          throw const GatewayException('Justifique o check-in manual.', code: 'VALIDATION_FAILED');
-        }
+      }
+      if (result.status != 'applied') failed.add(m.entityId);
+      _results[m.mutationId] = result;
+      results.add(result);
     }
-    return _move(
-      visit,
-      'on_site',
-      woStatus: 'in_progress',
-      also: (v) => v.copyWith(
-        checkedInAt: DateTime.utc(2026, 11, 17, 11, 30),
-        checkInMethod: input.method,
-        checkInJustification: input.justification,
-      ),
-    );
-  }
-
-  @override
-  Future<Visit> pause(Visit visit) async {
-    _maybeFail('pause');
-    _require(visit, {'on_site'});
-    return _move(visit, 'paused');
-  }
-
-  @override
-  Future<Visit> resume(Visit visit) async {
-    _maybeFail('resume');
-    _require(visit, {'paused'});
-    return _move(visit, 'on_site');
-  }
-
-  @override
-  Future<Visit> finish(Visit visit, VisitFinish input) async {
-    _maybeFail('finish');
-    _require(visit, {'scheduled', 'en_route', 'on_site', 'paused'});
-    lastFinish = input;
-    final woStatus = switch (input.outcome) {
-      'resolved' => 'completed',
-      'not_executed' => 'open',
-      _ => 'on_hold',
-    };
-    return _move(
-      visit,
-      'finished',
-      woStatus: woStatus,
-      also: (v) => v.copyWith(
-        outcome: input.outcome,
-        outcomeNotes: input.notes,
-        finishedAt: DateTime.utc(2026, 11, 17, 13),
-      ),
-    );
+    if (dropNextPushResponse) {
+      dropNextPushResponse = false;
+      throw offlineError;
+    }
+    return results;
   }
 }
