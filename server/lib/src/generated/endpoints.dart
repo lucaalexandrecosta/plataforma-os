@@ -458,6 +458,15 @@ class Endpoints extends _is.EndpointDispatch {
                 technicianApp: params['technicianApp'],
               ),
         ),
+        'myTenants': _is.MethodConnector(
+          name: 'myTenants',
+          params: {},
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['auth'] as _i077kp7v.AuthEndpoint).myTenants(session),
+        ),
       },
     );
     connectors['emailIdp'] = _is.EndpointConnector(

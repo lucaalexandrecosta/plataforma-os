@@ -20,4 +20,9 @@ class AuthEndpoint extends Endpoint {
   /// no tenant, ou tenant inexistente), `TENANT_SUSPENDED`.
   Future<TenantToken> selectTenant(Session session, String tenantSlug, {bool? technicianApp}) =>
       uc.selectTenant(session, tenantSlug: tenantSlug, technicianApp: technicianApp ?? false);
+
+  /// Empresas em que o usuário da sessão de login pode entrar, em ordem de
+  /// nome. Erros: `UNAUTHENTICATED`, `FORBIDDEN` (usuário inativo ou sem
+  /// convite).
+  Future<List<TenantSummary>> myTenants(Session session) => uc.myTenants(session);
 }

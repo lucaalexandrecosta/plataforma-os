@@ -1,0 +1,33 @@
+# Backoffice da equipe (Flutter Web): login próprio, escolha de empresa, OS e
+# bens. Tokens só em memória (docs/04 §4.3): recarregar a página pede login.
+name: plataforma_os_backoffice
+description: Backoffice web da plataforma de OS.
+publish_to: none
+version: 0.1.0
+resolution: workspace
+
+environment:
+  sdk: ^3.12.0
+  flutter: ">=3.47.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  flutter_riverpod: ^3.0.0
+  flutter_web_plugins:
+    sdk: flutter
+  go_router: ^17.0.0
+  intl: any
+  plataforma_os_client: any
+  serverpod_auth_core_client: 4.1.1
+  serverpod_client: 4.1.1
+
+dev_dependencies:
+  flutter_lints: ^6.0.0
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true

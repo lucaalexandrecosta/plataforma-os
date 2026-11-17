@@ -1,0 +1,82 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
+
+import '../session/session.dart';
+
+/// Moldura das telas internas: empresa e usuário no topo, menu à esquerda.
+class AppShell extends ConsumerWidget {
+  const AppShell({super.key, required this.location, required this.child});
+
+  final String location;
+  final Widget child;
+
+  static const _sections = [
+    (path: '/os', label: 'Ordens de serviço', icon: Icons.assignment_outlined, selected: Icons.assignment),
+    (path: '/bens', label: 'Bens', icon: Icons.inventory_2_outlined, selected: Icons.inventory_2),
+  ];
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final state = ref.watch(sessionProvider);
+    if (state is! SignedIn) return const SizedBox.shrink();
+    final me = state.me;
+    final index = _sections.indexWhere((s) => location.startsWith(s.path));
+    final wide = MediaQuery.sizeOf(context).width >= 900;
+
+    return Scaffold(
+      appBar: AppBar(
+        title: Text(me.tenant.displayName),
+        actions: [
+          PopupMenuButton<String>(
+            key: const Key('user-menu'),
+            tooltip: 'Conta',
+            onSelected: (choice) {
+              final session = ref.read(sessionProvider.notifier);
+              if (choice == 'switch') session.chooseAnotherTenant();
+              if (choice == 'logout') session.signOut();
+            },
+            itemBuilder: (context) => [
+              PopupMenuItem(
+                enabled: false,
+                child: Text(me.email == null ? me.fullName : '${me.fullName}\n${me.email}'),
+              ),
+              const PopupMenuDivider(),
+              if (state.tenants.length > 1) const PopupMenuItem(value: 'switch', child: Text('Trocar de empresa')),
+              const PopupMenuItem(value: 'logout', child: Text('Sair')),
+            ],
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Row(
+                children: [
+                  const Icon(Icons.account_circle_outlined),
+                  const SizedBox(width: 8),
+                  Text(me.fullName),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+      body: Row(
+        children: [
+          NavigationRail(
+            extended: wide,
+            selectedIndex: index < 0 ? null : index,
+            labelType: wide ? NavigationRailLabelType.none : NavigationRailLabelType.all,
+            onDestinationSelected: (i) => context.go(_sections[i].path),
+            destinations: [
+              for (final s in _sections)
+                NavigationRailDestination(icon: Icon(s.icon), selectedIcon: Icon(s.selected), label: Text(s.label)),
+            ],
+          ),
+          const VerticalDivider(width: 1),
+          // A chave da empresa zera o estado das telas ao trocar de empresa.
+          Expanded(
+            child: KeyedSubtree(key: ValueKey(me.tenant.id), child: child),
+          ),
+        ],
+      ),
+    );
+  }
+}

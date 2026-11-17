@@ -17,6 +17,7 @@ products:
   - create:
 auth:
   - selectTenant:
+  - myTenants:
 emailIdp:
   - login:
   - startRegistration:
