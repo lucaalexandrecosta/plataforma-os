@@ -14,6 +14,7 @@ class FakeGateway implements Gateway {
     'work_orders.close',
     'work_orders.reopen',
     'assets.manage',
+    'visits.schedule',
   ];
 
   static final frioSul = TenantSummary(
@@ -237,5 +238,144 @@ class FakeGateway implements Gateway {
   Future<WorkOrder> reopenWorkOrder(WorkOrder wo, String reason) async {
     _maybeFail('reopenWorkOrder');
     return _replace(wo, 'open');
+  }
+
+  // agenda
+  final technicianList = <Technician>[
+    Technician(
+      id: UuidValue.fromString('00000000-0000-4000-8000-0000000000d1'),
+      code: 'T01',
+      name: 'Eduardo Técnico',
+      isActive: true,
+      version: 1,
+    ),
+  ];
+  final visitList = <Visit>[];
+  VisitInput? lastVisitInput;
+  DateTime? lastAgendaFrom;
+  DateTime? lastAgendaTo;
+
+  static Visit sampleVisit(WorkOrder wo, Technician t, DateTime start, {int number = 1, String status = 'scheduled'}) =>
+      Visit(
+        id: UuidValue.fromString('00000000-0000-4000-9000-${number.toString().padLeft(12, '0')}'),
+        workOrderId: wo.id,
+        workOrderNumber: wo.number,
+        workOrderStatus: 'scheduled',
+        workOrderPriority: wo.priority,
+        problemDescription: wo.problemDescription,
+        assetLabel: wo.assetLabel,
+        productName: wo.productName,
+        visitNumber: number,
+        technicianId: t.id,
+        technicianName: t.name,
+        status: status,
+        scheduledStart: start,
+        scheduledEnd: start.add(const Duration(hours: 2)),
+        checkInOffSite: false,
+        version: 1,
+      );
+
+  @override
+  Future<List<Technician>> technicians({bool includeInactive = false}) async {
+    _maybeFail('technicians');
+    return [
+      for (final t in technicianList)
+        if (includeInactive || t.isActive) t,
+    ];
+  }
+
+  @override
+  Future<Technician> createTechnician(TechnicianInput input) async {
+    _maybeFail('createTechnician');
+    final t = Technician(
+      id: UuidValue.fromString('00000000-0000-4000-8000-0000000000d${technicianList.length + 1}'),
+      code: input.code,
+      name: input.name,
+      email: input.email,
+      phone: input.phone,
+      isActive: input.isActive,
+      version: 1,
+    );
+    technicianList.add(t);
+    return t;
+  }
+
+  @override
+  Future<Technician> updateTechnician(Technician technician, TechnicianInput input) async {
+    _maybeFail('updateTechnician');
+    final t = technician.copyWith(
+      code: input.code,
+      name: input.name,
+      isActive: input.isActive,
+      version: technician.version + 1,
+    );
+    technicianList[technicianList.indexWhere((x) => x.id == t.id)] = t;
+    return t;
+  }
+
+  @override
+  Future<List<Visit>> agenda(
+    DateTime from,
+    DateTime to, {
+    UuidValue? technicianId,
+    bool includeCancelled = false,
+  }) async {
+    _maybeFail('agenda');
+    lastAgendaFrom = from;
+    lastAgendaTo = to;
+    return [
+      for (final v in visitList)
+        if (!v.scheduledStart.isBefore(from) &&
+            v.scheduledStart.isBefore(to) &&
+            (includeCancelled || v.status != 'cancelled'))
+          v,
+    ];
+  }
+
+  @override
+  Future<List<Visit>> visitsOfWorkOrder(UuidValue workOrderId) async => [
+    for (final v in visitList)
+      if (v.workOrderId == workOrderId) v,
+  ];
+
+  @override
+  Future<Visit> scheduleVisit(UuidValue workOrderId, VisitInput input) async {
+    _maybeFail('scheduleVisit');
+    lastVisitInput = input;
+    final wo = workOrderList.singleWhere((w) => w.id == workOrderId);
+    final t = technicianList.singleWhere((x) => x.id == input.technicianId);
+    final v = sampleVisit(
+      wo,
+      t,
+      input.scheduledStart,
+      number: visitList.length + 1,
+    ).copyWith(scheduledEnd: input.scheduledEnd);
+    visitList.add(v);
+    _replace(wo, 'scheduled');
+    return v;
+  }
+
+  @override
+  Future<Visit> rescheduleVisit(Visit visit, VisitInput input) async {
+    _maybeFail('rescheduleVisit');
+    lastVisitInput = input;
+    final v = visit.copyWith(
+      scheduledStart: input.scheduledStart,
+      scheduledEnd: input.scheduledEnd,
+      version: visit.version + 1,
+    );
+    visitList[visitList.indexWhere((x) => x.id == v.id)] = v;
+    return v;
+  }
+
+  String? lastVisitCancelReason;
+
+  @override
+  Future<Visit> cancelVisit(Visit visit, String reason) async {
+    _maybeFail('cancelVisit');
+    lastVisitCancelReason = reason;
+    final v = visit.copyWith(status: 'cancelled', cancellationReason: reason, version: visit.version + 1);
+    visitList[visitList.indexWhere((x) => x.id == v.id)] = v;
+    return v;
   }
 }

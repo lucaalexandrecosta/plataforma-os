@@ -33,8 +33,9 @@ class _AssetsPageState extends ConsumerState<AssetsPage> {
     super.dispose();
   }
 
-  void _load() =>
-      _page = ref.read(gatewayProvider).assets(search: _search.text, limit: PagerBar.pageSize, offset: _offset);
+  void _load() {
+    _page = ref.read(gatewayProvider).assets(search: _search.text, limit: PagerBar.pageSize, offset: _offset);
+  }
 
   @override
   Widget build(BuildContext context) {

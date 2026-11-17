@@ -29,3 +29,18 @@ String formatMoney(int? cents) {
   }
   return '${negative ? '-' : ''}R\$ $grouped,${_two(abs % 100)}';
 }
+
+/// 14:05 (hora local).
+String formatTime(DateTime? value) {
+  if (value == null) return '—';
+  final d = value.toLocal();
+  return '${_two(d.hour)}:${_two(d.minute)}';
+}
+
+const _weekdays = ['segunda', 'terça', 'quarta', 'quinta', 'sexta', 'sábado', 'domingo'];
+
+/// "terça, 17/11/2026".
+String formatDay(DateTime value) => '${_weekdays[value.weekday - 1]}, ${formatDate(value)}';
+
+/// Início do dia local.
+DateTime startOfDay(DateTime value) => DateTime(value.year, value.month, value.day);
