@@ -66,6 +66,10 @@ visits:
   - pause:
   - resume:
   - finish:
+technicianSync:
+  - registerDevice:
+  - pull:
+  - push:
 branches:
   - list:
   - create:

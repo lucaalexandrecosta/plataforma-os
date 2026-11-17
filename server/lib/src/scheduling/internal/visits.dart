@@ -94,6 +94,13 @@ abstract final class Visits {
     return [for (final r in rows) _map(r)];
   }
 
+  /// Visita como está no servidor, para o push do sync decidir entre aplicar
+  /// e recusar (sem conferir versão: a mutação é um comando).
+  static Future<Visit?> findForSync(Session session, UuidValue id) async {
+    await Authorization.require(session, executePermission);
+    return _find(session, id);
+  }
+
   static Future<List<Visit>> ofWorkOrder(Session session, UuidValue workOrderId) async {
     await Authorization.requireAny(session, _readPermissions);
     final rows = await session.db.unsafeQuery(
@@ -204,18 +211,41 @@ abstract final class Visits {
 
   // ------------------------------------------------------------------ execução (técnico da visita)
 
-  static Future<Visit> startTravel(Session session, UuidValue id, int expectedVersion) async {
+  /// [occurredAt]: horário do fato no aparelho (sync offline); limitado a
+  /// [maxBackdate] para trás e nunca no futuro. [transaction]: a do push do
+  /// sync, que grava a mutação junto (idempotência).
+  static Future<Visit> startTravel(
+    Session session,
+    UuidValue id,
+    int expectedVersion, {
+    DateTime? occurredAt,
+    Transaction? transaction,
+  }) async {
     final visit = await _ownVisit(session, id, expectedVersion);
     _requireStatus(session, visit, const {'scheduled'}, 'O deslocamento só começa em visita agendada.');
     await _ensureNoOtherActive(session, visit);
-    await session.db.transaction((tx) async {
-      await _apply(session, id, expectedVersion, "status = 'en_route', travel_started_at = now()", const {}, tx);
+    return _inTransaction(session, transaction, (tx) async {
+      await _apply(
+        session,
+        id,
+        expectedVersion,
+        "status = 'en_route', travel_started_at = @at",
+        {'at': _at(occurredAt)},
+        tx,
+      );
       await WorkOrders.onVisitStarted(session, visit.workOrderId, tx, checkedIn: false);
+      return (await _find(session, id, transaction: tx))!;
     });
-    return (await _find(session, id))!;
   }
 
-  static Future<Visit> checkIn(Session session, UuidValue id, int expectedVersion, VisitCheckIn input) async {
+  static Future<Visit> checkIn(
+    Session session,
+    UuidValue id,
+    int expectedVersion,
+    VisitCheckIn input, {
+    DateTime? occurredAt,
+    Transaction? transaction,
+  }) async {
     final visit = await _ownVisit(session, id, expectedVersion);
     _requireStatus(session, visit, const {
       'scheduled',
@@ -256,12 +286,12 @@ abstract final class Visits {
         throw ApiErrors.fieldError(session, 'method', 'INVALID', 'Método de check-in inválido.');
     }
     final offSite = distance != null && distance > offSiteMeters;
-    await session.db.transaction((tx) async {
+    return _inTransaction(session, transaction, (tx) async {
       await _apply(
         session,
         id,
         expectedVersion,
-        "status = 'on_site', checked_in_at = now(), check_in_method = @method, check_in_latitude = @lat, "
+        "status = 'on_site', checked_in_at = @at, check_in_method = @method, check_in_latitude = @lat, "
         'check_in_longitude = @lng, check_in_accuracy_m = @accuracy, check_in_distance_m = @distance, '
         'check_in_off_site = @offSite, check_in_justification = @justification',
         {
@@ -272,34 +302,42 @@ abstract final class Visits {
           'distance': distance,
           'offSite': offSite,
           'justification': justification,
+          'at': _at(occurredAt),
         },
         tx,
       );
       await WorkOrders.onVisitStarted(session, visit.workOrderId, tx, checkedIn: true, offSite: offSite);
+      return (await _find(session, id, transaction: tx))!;
     });
-    return (await _find(session, id))!;
   }
 
-  static Future<Visit> pause(Session session, UuidValue id, int expectedVersion) async {
+  static Future<Visit> pause(Session session, UuidValue id, int expectedVersion, {Transaction? transaction}) async {
     final visit = await _ownVisit(session, id, expectedVersion);
     _requireStatus(session, visit, const {'on_site'}, 'Só visita em execução pode ser pausada.');
-    await session.db.transaction(
-      (tx) => _apply(session, id, expectedVersion, "status = 'paused'", const {}, tx),
-    );
-    return (await _find(session, id))!;
+    return _inTransaction(session, transaction, (tx) async {
+      await _apply(session, id, expectedVersion, "status = 'paused'", const {}, tx);
+      return (await _find(session, id, transaction: tx))!;
+    });
   }
 
-  static Future<Visit> resume(Session session, UuidValue id, int expectedVersion) async {
+  static Future<Visit> resume(Session session, UuidValue id, int expectedVersion, {Transaction? transaction}) async {
     final visit = await _ownVisit(session, id, expectedVersion);
     _requireStatus(session, visit, const {'paused'}, 'Só visita pausada pode ser retomada.');
     await _ensureNoOtherActive(session, visit);
-    await session.db.transaction(
-      (tx) => _apply(session, id, expectedVersion, "status = 'on_site'", const {}, tx),
-    );
-    return (await _find(session, id))!;
+    return _inTransaction(session, transaction, (tx) async {
+      await _apply(session, id, expectedVersion, "status = 'on_site'", const {}, tx);
+      return (await _find(session, id, transaction: tx))!;
+    });
   }
 
-  static Future<Visit> finish(Session session, UuidValue id, int expectedVersion, VisitFinish input) async {
+  static Future<Visit> finish(
+    Session session,
+    UuidValue id,
+    int expectedVersion,
+    VisitFinish input, {
+    DateTime? occurredAt,
+    Transaction? transaction,
+  }) async {
     final visit = await _ownVisit(session, id, expectedVersion);
     if (!_outcomes.contains(input.outcome)) {
       throw ApiErrors.fieldError(session, 'outcome', 'INVALID', 'Resultado da visita inválido.');
@@ -326,14 +364,20 @@ abstract final class Visits {
     if (input.outcome == 'needs_return' && holdReason != null && !_returnHoldReasons.contains(holdReason)) {
       throw ApiErrors.fieldError(session, 'holdReason', 'INVALID', 'Use "aguardando peça" ou "precisa de retorno".');
     }
-    await session.db.transaction((tx) async {
+    return _inTransaction(session, transaction, (tx) async {
       await _apply(
         session,
         id,
         expectedVersion,
-        "status = 'finished', finished_at = now(), outcome = @outcome, outcome_notes = @notes, "
+        "status = 'finished', finished_at = @at, outcome = @outcome, outcome_notes = @notes, "
         'finish_latitude = @lat, finish_longitude = @lng',
-        {'outcome': input.outcome, 'notes': notes, 'lat': input.latitude, 'lng': input.longitude},
+        {
+          'outcome': input.outcome,
+          'notes': notes,
+          'lat': input.latitude,
+          'lng': input.longitude,
+          'at': _at(occurredAt),
+        },
         tx,
       );
       await WorkOrders.onVisitFinished(
@@ -345,11 +389,28 @@ abstract final class Visits {
         notes: notes,
         holdReason: holdReason,
       );
+      return (await _find(session, id, transaction: tx))!;
     });
-    return (await _find(session, id))!;
   }
 
   // ------------------------------------------------------------------ internos
+
+  /// Quanto um horário informado pelo aparelho pode voltar no tempo.
+  static const maxBackdate = Duration(days: 14);
+
+  /// Horário do fato: o do aparelho, se plausível; senão o do servidor.
+  static DateTime _at(DateTime? occurredAt) {
+    final now = DateTime.now().toUtc();
+    final at = occurredAt?.toUtc();
+    if (at == null || at.isAfter(now) || at.isBefore(now.subtract(maxBackdate))) return now;
+    return at;
+  }
+
+  static Future<T> _inTransaction<T>(
+    Session session,
+    Transaction? outer,
+    Future<T> Function(Transaction tx) body,
+  ) => outer != null ? body(outer) : session.db.transaction(body);
 
   static void _checkPeriod(Session session, DateTime from, DateTime to) {
     if (!to.isAfter(from) || to.difference(from).inDays > 62) {
@@ -450,10 +511,11 @@ abstract final class Visits {
     }
   }
 
-  static Future<Visit?> _find(Session session, UuidValue id) async {
+  static Future<Visit?> _find(Session session, UuidValue id, {Transaction? transaction}) async {
     final rows = await session.db.unsafeQuery(
       '$_select WHERE v.id = @id::uuid',
       parameters: QueryParameters.named({'id': id.uuid}),
+      transaction: transaction,
     );
     return rows.isEmpty ? null : _map(rows.first);
   }

@@ -1,0 +1,7 @@
+# Payload das mutações de visita. occurredAt: horário do fato no aparelho
+# (UTC); checkIn só em visit.check_in e finish só em visit.finish.
+class: VisitMutationPayload
+fields:
+  occurredAt: DateTime?
+  checkIn: VisitCheckIn?
+  finish: VisitFinish?

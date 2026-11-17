@@ -35,6 +35,10 @@ import 'package:plataforma_os_server/src/generated/scheduling/models/visit.dart'
 import 'package:plataforma_os_server/src/generated/scheduling/models/visit_check_in.dart' as _in4grqdw;
 import 'package:plataforma_os_server/src/generated/scheduling/models/visit_finish.dart' as _izl7q3ap;
 import 'package:plataforma_os_server/src/generated/scheduling/models/visit_input.dart' as _isygpo5n;
+import 'package:plataforma_os_server/src/generated/sync/models/device_registration.dart' as _ifayztnr;
+import 'package:plataforma_os_server/src/generated/sync/models/sync_mutation_result.dart' as _ilt9w9x8;
+import 'package:plataforma_os_server/src/generated/sync/models/sync_pull_result.dart' as _iw54s95p;
+import 'package:plataforma_os_server/src/generated/sync/models/sync_push_request.dart' as _is7nu1l0;
 import 'package:plataforma_os_server/src/generated/tenancy/models/branch.dart' as _i7vupwwc;
 import 'package:plataforma_os_server/src/generated/tenancy/models/branch_input.dart' as _i6djw631;
 import 'package:plataforma_os_server/src/generated/tenancy/models/cost_center.dart' as _islkyssd;
@@ -205,6 +209,8 @@ class TestEndpoints {
 
   late final _VisitsEndpoint visits;
 
+  late final _TechnicianSyncEndpoint technicianSync;
+
   late final _BranchesEndpoint branches;
 
   late final _CostCentersEndpoint costCenters;
@@ -259,6 +265,10 @@ class _InternalTestEndpoints extends TestEndpoints implements _ist.InternalTestE
       serializationManager,
     );
     visits = _VisitsEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    technicianSync = _TechnicianSyncEndpoint(
       endpoints,
       serializationManager,
     );
@@ -2221,6 +2231,107 @@ class _VisitsEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<_iezjjcq0.Visit>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
+class _TechnicianSyncEndpoint {
+  _TechnicianSyncEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _is.EndpointDispatch _endpointDispatch;
+
+  final _is.SerializationManager _serializationManager;
+
+  _ida.Future<void> registerDevice(
+    _ist.TestSessionBuilder sessionBuilder,
+    _ifayztnr.DeviceRegistration input,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'technicianSync',
+        method: 'registerDevice',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'technicianSync',
+          methodName: 'registerDevice',
+          parameters: _ist.testObjectToJson({'input': input}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<void>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_iw54s95p.SyncPullResult> pull(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue deviceId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'technicianSync',
+        method: 'pull',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'technicianSync',
+          methodName: 'pull',
+          parameters: _ist.testObjectToJson({'deviceId': deviceId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_iw54s95p.SyncPullResult>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_ilt9w9x8.SyncMutationResult>> push(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is7nu1l0.SyncPushRequest request,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'technicianSync',
+        method: 'push',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'technicianSync',
+          methodName: 'push',
+          parameters: _ist.testObjectToJson({'request': request}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_ilt9w9x8.SyncMutationResult>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
