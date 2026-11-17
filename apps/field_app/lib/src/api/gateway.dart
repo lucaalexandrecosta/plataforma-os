@@ -21,24 +21,19 @@ abstract interface class Gateway {
   /// usuário com papéis e permissões.
   Future<MeInfo> enterTenant(String slug);
 
-  /// Esquece os tokens (ficam só em memória nesta versão).
+  /// Esquece os tokens (ficam só em memória nesta versão: o app precisa de
+  /// rede para entrar; depois de entrar, trabalha sem sinal).
   void signOut();
 
-  // ----------------------------------------------------------- agenda
-  /// Técnico ligado ao login, ou nulo se o acesso não estiver ligado a um.
-  Future<Technician?> myTechnician();
+  // ----------------------------------------------------------- sync
+  /// Registra o aparelho do técnico nesta empresa.
+  Future<void> registerDevice(DeviceRegistration device);
 
-  /// Visitas do técnico com início planejado entre [from] e [to].
-  Future<List<Visit>> myVisits(DateTime from, DateTime to);
-  Future<Visit> visit(UuidValue id);
-  Future<WorkOrderDetail> workOrder(UuidValue id);
+  /// Recorte atual do técnico (visitas e OS).
+  Future<SyncPullResult> pull(UuidValue deviceId);
 
-  // ----------------------------------------------------------- execução
-  Future<Visit> startTravel(Visit visit);
-  Future<Visit> checkIn(Visit visit, VisitCheckIn input);
-  Future<Visit> pause(Visit visit);
-  Future<Visit> resume(Visit visit);
-  Future<Visit> finish(Visit visit, VisitFinish input);
+  /// Envia as ações feitas no aparelho; um resultado por ação, na ordem.
+  Future<List<SyncMutationResult>> push(SyncPushRequest request);
 }
 
 /// Erro para mostrar à pessoa. [code] é o código do catálogo de erros do

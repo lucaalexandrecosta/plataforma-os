@@ -1,0 +1,10 @@
+# Resultado de cada mutação do push. status: applied, duplicate (já aplicada
+# antes), rejected (inválida) ou conflict (o servidor mudou: visita cancelada
+# ou transferida). visit: estado atual da visita no servidor, quando houver.
+class: SyncMutationResult
+fields:
+  mutationId: UuidValue
+  status: String
+  errorCode: String?
+  errorMessage: String?
+  visit: Visit?

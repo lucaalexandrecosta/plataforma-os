@@ -19,6 +19,7 @@ import 'package:plataforma_os_server/src/generated/identity_access/models/tenant
 import 'package:plataforma_os_server/src/generated/patrimony/models/depreciation_closing.dart' as _ip56mlnh;
 import 'package:plataforma_os_server/src/generated/scheduling/models/technician.dart' as _ixvhwnkq;
 import 'package:plataforma_os_server/src/generated/scheduling/models/visit.dart' as _iezjjcq0;
+import 'package:plataforma_os_server/src/generated/sync/models/sync_mutation_result.dart' as _ilt9w9x8;
 import 'package:plataforma_os_server/src/generated/tenancy/models/branch.dart' as _i7vupwwc;
 import 'package:plataforma_os_server/src/generated/tenancy/models/cost_center.dart' as _islkyssd;
 import 'package:plataforma_os_server/src/generated/tenancy/models/tenant_summary.dart' as _inphvrgt;
@@ -59,6 +60,12 @@ import 'scheduling/models/visit.dart' as _i3v1yqab;
 import 'scheduling/models/visit_check_in.dart' as _iz6dmpx4;
 import 'scheduling/models/visit_finish.dart' as _iemqddjv;
 import 'scheduling/models/visit_input.dart' as _iqwjilz9;
+import 'sync/models/device_registration.dart' as _iqd8b9b2;
+import 'sync/models/sync_mutation.dart' as _i8kxdcd0;
+import 'sync/models/sync_mutation_result.dart' as _ihyj8e8a;
+import 'sync/models/sync_pull_result.dart' as _iweo9dks;
+import 'sync/models/sync_push_request.dart' as _iwotyfoq;
+import 'sync/models/visit_mutation_payload.dart' as _ijam3dib;
 import 'tenancy/models/branch.dart' as _iou7eiap;
 import 'tenancy/models/branch_input.dart' as _iptw6tnd;
 import 'tenancy/models/cost_center.dart' as _iehhesp7;
@@ -106,6 +113,12 @@ export 'scheduling/models/visit.dart';
 export 'scheduling/models/visit_check_in.dart';
 export 'scheduling/models/visit_finish.dart';
 export 'scheduling/models/visit_input.dart';
+export 'sync/models/device_registration.dart';
+export 'sync/models/sync_mutation.dart';
+export 'sync/models/sync_mutation_result.dart';
+export 'sync/models/sync_pull_result.dart';
+export 'sync/models/sync_push_request.dart';
+export 'sync/models/visit_mutation_payload.dart';
 export 'tenancy/models/branch.dart';
 export 'tenancy/models/branch_input.dart';
 export 'tenancy/models/cost_center.dart';
@@ -165,6 +178,12 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<_iz6dmpx4.VisitCheckIn>,
       _is.getType<_iemqddjv.VisitFinish>,
       _is.getType<_iqwjilz9.VisitInput>,
+      _is.getType<_iqd8b9b2.DeviceRegistration>,
+      _is.getType<_i8kxdcd0.SyncMutation>,
+      _is.getType<_ihyj8e8a.SyncMutationResult>,
+      _is.getType<_iweo9dks.SyncPullResult>,
+      _is.getType<_iwotyfoq.SyncPushRequest>,
+      _is.getType<_ijam3dib.VisitMutationPayload>,
       _is.getType<_iou7eiap.Branch>,
       _is.getType<_iptw6tnd.BranchInput>,
       _is.getType<_iehhesp7.CostCenter>,
@@ -212,6 +231,12 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<_iz6dmpx4.VisitCheckIn?>,
       _is.getType<_iemqddjv.VisitFinish?>,
       _is.getType<_iqwjilz9.VisitInput?>,
+      _is.getType<_iqd8b9b2.DeviceRegistration?>,
+      _is.getType<_i8kxdcd0.SyncMutation?>,
+      _is.getType<_ihyj8e8a.SyncMutationResult?>,
+      _is.getType<_iweo9dks.SyncPullResult?>,
+      _is.getType<_iwotyfoq.SyncPushRequest?>,
+      _is.getType<_ijam3dib.VisitMutationPayload?>,
       _is.getType<_iou7eiap.Branch?>,
       _is.getType<_iptw6tnd.BranchInput?>,
       _is.getType<_iehhesp7.CostCenter?>,
@@ -236,8 +261,10 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<List<_i3z3bgdl.FieldError>?>,
       _is.getType<Map<String, String>>,
       _is.getType<Map<String, String>?>,
-      _is.getType<List<_i00stvlt.WorkOrderStatusChange>>,
+      _is.getType<List<_i3v1yqab.Visit>>,
       _is.getType<List<_i5zaa4b8.WorkOrder>>,
+      _is.getType<List<_i8kxdcd0.SyncMutation>>,
+      _is.getType<List<_i00stvlt.WorkOrderStatusChange>>,
       _is.getType<List<_i07n19u6.QrTagBatch>>,
       _is.getType<List<_idzaz83i.QrTag>>,
       _is.getType<List<_ico54ik3.ProductSummary>>,
@@ -248,6 +275,7 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<List<_ip56mlnh.DepreciationClosing>>,
       _is.getType<List<_ixvhwnkq.Technician>>,
       _is.getType<List<_iezjjcq0.Visit>>,
+      _is.getType<List<_ilt9w9x8.SyncMutationResult>>,
       _is.getType<List<_i7vupwwc.Branch>>,
       _is.getType<List<_islkyssd.CostCenter>>,
       _is.getType<List<String>?>,
@@ -291,6 +319,12 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       'VisitCheckIn',
       'VisitFinish',
       'VisitInput',
+      'DeviceRegistration',
+      'SyncMutation',
+      'SyncMutationResult',
+      'SyncPullResult',
+      'SyncPushRequest',
+      'VisitMutationPayload',
       'Branch',
       'BranchInput',
       'CostCenter',
@@ -632,6 +666,24 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == _iqwjilz9.VisitInput) {
       return _iqwjilz9.VisitInput.fromJson(data) as T;
     }
+    if (t == _iqd8b9b2.DeviceRegistration) {
+      return _iqd8b9b2.DeviceRegistration.fromJson(data) as T;
+    }
+    if (t == _i8kxdcd0.SyncMutation) {
+      return _i8kxdcd0.SyncMutation.fromJson(data) as T;
+    }
+    if (t == _ihyj8e8a.SyncMutationResult) {
+      return _ihyj8e8a.SyncMutationResult.fromJson(data) as T;
+    }
+    if (t == _iweo9dks.SyncPullResult) {
+      return _iweo9dks.SyncPullResult.fromJson(data) as T;
+    }
+    if (t == _iwotyfoq.SyncPushRequest) {
+      return _iwotyfoq.SyncPushRequest.fromJson(data) as T;
+    }
+    if (t == _ijam3dib.VisitMutationPayload) {
+      return _ijam3dib.VisitMutationPayload.fromJson(data) as T;
+    }
     if (t == _iou7eiap.Branch) {
       return _iou7eiap.Branch.fromJson(data) as T;
     }
@@ -773,6 +825,24 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == _is.getType<_iqwjilz9.VisitInput?>()) {
       return (data != null ? _iqwjilz9.VisitInput.fromJson(data) : null) as T;
     }
+    if (t == _is.getType<_iqd8b9b2.DeviceRegistration?>()) {
+      return (data != null ? _iqd8b9b2.DeviceRegistration.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i8kxdcd0.SyncMutation?>()) {
+      return (data != null ? _i8kxdcd0.SyncMutation.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ihyj8e8a.SyncMutationResult?>()) {
+      return (data != null ? _ihyj8e8a.SyncMutationResult.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iweo9dks.SyncPullResult?>()) {
+      return (data != null ? _iweo9dks.SyncPullResult.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iwotyfoq.SyncPushRequest?>()) {
+      return (data != null ? _iwotyfoq.SyncPushRequest.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ijam3dib.VisitMutationPayload?>()) {
+      return (data != null ? _ijam3dib.VisitMutationPayload.fromJson(data) : null) as T;
+    }
     if (t == _is.getType<_iou7eiap.Branch?>()) {
       return (data != null ? _iou7eiap.Branch.fromJson(data) : null) as T;
     }
@@ -848,11 +918,17 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
               : null)
           as T;
     }
-    if (t == List<_i00stvlt.WorkOrderStatusChange>) {
-      return (data as List).map((e) => deserialize<_i00stvlt.WorkOrderStatusChange>(e)).toList() as T;
+    if (t == List<_i3v1yqab.Visit>) {
+      return (data as List).map((e) => deserialize<_i3v1yqab.Visit>(e)).toList() as T;
     }
     if (t == List<_i5zaa4b8.WorkOrder>) {
       return (data as List).map((e) => deserialize<_i5zaa4b8.WorkOrder>(e)).toList() as T;
+    }
+    if (t == List<_i8kxdcd0.SyncMutation>) {
+      return (data as List).map((e) => deserialize<_i8kxdcd0.SyncMutation>(e)).toList() as T;
+    }
+    if (t == List<_i00stvlt.WorkOrderStatusChange>) {
+      return (data as List).map((e) => deserialize<_i00stvlt.WorkOrderStatusChange>(e)).toList() as T;
     }
     if (t == List<_i07n19u6.QrTagBatch>) {
       return (data as List).map((e) => deserialize<_i07n19u6.QrTagBatch>(e)).toList() as T;
@@ -883,6 +959,9 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     }
     if (t == List<_iezjjcq0.Visit>) {
       return (data as List).map((e) => deserialize<_iezjjcq0.Visit>(e)).toList() as T;
+    }
+    if (t == List<_ilt9w9x8.SyncMutationResult>) {
+      return (data as List).map((e) => deserialize<_ilt9w9x8.SyncMutationResult>(e)).toList() as T;
     }
     if (t == List<_i7vupwwc.Branch>) {
       return (data as List).map((e) => deserialize<_i7vupwwc.Branch>(e)).toList() as T;
@@ -943,6 +1022,12 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _iz6dmpx4.VisitCheckIn => 'VisitCheckIn',
       _iemqddjv.VisitFinish => 'VisitFinish',
       _iqwjilz9.VisitInput => 'VisitInput',
+      _iqd8b9b2.DeviceRegistration => 'DeviceRegistration',
+      _i8kxdcd0.SyncMutation => 'SyncMutation',
+      _ihyj8e8a.SyncMutationResult => 'SyncMutationResult',
+      _iweo9dks.SyncPullResult => 'SyncPullResult',
+      _iwotyfoq.SyncPushRequest => 'SyncPushRequest',
+      _ijam3dib.VisitMutationPayload => 'VisitMutationPayload',
       _iou7eiap.Branch => 'Branch',
       _iptw6tnd.BranchInput => 'BranchInput',
       _iehhesp7.CostCenter => 'CostCenter',
@@ -1036,6 +1121,18 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
         return 'VisitFinish';
       case _iqwjilz9.VisitInput():
         return 'VisitInput';
+      case _iqd8b9b2.DeviceRegistration():
+        return 'DeviceRegistration';
+      case _i8kxdcd0.SyncMutation():
+        return 'SyncMutation';
+      case _ihyj8e8a.SyncMutationResult():
+        return 'SyncMutationResult';
+      case _iweo9dks.SyncPullResult():
+        return 'SyncPullResult';
+      case _iwotyfoq.SyncPushRequest():
+        return 'SyncPushRequest';
+      case _ijam3dib.VisitMutationPayload():
+        return 'VisitMutationPayload';
       case _iou7eiap.Branch():
         return 'Branch';
       case _iptw6tnd.BranchInput():
@@ -1183,6 +1280,24 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     }
     if (dataClassName == 'VisitInput') {
       return deserialize<_iqwjilz9.VisitInput>(data['data']);
+    }
+    if (dataClassName == 'DeviceRegistration') {
+      return deserialize<_iqd8b9b2.DeviceRegistration>(data['data']);
+    }
+    if (dataClassName == 'SyncMutation') {
+      return deserialize<_i8kxdcd0.SyncMutation>(data['data']);
+    }
+    if (dataClassName == 'SyncMutationResult') {
+      return deserialize<_ihyj8e8a.SyncMutationResult>(data['data']);
+    }
+    if (dataClassName == 'SyncPullResult') {
+      return deserialize<_iweo9dks.SyncPullResult>(data['data']);
+    }
+    if (dataClassName == 'SyncPushRequest') {
+      return deserialize<_iwotyfoq.SyncPushRequest>(data['data']);
+    }
+    if (dataClassName == 'VisitMutationPayload') {
+      return deserialize<_ijam3dib.VisitMutationPayload>(data['data']);
     }
     if (dataClassName == 'Branch') {
       return deserialize<_iou7eiap.Branch>(data['data']);

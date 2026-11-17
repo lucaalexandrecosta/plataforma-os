@@ -1,0 +1,7 @@
+# Lote do push (technicianSync.push): até 100 mutações, na ordem em que foram
+# feitas no aparelho.
+class: SyncPushRequest
+fields:
+  deviceId: UuidValue
+  appVersion: String
+  mutations: List<SyncMutation>
