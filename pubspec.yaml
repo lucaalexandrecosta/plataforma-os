@@ -12,6 +12,7 @@ environment:
 
 workspace:
   - packages/core
+  - packages/depreciation
   - server
   - server_client
 
