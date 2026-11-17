@@ -1,0 +1,14 @@
+# Técnico de campo (app.technicians), opcionalmente ligado ao login de uma
+# pessoa com acesso à empresa.
+class: Technician
+fields:
+  id: UuidValue
+  code: String
+  name: String
+  email: String?
+  # E.164 (ex.: +5551999990000).
+  phone: String?
+  userId: UuidValue?
+  branchId: UuidValue?
+  isActive: bool
+  version: int

@@ -2231,6 +2231,7 @@ CREATE TABLE app.work_order_visits (
   check_in_method         text CHECK (check_in_method IN ('qr', 'gps', 'manual')),
   check_in_distance_m     double precision CHECK (check_in_distance_m IS NULL OR check_in_distance_m >= 0),
   check_in_off_site       boolean NOT NULL DEFAULT false,
+  check_in_justification  text,
   finish_latitude         double precision CHECK (finish_latitude BETWEEN -90 AND 90),
   finish_longitude        double precision CHECK (finish_longitude BETWEEN -180 AND 180),
   signature_attachment_id uuid,
@@ -2266,7 +2267,8 @@ CREATE TABLE app.work_order_visits (
   CHECK (status <> 'finished' OR finished_at IS NOT NULL),
   CHECK (status <> 'cancelled' OR cancelled_at IS NOT NULL),
   CHECK (status NOT IN ('on_site', 'paused', 'finished') OR checked_in_at IS NOT NULL OR outcome IN ('customer_absent', 'not_executed')),
-  CHECK ((signature_attachment_id IS NULL) OR (signer_name IS NOT NULL AND signed_at IS NOT NULL))
+  CHECK ((signature_attachment_id IS NULL) OR (signer_name IS NOT NULL AND signed_at IS NOT NULL)),
+  CHECK (check_in_method IS DISTINCT FROM 'manual' OR check_in_justification IS NOT NULL)
 );
 CREATE INDEX work_order_visits_agenda_idx ON app.work_order_visits (tenant_id, technician_id, scheduled_start);
 CREATE INDEX work_order_visits_team_idx ON app.work_order_visits (tenant_id, team_id, scheduled_start) WHERE team_id IS NOT NULL;
@@ -2286,6 +2288,7 @@ COMMENT ON COLUMN app.work_order_visits.service_provider_id IS 'v0.2 (MVP). Pres
 COMMENT ON TABLE app.work_order_visits IS 'Visita/atendimento de uma OS (uma OS pode ter várias: retorno por falta de peça etc.). Técnico responsável único por visita no MVP. Transições: scheduled -> en_route (visit.start_travel, emite visit.travel_started); scheduled/en_route -> on_site (visit.check_in, emite visit.checked_in).';
 COMMENT ON COLUMN app.work_order_visits.check_in_method IS 'Como a presença foi comprovada no check-in: qr (leitura da etiqueta do ativo), gps (dentro do raio do local) ou manual (justificado pelo técnico). A API exige o método em todo check-in novo; nulo apenas em visitas sem check-in.';
 COMMENT ON COLUMN app.work_order_visits.check_in_distance_m IS 'Distância, em metros, entre a posição do check-in e a coordenada do local (customer_sites) no momento do check-in.';
+COMMENT ON COLUMN app.work_order_visits.check_in_justification IS 'Visitas (15/11/2026). Justificativa do técnico quando o check-in não comprova presença pelo QR: obrigatória no método manual (CHECK) e, pela API, também no GPS quando o tipo ou o tenant exige QR (require_qr_check_in).';
 COMMENT ON COLUMN app.work_order_visits.check_in_off_site IS 'Check-in feito fora do raio do local; não bloqueia o atendimento, sinaliza para conferência.';
 COMMENT ON COLUMN app.work_order_visits.signer_document IS 'Documento (CPF/RG/matrícula) informado por quem assinou o atendimento; dado pessoal, mascarado nas listagens.';
 COMMENT ON COLUMN app.work_order_visits.confirmed_symptom_id IS 'Diagnóstico por visita (mutação visit.record_diagnosis, evento visit.diagnosis_recorded): sintoma confirmado em campo. O diagnóstico da OS (work_orders.failure_cause_id/resolution_code_id/resolution_notes) é o da última visita finalizada: ao finalizar uma visita com diagnóstico, a aplicação copia esses campos para a OS; o backoffice pode corrigir a OS na conferência sem alterar a visita.';

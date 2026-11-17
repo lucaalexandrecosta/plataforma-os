@@ -1,0 +1,6 @@
+# Agendamento ou reagendamento de visita (visits.schedule e reschedule).
+class: VisitInput
+fields:
+  technicianId: UuidValue
+  scheduledStart: DateTime
+  scheduledEnd: DateTime

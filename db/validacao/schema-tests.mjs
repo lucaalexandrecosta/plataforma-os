@@ -546,6 +546,16 @@ export async function run({ db, q, t }) {
       /foreign key/, 'OS do tenant A com centro de custo do B')
   })
 
+  await t('visitas: check-in manual exige justificativa', async () => {
+    const f = await mkTenant()
+    const w = await mkWorkOrder(f, { status: 'open' })
+    const v = await mkVisit(f, w.id, f.tech)
+    await fails(() => q(`update app.work_order_visits set status = 'on_site', checked_in_at = now(), check_in_method = 'manual' where id = $1`, [v.id]),
+      /check constraint/, 'manual sem justificativa')
+    await q(`update app.work_order_visits set status = 'on_site', checked_in_at = now(), check_in_method = 'manual',
+               check_in_justification = 'Etiqueta danificada' where id = $1`, [v.id])
+  })
+
   await t('v0.2 escalonamento: aceite exige quem; nível > 0 exige política', async () => {
     const f = await mkTenant()
     const w = await mkWorkOrder(f)
