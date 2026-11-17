@@ -1,0 +1,17 @@
+# Entrada de customers.createSite/updateSite.
+class: CustomerSiteInput
+fields:
+  code: String?
+  name: String
+  street: String?
+  streetNumber: String?
+  complement: String?
+  district: String?
+  city: String?
+  state: String?
+  postalCode: String?
+  latitude: double?
+  longitude: double?
+  phone: String?
+  accessNotes: String?
+  isActive: bool

@@ -16,6 +16,13 @@ class AppShell extends ConsumerWidget {
     (path: '/agenda', label: 'Agenda', icon: Icons.event_outlined, selected: Icons.event, needs: null),
     (path: '/bens', label: 'Bens', icon: Icons.inventory_2_outlined, selected: Icons.inventory_2, needs: null),
     (
+      path: '/clientes',
+      label: 'Clientes',
+      icon: Icons.storefront_outlined,
+      selected: Icons.storefront,
+      needs: 'customers.manage|work_orders.read|assets.manage|visits.schedule',
+    ),
+    (
       path: '/depreciacao',
       label: 'Depreciação',
       icon: Icons.trending_down_outlined,

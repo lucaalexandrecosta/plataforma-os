@@ -3,6 +3,9 @@ assets:
   - get:
   - create:
   - update:
+  - install:
+  - withdraw:
+  - assignments:
 qrTags:
   - generateBatch:
   - listBatches:
@@ -15,6 +18,14 @@ qrTags:
 products:
   - list:
   - create:
+customers:
+  - list:
+  - get:
+  - create:
+  - update:
+  - sites:
+  - createSite:
+  - updateSite:
 auth:
   - selectTenant:
   - myTenants:

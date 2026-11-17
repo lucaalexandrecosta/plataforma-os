@@ -9,6 +9,8 @@ import 'ui/agenda/agenda_page.dart';
 import 'ui/agenda/technicians_page.dart';
 import 'ui/assets/asset_detail_page.dart';
 import 'ui/assets/assets_page.dart';
+import 'ui/customers/customer_detail_page.dart';
+import 'ui/customers/customers_page.dart';
 import 'ui/depreciation/depreciation_page.dart';
 import 'ui/login_page.dart';
 import 'ui/master_data/master_data_page.dart';
@@ -58,6 +60,12 @@ final routerProvider = Provider<GoRouter>((ref) {
                     WorkOrderDetailPage(id: UuidValue.withValidation(state.pathParameters['id']!)),
               ),
             ],
+          ),
+          // Ficha como rota irmã (não filha): voltar recria a lista e recarrega.
+          GoRoute(path: '/clientes', builder: (context, state) => const CustomersPage()),
+          GoRoute(
+            path: '/clientes/:id',
+            builder: (context, state) => CustomerDetailPage(id: UuidValue.withValidation(state.pathParameters['id']!)),
           ),
           GoRoute(path: '/agenda', builder: (context, state) => const AgendaPage()),
           GoRoute(path: '/tecnicos', builder: (context, state) => const TechniciansPage()),

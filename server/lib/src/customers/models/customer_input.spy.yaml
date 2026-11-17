@@ -1,0 +1,14 @@
+# Entrada de customers.create/update. O tipo de documento sai de personType:
+# company → CNPJ (14 dígitos), individual → CPF (11); vazio = sem documento.
+class: CustomerInput
+fields:
+  code: String?
+  name: String
+  tradeName: String?
+  personType: String
+  documentNumber: String?
+  stateRegistration: String?
+  email: String?
+  phone: String?
+  notes: String?
+  isActive: bool

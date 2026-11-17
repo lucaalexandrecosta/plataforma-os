@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:plataforma_os_backoffice/src/ui/master_data/master_data_page.dart';
+import 'package:plataforma_os_backoffice/src/ui/common/format.dart';
 import 'package:plataforma_os_client/plataforma_os_client.dart';
 
 import 'app_test.dart' show login, pumpApp;

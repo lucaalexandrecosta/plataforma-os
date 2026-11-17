@@ -184,6 +184,39 @@ class ServerGateway implements Gateway {
   Future<QrTag> revokeQrTag(QrTag tag, String reason, {String? note}) =>
       _guard(() => _tenant.qrTags.revoke(tag.id, reason, note: _blankToNull(note)));
 
+  // ----------------------------------------------------------- clientes
+  @override
+  Future<CustomerPage> customers({String? search, bool includeInactive = false, int limit = 50, int offset = 0}) =>
+      _guard(
+        () => _tenant.customers.list(
+          search: _blankToNull(search),
+          includeInactive: includeInactive ? true : null,
+          limit: limit,
+          offset: offset,
+        ),
+      );
+
+  @override
+  Future<Customer> customer(UuidValue id) => _guard(() => _tenant.customers.get(id));
+
+  @override
+  Future<Customer> createCustomer(CustomerInput input) => _guard(() => _tenant.customers.create(input));
+
+  @override
+  Future<Customer> updateCustomer(Customer customer, CustomerInput input) =>
+      _guard(() => _tenant.customers.update(customer.id, customer.version, input));
+
+  @override
+  Future<List<CustomerSite>> customerSites(UuidValue customerId) => _guard(() => _tenant.customers.sites(customerId));
+
+  @override
+  Future<CustomerSite> createCustomerSite(UuidValue customerId, CustomerSiteInput input) =>
+      _guard(() => _tenant.customers.createSite(customerId, input));
+
+  @override
+  Future<CustomerSite> updateCustomerSite(CustomerSite site, CustomerSiteInput input) =>
+      _guard(() => _tenant.customers.updateSite(site.id, site.version, input));
+
   @override
   Future<List<Branch>> branches({bool includeInactive = false}) =>
       _guard(() => _tenant.branches.list(includeInactive: includeInactive ? true : null));
@@ -214,8 +247,9 @@ class ServerGateway implements Gateway {
   Future<ProductSummary> createProduct(ProductInput input) => _guard(() => _tenant.products.create(input));
 
   @override
-  Future<AssetPage> assets({String? search, int limit = 50, int offset = 0}) =>
-      _guard(() => _tenant.assets.list(search: _blankToNull(search), limit: limit, offset: offset));
+  Future<AssetPage> assets({String? search, UuidValue? customerId, int limit = 50, int offset = 0}) => _guard(
+    () => _tenant.assets.list(search: _blankToNull(search), customerId: customerId, limit: limit, offset: offset),
+  );
 
   @override
   Future<Asset> asset(UuidValue id) => _guard(() => _tenant.assets.get(id));
@@ -226,6 +260,18 @@ class ServerGateway implements Gateway {
   @override
   Future<Asset> updateAsset(Asset asset, AssetInput input) =>
       _guard(() => _tenant.assets.update(asset.id, asset.version, input));
+
+  @override
+  Future<Asset> installAsset(Asset asset, AssetInstallInput input) =>
+      _guard(() => _tenant.assets.install(asset.id, asset.version, input));
+
+  @override
+  Future<Asset> withdrawAsset(Asset asset, AssetWithdrawInput input) =>
+      _guard(() => _tenant.assets.withdraw(asset.id, asset.version, input));
+
+  @override
+  Future<List<AssetAssignment>> assetAssignments(UuidValue assetId) =>
+      _guard(() => _tenant.assets.assignments(assetId));
 
   // ----------------------------------------------------------- OS
 

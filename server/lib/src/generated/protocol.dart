@@ -11,9 +11,11 @@
 // ignore_for_file: dead_code, unnecessary_type_check
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
+import 'package:plataforma_os_server/src/generated/assets/models/asset_assignment.dart' as _iqmm5djm;
 import 'package:plataforma_os_server/src/generated/assets/models/qr_tag.dart' as _idzaz83i;
 import 'package:plataforma_os_server/src/generated/assets/models/qr_tag_batch.dart' as _i07n19u6;
 import 'package:plataforma_os_server/src/generated/catalog/models/product_summary.dart' as _ico54ik3;
+import 'package:plataforma_os_server/src/generated/customers/models/customer_site.dart' as _ing115qe;
 import 'package:plataforma_os_server/src/generated/identity_access/models/assignable_role.dart' as _iur1xixc;
 import 'package:plataforma_os_server/src/generated/identity_access/models/tenant_user.dart' as _iqhozu6i;
 import 'package:plataforma_os_server/src/generated/patrimony/models/depreciation_closing.dart' as _ip56mlnh;
@@ -29,12 +31,20 @@ import 'package:serverpod/serverpod.dart' as _is;
 import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart' as _iacs;
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart' as _iais;
 import 'assets/models/asset.dart' as _ib3mptol;
+import 'assets/models/asset_assignment.dart' as _i9j61cby;
 import 'assets/models/asset_input.dart' as _i6icgsi8;
+import 'assets/models/asset_install_input.dart' as _iqytokqf;
 import 'assets/models/asset_page.dart' as _is3mug9m;
+import 'assets/models/asset_withdraw_input.dart' as _i7jdajp7;
 import 'assets/models/qr_tag.dart' as _i760nubs;
 import 'assets/models/qr_tag_batch.dart' as _ikikcay0;
 import 'catalog/models/product_input.dart' as _iuumnsch;
 import 'catalog/models/product_summary.dart' as _i4geouqi;
+import 'customers/models/customer.dart' as _in2ysqih;
+import 'customers/models/customer_input.dart' as _i54pcl9h;
+import 'customers/models/customer_page.dart' as _iu4jficl;
+import 'customers/models/customer_site.dart' as _ihhtee09;
+import 'customers/models/customer_site_input.dart' as _ii01wxyo;
 import 'identity_access/models/app_user.dart' as _i5wnkftg;
 import 'identity_access/models/assignable_role.dart' as _ilvk5aly;
 import 'identity_access/models/me_info.dart' as _ip4w8f8l;
@@ -82,12 +92,20 @@ import 'work_orders/models/work_order_status_change.dart' as _i00stvlt;
 import 'work_orders/models/work_order_type.dart' as _iduxn53h;
 import 'work_orders/models/work_order_type_input.dart' as _iolj0kda;
 export 'assets/models/asset.dart';
+export 'assets/models/asset_assignment.dart';
 export 'assets/models/asset_input.dart';
+export 'assets/models/asset_install_input.dart';
 export 'assets/models/asset_page.dart';
+export 'assets/models/asset_withdraw_input.dart';
 export 'assets/models/qr_tag.dart';
 export 'assets/models/qr_tag_batch.dart';
 export 'catalog/models/product_input.dart';
 export 'catalog/models/product_summary.dart';
+export 'customers/models/customer.dart';
+export 'customers/models/customer_input.dart';
+export 'customers/models/customer_page.dart';
+export 'customers/models/customer_site.dart';
+export 'customers/models/customer_site_input.dart';
 export 'identity_access/models/app_user.dart';
 export 'identity_access/models/assignable_role.dart';
 export 'identity_access/models/me_info.dart';
@@ -147,12 +165,20 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     this,
     types: const [
       _is.getType<_ib3mptol.Asset>,
+      _is.getType<_i9j61cby.AssetAssignment>,
       _is.getType<_i6icgsi8.AssetInput>,
+      _is.getType<_iqytokqf.AssetInstallInput>,
       _is.getType<_is3mug9m.AssetPage>,
+      _is.getType<_i7jdajp7.AssetWithdrawInput>,
       _is.getType<_i760nubs.QrTag>,
       _is.getType<_ikikcay0.QrTagBatch>,
       _is.getType<_iuumnsch.ProductInput>,
       _is.getType<_i4geouqi.ProductSummary>,
+      _is.getType<_in2ysqih.Customer>,
+      _is.getType<_i54pcl9h.CustomerInput>,
+      _is.getType<_iu4jficl.CustomerPage>,
+      _is.getType<_ihhtee09.CustomerSite>,
+      _is.getType<_ii01wxyo.CustomerSiteInput>,
       _is.getType<_i5wnkftg.AppUser>,
       _is.getType<_ilvk5aly.AssignableRole>,
       _is.getType<_ip4w8f8l.MeInfo>,
@@ -200,12 +226,20 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<_iduxn53h.WorkOrderType>,
       _is.getType<_iolj0kda.WorkOrderTypeInput>,
       _is.getType<_ib3mptol.Asset?>,
+      _is.getType<_i9j61cby.AssetAssignment?>,
       _is.getType<_i6icgsi8.AssetInput?>,
+      _is.getType<_iqytokqf.AssetInstallInput?>,
       _is.getType<_is3mug9m.AssetPage?>,
+      _is.getType<_i7jdajp7.AssetWithdrawInput?>,
       _is.getType<_i760nubs.QrTag?>,
       _is.getType<_ikikcay0.QrTagBatch?>,
       _is.getType<_iuumnsch.ProductInput?>,
       _is.getType<_i4geouqi.ProductSummary?>,
+      _is.getType<_in2ysqih.Customer?>,
+      _is.getType<_i54pcl9h.CustomerInput?>,
+      _is.getType<_iu4jficl.CustomerPage?>,
+      _is.getType<_ihhtee09.CustomerSite?>,
+      _is.getType<_ii01wxyo.CustomerSiteInput?>,
       _is.getType<_i5wnkftg.AppUser?>,
       _is.getType<_ilvk5aly.AssignableRole?>,
       _is.getType<_ip4w8f8l.MeInfo?>,
@@ -253,6 +287,7 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<_iduxn53h.WorkOrderType?>,
       _is.getType<_iolj0kda.WorkOrderTypeInput?>,
       _is.getType<List<_ib3mptol.Asset>>,
+      _is.getType<List<_in2ysqih.Customer>>,
       _is.getType<List<String>>,
       _is.getType<List<_irfplgys.DepreciationLine>>,
       _is.getType<List<_ikti05ap.DepreciationPositionItem>>,
@@ -265,9 +300,11 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<List<_i5zaa4b8.WorkOrder>>,
       _is.getType<List<_i8kxdcd0.SyncMutation>>,
       _is.getType<List<_i00stvlt.WorkOrderStatusChange>>,
+      _is.getType<List<_iqmm5djm.AssetAssignment>>,
       _is.getType<List<_i07n19u6.QrTagBatch>>,
       _is.getType<List<_idzaz83i.QrTag>>,
       _is.getType<List<_ico54ik3.ProductSummary>>,
+      _is.getType<List<_ing115qe.CustomerSite>>,
       _is.getType<List<_inphvrgt.TenantSummary>>,
       _is.getType<List<_iur1xixc.AssignableRole>>,
       _is.getType<List<_iqhozu6i.TenantUser>>,
@@ -288,12 +325,20 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     ],
     classNames: const [
       'Asset',
+      'AssetAssignment',
       'AssetInput',
+      'AssetInstallInput',
       'AssetPage',
+      'AssetWithdrawInput',
       'QrTag',
       'QrTagBatch',
       'ProductInput',
       'ProductSummary',
+      'Customer',
+      'CustomerInput',
+      'CustomerPage',
+      'CustomerSite',
+      'CustomerSiteInput',
       'AppUser',
       'AssignableRole',
       'MeInfo',
@@ -573,11 +618,20 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == _ib3mptol.Asset) {
       return _ib3mptol.Asset.fromJson(data) as T;
     }
+    if (t == _i9j61cby.AssetAssignment) {
+      return _i9j61cby.AssetAssignment.fromJson(data) as T;
+    }
     if (t == _i6icgsi8.AssetInput) {
       return _i6icgsi8.AssetInput.fromJson(data) as T;
     }
+    if (t == _iqytokqf.AssetInstallInput) {
+      return _iqytokqf.AssetInstallInput.fromJson(data) as T;
+    }
     if (t == _is3mug9m.AssetPage) {
       return _is3mug9m.AssetPage.fromJson(data) as T;
+    }
+    if (t == _i7jdajp7.AssetWithdrawInput) {
+      return _i7jdajp7.AssetWithdrawInput.fromJson(data) as T;
     }
     if (t == _i760nubs.QrTag) {
       return _i760nubs.QrTag.fromJson(data) as T;
@@ -590,6 +644,21 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     }
     if (t == _i4geouqi.ProductSummary) {
       return _i4geouqi.ProductSummary.fromJson(data) as T;
+    }
+    if (t == _in2ysqih.Customer) {
+      return _in2ysqih.Customer.fromJson(data) as T;
+    }
+    if (t == _i54pcl9h.CustomerInput) {
+      return _i54pcl9h.CustomerInput.fromJson(data) as T;
+    }
+    if (t == _iu4jficl.CustomerPage) {
+      return _iu4jficl.CustomerPage.fromJson(data) as T;
+    }
+    if (t == _ihhtee09.CustomerSite) {
+      return _ihhtee09.CustomerSite.fromJson(data) as T;
+    }
+    if (t == _ii01wxyo.CustomerSiteInput) {
+      return _ii01wxyo.CustomerSiteInput.fromJson(data) as T;
     }
     if (t == _i5wnkftg.AppUser) {
       return _i5wnkftg.AppUser.fromJson(data) as T;
@@ -732,11 +801,20 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == _is.getType<_ib3mptol.Asset?>()) {
       return (data != null ? _ib3mptol.Asset.fromJson(data) : null) as T;
     }
+    if (t == _is.getType<_i9j61cby.AssetAssignment?>()) {
+      return (data != null ? _i9j61cby.AssetAssignment.fromJson(data) : null) as T;
+    }
     if (t == _is.getType<_i6icgsi8.AssetInput?>()) {
       return (data != null ? _i6icgsi8.AssetInput.fromJson(data) : null) as T;
     }
+    if (t == _is.getType<_iqytokqf.AssetInstallInput?>()) {
+      return (data != null ? _iqytokqf.AssetInstallInput.fromJson(data) : null) as T;
+    }
     if (t == _is.getType<_is3mug9m.AssetPage?>()) {
       return (data != null ? _is3mug9m.AssetPage.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i7jdajp7.AssetWithdrawInput?>()) {
+      return (data != null ? _i7jdajp7.AssetWithdrawInput.fromJson(data) : null) as T;
     }
     if (t == _is.getType<_i760nubs.QrTag?>()) {
       return (data != null ? _i760nubs.QrTag.fromJson(data) : null) as T;
@@ -749,6 +827,21 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     }
     if (t == _is.getType<_i4geouqi.ProductSummary?>()) {
       return (data != null ? _i4geouqi.ProductSummary.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_in2ysqih.Customer?>()) {
+      return (data != null ? _in2ysqih.Customer.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i54pcl9h.CustomerInput?>()) {
+      return (data != null ? _i54pcl9h.CustomerInput.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iu4jficl.CustomerPage?>()) {
+      return (data != null ? _iu4jficl.CustomerPage.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ihhtee09.CustomerSite?>()) {
+      return (data != null ? _ihhtee09.CustomerSite.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_ii01wxyo.CustomerSiteInput?>()) {
+      return (data != null ? _ii01wxyo.CustomerSiteInput.fromJson(data) : null) as T;
     }
     if (t == _is.getType<_i5wnkftg.AppUser?>()) {
       return (data != null ? _i5wnkftg.AppUser.fromJson(data) : null) as T;
@@ -891,6 +984,9 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == List<_ib3mptol.Asset>) {
       return (data as List).map((e) => deserialize<_ib3mptol.Asset>(e)).toList() as T;
     }
+    if (t == List<_in2ysqih.Customer>) {
+      return (data as List).map((e) => deserialize<_in2ysqih.Customer>(e)).toList() as T;
+    }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
@@ -930,6 +1026,9 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == List<_i00stvlt.WorkOrderStatusChange>) {
       return (data as List).map((e) => deserialize<_i00stvlt.WorkOrderStatusChange>(e)).toList() as T;
     }
+    if (t == List<_iqmm5djm.AssetAssignment>) {
+      return (data as List).map((e) => deserialize<_iqmm5djm.AssetAssignment>(e)).toList() as T;
+    }
     if (t == List<_i07n19u6.QrTagBatch>) {
       return (data as List).map((e) => deserialize<_i07n19u6.QrTagBatch>(e)).toList() as T;
     }
@@ -938,6 +1037,9 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     }
     if (t == List<_ico54ik3.ProductSummary>) {
       return (data as List).map((e) => deserialize<_ico54ik3.ProductSummary>(e)).toList() as T;
+    }
+    if (t == List<_ing115qe.CustomerSite>) {
+      return (data as List).map((e) => deserialize<_ing115qe.CustomerSite>(e)).toList() as T;
     }
     if (t == List<_inphvrgt.TenantSummary>) {
       return (data as List).map((e) => deserialize<_inphvrgt.TenantSummary>(e)).toList() as T;
@@ -991,12 +1093,20 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
   static String? getClassNameForType(Type type) {
     return switch (type) {
       _ib3mptol.Asset => 'Asset',
+      _i9j61cby.AssetAssignment => 'AssetAssignment',
       _i6icgsi8.AssetInput => 'AssetInput',
+      _iqytokqf.AssetInstallInput => 'AssetInstallInput',
       _is3mug9m.AssetPage => 'AssetPage',
+      _i7jdajp7.AssetWithdrawInput => 'AssetWithdrawInput',
       _i760nubs.QrTag => 'QrTag',
       _ikikcay0.QrTagBatch => 'QrTagBatch',
       _iuumnsch.ProductInput => 'ProductInput',
       _i4geouqi.ProductSummary => 'ProductSummary',
+      _in2ysqih.Customer => 'Customer',
+      _i54pcl9h.CustomerInput => 'CustomerInput',
+      _iu4jficl.CustomerPage => 'CustomerPage',
+      _ihhtee09.CustomerSite => 'CustomerSite',
+      _ii01wxyo.CustomerSiteInput => 'CustomerSiteInput',
       _i5wnkftg.AppUser => 'AppUser',
       _ilvk5aly.AssignableRole => 'AssignableRole',
       _ip4w8f8l.MeInfo => 'MeInfo',
@@ -1059,10 +1169,16 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     switch (data) {
       case _ib3mptol.Asset():
         return 'Asset';
+      case _i9j61cby.AssetAssignment():
+        return 'AssetAssignment';
       case _i6icgsi8.AssetInput():
         return 'AssetInput';
+      case _iqytokqf.AssetInstallInput():
+        return 'AssetInstallInput';
       case _is3mug9m.AssetPage():
         return 'AssetPage';
+      case _i7jdajp7.AssetWithdrawInput():
+        return 'AssetWithdrawInput';
       case _i760nubs.QrTag():
         return 'QrTag';
       case _ikikcay0.QrTagBatch():
@@ -1071,6 +1187,16 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
         return 'ProductInput';
       case _i4geouqi.ProductSummary():
         return 'ProductSummary';
+      case _in2ysqih.Customer():
+        return 'Customer';
+      case _i54pcl9h.CustomerInput():
+        return 'CustomerInput';
+      case _iu4jficl.CustomerPage():
+        return 'CustomerPage';
+      case _ihhtee09.CustomerSite():
+        return 'CustomerSite';
+      case _ii01wxyo.CustomerSiteInput():
+        return 'CustomerSiteInput';
       case _i5wnkftg.AppUser():
         return 'AppUser';
       case _ilvk5aly.AssignableRole():
@@ -1188,11 +1314,20 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (dataClassName == 'Asset') {
       return deserialize<_ib3mptol.Asset>(data['data']);
     }
+    if (dataClassName == 'AssetAssignment') {
+      return deserialize<_i9j61cby.AssetAssignment>(data['data']);
+    }
     if (dataClassName == 'AssetInput') {
       return deserialize<_i6icgsi8.AssetInput>(data['data']);
     }
+    if (dataClassName == 'AssetInstallInput') {
+      return deserialize<_iqytokqf.AssetInstallInput>(data['data']);
+    }
     if (dataClassName == 'AssetPage') {
       return deserialize<_is3mug9m.AssetPage>(data['data']);
+    }
+    if (dataClassName == 'AssetWithdrawInput') {
+      return deserialize<_i7jdajp7.AssetWithdrawInput>(data['data']);
     }
     if (dataClassName == 'QrTag') {
       return deserialize<_i760nubs.QrTag>(data['data']);
@@ -1205,6 +1340,21 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     }
     if (dataClassName == 'ProductSummary') {
       return deserialize<_i4geouqi.ProductSummary>(data['data']);
+    }
+    if (dataClassName == 'Customer') {
+      return deserialize<_in2ysqih.Customer>(data['data']);
+    }
+    if (dataClassName == 'CustomerInput') {
+      return deserialize<_i54pcl9h.CustomerInput>(data['data']);
+    }
+    if (dataClassName == 'CustomerPage') {
+      return deserialize<_iu4jficl.CustomerPage>(data['data']);
+    }
+    if (dataClassName == 'CustomerSite') {
+      return deserialize<_ihhtee09.CustomerSite>(data['data']);
+    }
+    if (dataClassName == 'CustomerSiteInput') {
+      return deserialize<_ii01wxyo.CustomerSiteInput>(data['data']);
     }
     if (dataClassName == 'AppUser') {
       return deserialize<_i5wnkftg.AppUser>(data['data']);

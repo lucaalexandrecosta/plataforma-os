@@ -11,7 +11,11 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:plataforma_os_server/src/generated/assets/models/asset_input.dart' as _i58orcz5;
+import 'package:plataforma_os_server/src/generated/assets/models/asset_install_input.dart' as _iggraypf;
+import 'package:plataforma_os_server/src/generated/assets/models/asset_withdraw_input.dart' as _ilt8ymra;
 import 'package:plataforma_os_server/src/generated/catalog/models/product_input.dart' as _iku7g2we;
+import 'package:plataforma_os_server/src/generated/customers/models/customer_input.dart' as _iw3fixvn;
+import 'package:plataforma_os_server/src/generated/customers/models/customer_site_input.dart' as _iv6e8owq;
 import 'package:plataforma_os_server/src/generated/patrimony/models/depreciation_profile_input.dart' as _ims07aom;
 import 'package:plataforma_os_server/src/generated/scheduling/models/technician_input.dart' as _i4g4d70s;
 import 'package:plataforma_os_server/src/generated/scheduling/models/visit_check_in.dart' as _in4grqdw;
@@ -30,6 +34,7 @@ import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart' as _ia
 import '../assets/endpoints/assets_endpoint.dart' as _i8oyhoxt;
 import '../assets/endpoints/qr_tags_endpoint.dart' as _ijcbp4ea;
 import '../catalog/endpoints/products_endpoint.dart' as _i87w2mxb;
+import '../customers/endpoints/customers_endpoint.dart' as _i2n45wl3;
 import '../identity_access/endpoints/auth_endpoint.dart' as _i077kp7v;
 import '../identity_access/endpoints/email_idp_endpoint.dart' as _iq8d1u02;
 import '../identity_access/endpoints/me_endpoint.dart' as _i2zd8mbu;
@@ -63,6 +68,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'products',
+          null,
+        ),
+      'customers': _i2n45wl3.CustomersEndpoint()
+        ..initialize(
+          server,
+          'customers',
           null,
         ),
       'auth': _i077kp7v.AuthEndpoint()
@@ -160,6 +171,11 @@ class Endpoints extends _is.EndpointDispatch {
               type: _is.getType<_is.UuidValue?>(),
               nullable: true,
             ),
+            'customerId': _is.ParameterDescription(
+              name: 'customerId',
+              type: _is.getType<_is.UuidValue?>(),
+              nullable: true,
+            ),
             'includeInactive': _is.ParameterDescription(
               name: 'includeInactive',
               type: _is.getType<bool?>(),
@@ -185,6 +201,7 @@ class Endpoints extends _is.EndpointDispatch {
                 search: params['search'],
                 branchId: params['branchId'],
                 costCenterId: params['costCenterId'],
+                customerId: params['customerId'],
                 includeInactive: params['includeInactive'],
                 limit: params['limit'],
                 offset: params['offset'],
@@ -254,6 +271,84 @@ class Endpoints extends _is.EndpointDispatch {
                 params['id'],
                 params['expectedVersion'],
                 params['input'],
+              ),
+        ),
+        'install': _is.MethodConnector(
+          name: 'install',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_iggraypf.AssetInstallInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['assets'] as _i8oyhoxt.AssetsEndpoint).install(
+                session,
+                params['id'],
+                params['expectedVersion'],
+                params['input'],
+              ),
+        ),
+        'withdraw': _is.MethodConnector(
+          name: 'withdraw',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_ilt8ymra.AssetWithdrawInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['assets'] as _i8oyhoxt.AssetsEndpoint).withdraw(
+                session,
+                params['id'],
+                params['expectedVersion'],
+                params['input'],
+              ),
+        ),
+        'assignments': _is.MethodConnector(
+          name: 'assignments',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['assets'] as _i8oyhoxt.AssetsEndpoint).assignments(
+                session,
+                params['id'],
               ),
         ),
       },
@@ -460,6 +555,186 @@ class Endpoints extends _is.EndpointDispatch {
                 Map<String, dynamic> params,
               ) async => (endpoints['products'] as _i87w2mxb.ProductsEndpoint).create(
                 session,
+                params['input'],
+              ),
+        ),
+      },
+    );
+    connectors['customers'] = _is.EndpointConnector(
+      name: 'customers',
+      endpoint: endpoints['customers']!,
+      methodConnectors: {
+        'list': _is.MethodConnector(
+          name: 'list',
+          params: {
+            'search': _is.ParameterDescription(
+              name: 'search',
+              type: _is.getType<String?>(),
+              nullable: true,
+            ),
+            'includeInactive': _is.ParameterDescription(
+              name: 'includeInactive',
+              type: _is.getType<bool?>(),
+              nullable: true,
+            ),
+            'limit': _is.ParameterDescription(
+              name: 'limit',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+            'offset': _is.ParameterDescription(
+              name: 'offset',
+              type: _is.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['customers'] as _i2n45wl3.CustomersEndpoint).list(
+                session,
+                search: params['search'],
+                includeInactive: params['includeInactive'],
+                limit: params['limit'],
+                offset: params['offset'],
+              ),
+        ),
+        'get': _is.MethodConnector(
+          name: 'get',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['customers'] as _i2n45wl3.CustomersEndpoint).get(
+                session,
+                params['id'],
+              ),
+        ),
+        'create': _is.MethodConnector(
+          name: 'create',
+          params: {
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_iw3fixvn.CustomerInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['customers'] as _i2n45wl3.CustomersEndpoint).create(
+                session,
+                params['input'],
+              ),
+        ),
+        'update': _is.MethodConnector(
+          name: 'update',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_iw3fixvn.CustomerInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['customers'] as _i2n45wl3.CustomersEndpoint).update(
+                session,
+                params['id'],
+                params['expectedVersion'],
+                params['input'],
+              ),
+        ),
+        'sites': _is.MethodConnector(
+          name: 'sites',
+          params: {
+            'customerId': _is.ParameterDescription(
+              name: 'customerId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['customers'] as _i2n45wl3.CustomersEndpoint).sites(
+                session,
+                params['customerId'],
+              ),
+        ),
+        'createSite': _is.MethodConnector(
+          name: 'createSite',
+          params: {
+            'customerId': _is.ParameterDescription(
+              name: 'customerId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_iv6e8owq.CustomerSiteInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['customers'] as _i2n45wl3.CustomersEndpoint).createSite(
+                session,
+                params['customerId'],
+                params['input'],
+              ),
+        ),
+        'updateSite': _is.MethodConnector(
+          name: 'updateSite',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_iv6e8owq.CustomerSiteInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['customers'] as _i2n45wl3.CustomersEndpoint).updateSite(
+                session,
+                params['id'],
+                params['expectedVersion'],
                 params['input'],
               ),
         ),

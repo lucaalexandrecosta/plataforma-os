@@ -1,0 +1,24 @@
+# Cliente do tenant (app.customers). Leitura e retorno de customers.*.
+class: Customer
+fields:
+  id: UuidValue
+  code: String?
+  # Razão social ou nome da pessoa.
+  name: String
+  tradeName: String?
+  # company ou individual.
+  personType: String
+  # cnpj, cpf ou none.
+  documentType: String
+  # Só dígitos.
+  documentNumber: String?
+  stateRegistration: String?
+  email: String?
+  phone: String?
+  notes: String?
+  isActive: bool
+  # local ou erp (campos mestres do ERP são só leitura).
+  source: String
+  # Unidades ativas, para a lista.
+  siteCount: int
+  version: int
