@@ -1,0 +1,9 @@
+# Registro do aparelho do técnico (technicianSync.registerDevice). deviceId é
+# gerado no aparelho, um por empresa. platform: android, ios ou web.
+class: DeviceRegistration
+fields:
+  deviceId: UuidValue
+  platform: String
+  appVersion: String?
+  osVersion: String?
+  deviceModel: String?

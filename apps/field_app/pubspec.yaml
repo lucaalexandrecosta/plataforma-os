@@ -12,6 +12,8 @@ environment:
   flutter: ">=3.47.0"
 
 dependencies:
+  drift: ^2.35.4
+  drift_flutter: ^0.3.1
   flutter:
     sdk: flutter
   flutter_localizations:
@@ -24,11 +26,15 @@ dependencies:
   plataforma_os_client: any
   serverpod_auth_core_client: 4.1.1
   serverpod_client: 4.1.1
+  uuid: ^4.6.0
 
 dev_dependencies:
+  build_runner: ^2.16.1
+  drift_dev: ^2.35.3
   flutter_lints: ^6.0.0
   flutter_test:
     sdk: flutter
+  meta: ^1.19.0
 
 flutter:
   uses-material-design: true

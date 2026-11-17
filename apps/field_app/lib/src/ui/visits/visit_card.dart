@@ -54,12 +54,35 @@ class PriorityBadge extends StatelessWidget {
   }
 }
 
+/// "Aguardando envio": a ação foi gravada no aparelho e ainda não chegou ao
+/// servidor.
+class PendingBadge extends StatelessWidget {
+  const PendingBadge({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    final color = Theme.of(context).colorScheme.tertiary;
+    return Row(
+      key: const Key('pending-badge'),
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(Icons.cloud_upload_outlined, size: 16, color: color),
+        const SizedBox(width: 4),
+        Text('Aguardando envio', style: Theme.of(context).textTheme.labelMedium?.copyWith(color: color)),
+      ],
+    );
+  }
+}
+
 /// Cartão da visita na agenda: janela, OS, onde e o quê.
 class VisitCard extends StatelessWidget {
-  const VisitCard({super.key, required this.visit, required this.onTap, this.dayRelativeTo});
+  const VisitCard({super.key, required this.visit, required this.onTap, this.dayRelativeTo, this.pending = false});
 
   final Visit visit;
   final VoidCallback onTap;
+
+  /// Há ações desta visita ainda não enviadas.
+  final bool pending;
 
   /// Mostra o dia ("Ontem · 08:00–10:00") nas seções fora do dia a dia.
   final DateTime? dayRelativeTo;
@@ -111,6 +134,10 @@ class VisitCard extends StatelessWidget {
                 if (visit.problemDescription case final problem?) ...[
                   const SizedBox(height: 6),
                   Text(problem, maxLines: 2, overflow: TextOverflow.ellipsis, style: theme.textTheme.bodySmall),
+                ],
+                if (pending) ...[
+                  const SizedBox(height: 6),
+                  const PendingBadge(),
                 ],
                 if (visit.outcome case final outcome?) ...[
                   const SizedBox(height: 6),

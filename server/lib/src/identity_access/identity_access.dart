@@ -3,5 +3,6 @@ library;
 
 export '../generated/protocol.dart' show MeInfo, TenantToken;
 export 'internal/application/authorization.dart' show Authorization;
+export 'internal/application/devices.dart' show Devices;
 export 'internal/application/memberships.dart' show Memberships;
 export 'tables.dart' show identityAccessOwnership;

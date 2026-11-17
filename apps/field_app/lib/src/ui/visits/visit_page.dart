@@ -6,16 +6,19 @@ import 'package:serverpod_client/serverpod_client.dart' show UuidValue;
 import '../../api/gateway.dart';
 import '../../device/device.dart';
 import '../../labels.dart';
-import '../../session/session.dart';
+import '../../local/field_store.dart';
+import '../../local/providers.dart';
+import '../../local/visit_rules.dart';
 import '../common/errors.dart';
 import '../common/format.dart';
+import 'sync_widgets.dart';
 import 'visit_card.dart';
 import 'visit_dialogs.dart';
 
 /// Detalhe e execução da visita: deslocamento, check-in, pausa e finalização
-/// (docs/06 §5.5 a §5.8 e §5.14). Cada ação vai direto ao servidor nesta
-/// versão; o servidor move a OS na mesma transação (visita resolvida, sem
-/// outra ativa, conclui a OS; ou encerra, se o tenant dispensa a conferência).
+/// (docs/06 §5.5 a §5.8 e §5.14). Cada ação muda a visita no banco local na
+/// hora e entra na fila do sync; o servidor confirma (e move a OS) quando a
+/// ação chega. Se recusar, a visita volta ao estado dele com um aviso.
 class VisitPage extends ConsumerStatefulWidget {
   const VisitPage({super.key, required this.id});
 
@@ -26,81 +29,38 @@ class VisitPage extends ConsumerStatefulWidget {
 }
 
 class _VisitPageState extends ConsumerState<VisitPage> {
-  Visit? _visit;
-  WorkOrderDetail? _wo;
-  Object? _error;
   var _busy = false;
-
-  Gateway get _gateway => ref.read(gatewayProvider);
-
-  @override
-  void initState() {
-    super.initState();
-    _load();
-  }
-
-  Future<void> _load() async {
-    setState(() => _error = null);
-    try {
-      final visit = await _gateway.visit(widget.id);
-      final wo = await _gateway.workOrder(visit.workOrderId);
-      if (mounted) {
-        setState(() {
-          _visit = visit;
-          _wo = wo;
-        });
-      }
-    } catch (e) {
-      if (mounted) setState(() => _error = e);
-    }
-  }
 
   void _snack(String text) => ScaffoldMessenger.of(context)
     ..hideCurrentSnackBar()
     ..showSnackBar(SnackBar(content: Text(text)));
 
-  /// Roda a ação; se a visita mudou no servidor, recarrega e avisa.
-  /// [handled] deixa quem chamou tratar um erro (devolve true se tratou).
+  /// Grava a ação no aparelho. [handled] deixa quem chamou tratar um erro
+  /// (devolve true se tratou).
   Future<bool> _run(
-    Future<Visit> Function(Visit visit) action, {
+    Visit visit,
+    String type, {
+    VisitMutationPayload? payload,
     String? done,
     bool Function(GatewayException e)? handled,
   }) async {
-    final visit = _visit;
-    if (visit == null || _busy) return false;
+    final store = ref.read(storeProvider);
+    if (store == null || _busy) return false;
     setState(() => _busy = true);
     try {
-      final updated = await action(visit);
-      final wo = await _gateway.workOrder(updated.workOrderId);
-      if (!mounted) return true;
-      setState(() {
-        _visit = updated;
-        _wo = wo;
-      });
-      if (done != null) _snack(done);
+      await store.act(visit, type, payload ?? VisitMutationPayload());
+      if (mounted && done != null) _snack(done);
       return true;
     } on GatewayException catch (e) {
-      if (!mounted || (handled?.call(e) ?? false)) return false;
-      if (e.code == 'VERSION_MISMATCH' || e.code == 'NOT_FOUND') {
-        await _load();
-        if (mounted) _snack('A visita mudou no escritório. A tela foi atualizada; confira e tente de novo.');
-      } else {
-        reportError(context, ref, e);
-      }
-      return false;
-    } catch (e) {
-      if (mounted) reportError(context, ref, e);
+      if (mounted && !(handled?.call(e) ?? false)) reportError(context, ref, e);
       return false;
     } finally {
       if (mounted) setState(() => _busy = false);
     }
   }
 
-  Future<void> _startTravel() => _run(_gateway.startTravel, done: 'Deslocamento iniciado.');
-
-  Future<void> _checkIn() async {
-    final hasAsset = _wo?.workOrder.assetId != null;
-    final choice = await chooseCheckIn(context, hasAsset: hasAsset);
+  Future<void> _checkIn(Visit visit) async {
+    final choice = await chooseCheckIn(context, hasAsset: visit.assetLabel != null);
     if (choice == null || !mounted) return;
     final device = ref.read(deviceProvider);
     switch (choice) {
@@ -108,11 +68,15 @@ class _VisitPageState extends ConsumerState<VisitPage> {
         final code = await device.scanQr(context);
         if (code == null || !mounted) return;
         await _run(
-          (v) => _gateway.checkIn(v, VisitCheckIn(method: 'qr', scannedCode: code)),
-          done: 'Check-in confirmado.',
+          visit,
+          VisitMutation.checkIn,
+          payload: VisitMutationPayload(
+            checkIn: VisitCheckIn(method: 'qr', scannedCode: code),
+          ),
+          done: 'Check-in registrado.',
         );
       case CheckInChoice.gps:
-        await _checkInByGps(device);
+        await _checkInByGps(visit, device);
       case CheckInChoice.manual:
         final justification = await askText(
           context,
@@ -122,15 +86,19 @@ class _VisitPageState extends ConsumerState<VisitPage> {
         );
         if (justification == null || !mounted) return;
         await _run(
-          (v) => _gateway.checkIn(v, VisitCheckIn(method: 'manual', justification: justification)),
+          visit,
+          VisitMutation.checkIn,
+          payload: VisitMutationPayload(
+            checkIn: VisitCheckIn(method: 'manual', justification: justification),
+          ),
           done: 'Check-in registrado.',
         );
     }
   }
 
-  /// GPS primeiro sem justificativa; se a OS exigir o QR, o servidor pede a
-  /// justificativa e o app tenta de novo com ela.
-  Future<void> _checkInByGps(Device device) async {
+  /// GPS primeiro sem justificativa; se a OS exigir o QR, pede a justificativa
+  /// e tenta de novo com ela.
+  Future<void> _checkInByGps(Visit visit, Device device) async {
     final DevicePosition position;
     setState(() => _busy = true);
     try {
@@ -141,17 +109,21 @@ class _VisitPageState extends ConsumerState<VisitPage> {
     } finally {
       if (mounted) setState(() => _busy = false);
     }
-    VisitCheckIn input(String? justification) => VisitCheckIn(
-      method: 'gps',
-      latitude: position.latitude,
-      longitude: position.longitude,
-      accuracyM: position.accuracyM,
-      justification: justification,
+    VisitMutationPayload input(String? justification) => VisitMutationPayload(
+      checkIn: VisitCheckIn(
+        method: 'gps',
+        latitude: position.latitude,
+        longitude: position.longitude,
+        accuracyM: position.accuracyM,
+        justification: justification,
+      ),
     );
     String? ask;
     final ok = await _run(
-      (v) => _gateway.checkIn(v, input(null)),
-      done: 'Check-in confirmado.',
+      visit,
+      VisitMutation.checkIn,
+      payload: input(null),
+      done: 'Check-in registrado.',
       handled: (e) => (ask = e.fieldErrors['justification']) != null,
     );
     final message = ask;
@@ -163,46 +135,68 @@ class _VisitPageState extends ConsumerState<VisitPage> {
       fieldLabel: 'Justificativa',
     );
     if (justification == null || !mounted) return;
-    await _run((v) => _gateway.checkIn(v, input(justification)), done: 'Check-in registrado.');
+    await _run(visit, VisitMutation.checkIn, payload: input(justification), done: 'Check-in registrado.');
   }
 
-  Future<void> _pause() => _run(_gateway.pause, done: 'Visita pausada.');
-
-  Future<void> _resume() => _run(_gateway.resume, done: 'Atendimento retomado.');
-
-  Future<void> _finish() async {
-    final checkedIn = const {'on_site', 'paused'}.contains(_visit?.status);
+  Future<void> _finish(Visit visit) async {
+    final checkedIn = const {'on_site', 'paused'}.contains(visit.status);
     final input = await askFinish(context, checkedIn: checkedIn);
     if (input == null || !mounted) return;
-    await _run((v) => _gateway.finish(v, input), done: 'Visita finalizada.');
+    await _run(
+      visit,
+      VisitMutation.finish,
+      payload: VisitMutationPayload(finish: input),
+      done: 'Visita finalizada.',
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    final visit = _visit;
-    final wo = _wo?.workOrder;
-    return Scaffold(
-      appBar: AppBar(title: Text(visit == null ? 'Visita' : 'OS ${visit.workOrderNumber}')),
-      body: _error != null
-          ? ErrorPanel(error: _error!, onRetry: _load)
-          : visit == null || wo == null
-          ? const Center(child: CircularProgressIndicator())
-          : RefreshIndicator(
-              onRefresh: _load,
-              child: ListView(
-                padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                children: [
-                  _Header(visit: visit, wo: wo),
-                  const SizedBox(height: 8),
-                  _Details(visit: visit, wo: wo),
-                ],
-              ),
-            ),
-      bottomNavigationBar: visit == null || wo == null ? null : _actions(visit, wo),
+    final store = ref.watch(storeProvider);
+    if (store == null) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    return StreamBuilder<Visit?>(
+      stream: store.watchVisit(widget.id),
+      builder: (context, snap) {
+        final visit = snap.data;
+        return Scaffold(
+          appBar: AppBar(
+            title: Text(visit == null ? 'Visita' : 'OS ${visit.workOrderNumber}'),
+            actions: [SyncButton(store: store)],
+          ),
+          body: snap.connectionState == ConnectionState.waiting
+              ? const Center(child: CircularProgressIndicator())
+              : visit == null
+              ? const Center(child: Text('Esta visita não está mais na sua agenda.'))
+              : StreamBuilder<WorkOrder?>(
+                  stream: store.watchWorkOrder(visit.workOrderId),
+                  builder: (context, woSnap) => StreamBuilder<SyncSummary>(
+                    stream: store.watchSummary(),
+                    initialData: store.summary,
+                    builder: (context, sumSnap) => RefreshIndicator(
+                      onRefresh: () => runSync(context, ref, store),
+                      child: ListView(
+                        physics: const AlwaysScrollableScrollPhysics(),
+                        padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                        children: [
+                          _Header(
+                            visit: visit,
+                            wo: woSnap.data,
+                            pending: sumSnap.data?.pendingVisitIds.contains(visit.id.uuid) ?? false,
+                          ),
+                          const SizedBox(height: 8),
+                          _Details(visit: visit, wo: woSnap.data),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+          bottomNavigationBar: visit == null ? null : _actions(visit),
+        );
+      },
     );
   }
 
-  Widget? _actions(Visit visit, WorkOrder wo) {
+  Widget? _actions(Visit visit) {
     final primary = <Widget>[];
     final secondary = <Widget>[];
     Widget main(String key, IconData icon, String text, VoidCallback onPressed) => FilledButton.icon(
@@ -221,18 +215,34 @@ class _VisitPageState extends ConsumerState<VisitPage> {
     );
     switch (visit.status) {
       case 'scheduled':
-        primary.add(main('act-travel', Icons.directions_car, 'Iniciar deslocamento', _startTravel));
-        secondary.add(other('act-checkin', Icons.place, 'Cheguei', _checkIn));
-        secondary.add(other('act-not-done', Icons.event_busy, 'Não atendida', _finish));
+        primary.add(
+          main(
+            'act-travel',
+            Icons.directions_car,
+            'Iniciar deslocamento',
+            () => _run(visit, VisitMutation.startTravel, done: 'Deslocamento iniciado.'),
+          ),
+        );
+        secondary.add(other('act-checkin', Icons.place, 'Cheguei', () => _checkIn(visit)));
+        secondary.add(other('act-not-done', Icons.event_busy, 'Não atendida', () => _finish(visit)));
       case 'en_route':
-        primary.add(main('act-checkin', Icons.place, 'Cheguei', _checkIn));
-        secondary.add(other('act-not-done', Icons.event_busy, 'Não atendida', _finish));
+        primary.add(main('act-checkin', Icons.place, 'Cheguei', () => _checkIn(visit)));
+        secondary.add(other('act-not-done', Icons.event_busy, 'Não atendida', () => _finish(visit)));
       case 'on_site':
-        primary.add(main('act-finish', Icons.task_alt, 'Finalizar visita', _finish));
-        secondary.add(other('act-pause', Icons.pause, 'Pausar', _pause));
+        primary.add(main('act-finish', Icons.task_alt, 'Finalizar visita', () => _finish(visit)));
+        secondary.add(
+          other('act-pause', Icons.pause, 'Pausar', () => _run(visit, VisitMutation.pause, done: 'Visita pausada.')),
+        );
       case 'paused':
-        primary.add(main('act-resume', Icons.play_arrow, 'Retomar', _resume));
-        secondary.add(other('act-finish', Icons.task_alt, 'Finalizar visita', _finish));
+        primary.add(
+          main(
+            'act-resume',
+            Icons.play_arrow,
+            'Retomar',
+            () => _run(visit, VisitMutation.resume, done: 'Atendimento retomado.'),
+          ),
+        );
+        secondary.add(other('act-finish', Icons.task_alt, 'Finalizar visita', () => _finish(visit)));
     }
     if (primary.isEmpty && secondary.isEmpty) return null;
     return SafeArea(
@@ -265,10 +275,11 @@ class _VisitPageState extends ConsumerState<VisitPage> {
 final _bigButton = ButtonStyle(minimumSize: WidgetStateProperty.all(const Size.fromHeight(52)));
 
 class _Header extends StatelessWidget {
-  const _Header({required this.visit, required this.wo});
+  const _Header({required this.visit, required this.wo, required this.pending});
 
   final Visit visit;
-  final WorkOrder wo;
+  final WorkOrder? wo;
+  final bool pending;
 
   @override
   Widget build(BuildContext context) {
@@ -287,17 +298,18 @@ class _Header extends StatelessWidget {
                 VisitStatusChip(visit.status),
                 PriorityBadge(visit.workOrderPriority),
                 Text('Visita ${visit.visitNumber}', style: theme.textTheme.labelLarge),
+                if (pending) const PendingBadge(),
               ],
             ),
             const SizedBox(height: 12),
-            Text(wo.workOrderTypeName, style: theme.textTheme.titleMedium),
+            Text(wo?.workOrderTypeName ?? 'OS', style: theme.textTheme.titleMedium),
             Text(
               '${formatDay(visit.scheduledStart, DateTime.now())} · ${formatWindow(visit.scheduledStart, visit.scheduledEnd)}',
               style: theme.textTheme.bodyMedium,
             ),
             const SizedBox(height: 4),
             Text(
-              'Situação da OS: ${label(workOrderStatusLabels, wo.status)}',
+              'Situação da OS: ${label(workOrderStatusLabels, visit.workOrderStatus)}',
               key: const Key('wo-status'),
               style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
             ),
@@ -312,12 +324,13 @@ class _Details extends StatelessWidget {
   const _Details({required this.visit, required this.wo});
 
   final Visit visit;
-  final WorkOrder wo;
+  final WorkOrder? wo;
 
   @override
   Widget build(BuildContext context) {
-    final where = [wo.customerName, wo.branchName].whereType<String>().join(' · ');
-    final asset = [wo.assetLabel, wo.productName].whereType<String>().join(' · ');
+    final wo = this.wo;
+    final where = [visit.customerName, visit.branchName].whereType<String>().join(' · ');
+    final asset = [visit.assetLabel, visit.productName].whereType<String>().join(' · ');
     final checkIn = visit.checkedInAt == null
         ? null
         : [
@@ -333,8 +346,8 @@ class _Details extends StatelessWidget {
           children: [
             _Line(Icons.business, 'Local', where.isEmpty ? '—' : where),
             _Line(Icons.inventory_2_outlined, 'Equipamento', asset.isEmpty ? 'OS sem bem' : asset),
-            _Line(Icons.report_problem_outlined, 'Problema', wo.problemDescription ?? '—'),
-            if (wo.requesterName != null || wo.requesterPhone != null)
+            _Line(Icons.report_problem_outlined, 'Problema', visit.problemDescription ?? '—'),
+            if (wo != null && (wo.requesterName != null || wo.requesterPhone != null))
               _Line(
                 Icons.person_outline,
                 'Solicitante',
