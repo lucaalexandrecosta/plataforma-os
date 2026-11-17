@@ -1,0 +1,10 @@
+# Recorte do técnico (technicianSync.pull): visitas de D-2 a D+14 e as em
+# andamento, com as OS delas. Nesta etapa o pull devolve o recorte inteiro e o
+# aparelho substitui o que tinha (sem cursor incremental).
+class: SyncPullResult
+fields:
+  serverTime: DateTime
+  scopeFrom: DateTime
+  scopeTo: DateTime
+  visits: List<Visit>
+  workOrders: List<WorkOrder>

@@ -96,6 +96,20 @@ abstract final class WorkOrders {
     return _detail(session, id);
   }
 
+  /// OS por id, para o recorte do sync do técnico (quem chama já filtrou o
+  /// escopo; a RLS garante o tenant).
+  static Future<List<WorkOrder>> byIds(Session session, List<UuidValue> ids) async {
+    await Authorization.requireAny(session, const {readPermission, 'visits.execute'});
+    if (ids.isEmpty) return const [];
+    final rows = await session.db.unsafeQuery(
+      '$_select WHERE w.id = ANY(@ids::uuid[]) ORDER BY w.id',
+      parameters: QueryParameters.named({
+        'ids': [for (final id in ids) id.uuid],
+      }),
+    );
+    return [for (final r in rows) _map(r)];
+  }
+
   // ------------------------------------------------------------------ abertura
 
   static Future<WorkOrderDetail> open(Session session, WorkOrderInput input) async {

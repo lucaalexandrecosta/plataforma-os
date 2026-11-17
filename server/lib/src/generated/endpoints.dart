@@ -17,6 +17,8 @@ import 'package:plataforma_os_server/src/generated/scheduling/models/technician_
 import 'package:plataforma_os_server/src/generated/scheduling/models/visit_check_in.dart' as _in4grqdw;
 import 'package:plataforma_os_server/src/generated/scheduling/models/visit_finish.dart' as _izl7q3ap;
 import 'package:plataforma_os_server/src/generated/scheduling/models/visit_input.dart' as _isygpo5n;
+import 'package:plataforma_os_server/src/generated/sync/models/device_registration.dart' as _ifayztnr;
+import 'package:plataforma_os_server/src/generated/sync/models/sync_push_request.dart' as _is7nu1l0;
 import 'package:plataforma_os_server/src/generated/tenancy/models/branch_input.dart' as _i6djw631;
 import 'package:plataforma_os_server/src/generated/tenancy/models/cost_center_input.dart' as _irkypkua;
 import 'package:plataforma_os_server/src/generated/work_orders/models/work_order_changes.dart' as _im8hf6je;
@@ -36,6 +38,7 @@ import '../identity_access/endpoints/users_endpoint.dart' as _if041dc0;
 import '../patrimony/endpoints/depreciation_endpoint.dart' as _ik1wssz1;
 import '../scheduling/endpoints/technicians_endpoint.dart' as _i7x07tna;
 import '../scheduling/endpoints/visits_endpoint.dart' as _i34c7in8;
+import '../sync/endpoints/technician_sync_endpoint.dart' as _i4wczera;
 import '../tenancy/endpoints/branches_endpoint.dart' as _i9d4u5j9;
 import '../tenancy/endpoints/cost_centers_endpoint.dart' as _inwd0tmb;
 import '../work_orders/endpoints/work_orders_endpoint.dart' as _i452a764;
@@ -108,6 +111,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'visits',
+          null,
+        ),
+      'technicianSync': _i4wczera.TechnicianSyncEndpoint()
+        ..initialize(
+          server,
+          'technicianSync',
           null,
         ),
       'branches': _i9d4u5j9.BranchesEndpoint()
@@ -1412,6 +1421,66 @@ class Endpoints extends _is.EndpointDispatch {
                 params['id'],
                 params['expectedVersion'],
                 params['input'],
+              ),
+        ),
+      },
+    );
+    connectors['technicianSync'] = _is.EndpointConnector(
+      name: 'technicianSync',
+      endpoint: endpoints['technicianSync']!,
+      methodConnectors: {
+        'registerDevice': _is.MethodConnector(
+          name: 'registerDevice',
+          params: {
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_ifayztnr.DeviceRegistration>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['technicianSync'] as _i4wczera.TechnicianSyncEndpoint).registerDevice(
+                session,
+                params['input'],
+              ),
+        ),
+        'pull': _is.MethodConnector(
+          name: 'pull',
+          params: {
+            'deviceId': _is.ParameterDescription(
+              name: 'deviceId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['technicianSync'] as _i4wczera.TechnicianSyncEndpoint).pull(
+                session,
+                params['deviceId'],
+              ),
+        ),
+        'push': _is.MethodConnector(
+          name: 'push',
+          params: {
+            'request': _is.ParameterDescription(
+              name: 'request',
+              type: _is.getType<_is7nu1l0.SyncPushRequest>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['technicianSync'] as _i4wczera.TechnicianSyncEndpoint).push(
+                session,
+                params['request'],
               ),
         ),
       },

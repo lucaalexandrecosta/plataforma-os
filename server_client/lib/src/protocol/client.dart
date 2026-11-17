@@ -34,6 +34,10 @@ import 'package:plataforma_os_client/src/protocol/scheduling/models/visit.dart' 
 import 'package:plataforma_os_client/src/protocol/scheduling/models/visit_check_in.dart' as _ias7e1vu;
 import 'package:plataforma_os_client/src/protocol/scheduling/models/visit_finish.dart' as _ikfe26w9;
 import 'package:plataforma_os_client/src/protocol/scheduling/models/visit_input.dart' as _ivjpdmyn;
+import 'package:plataforma_os_client/src/protocol/sync/models/device_registration.dart' as _iam7n156;
+import 'package:plataforma_os_client/src/protocol/sync/models/sync_mutation_result.dart' as _ief0slxz;
+import 'package:plataforma_os_client/src/protocol/sync/models/sync_pull_result.dart' as _irdeaok0;
+import 'package:plataforma_os_client/src/protocol/sync/models/sync_push_request.dart' as _i65q2o7k;
 import 'package:plataforma_os_client/src/protocol/tenancy/models/branch.dart' as _ied3wtyg;
 import 'package:plataforma_os_client/src/protocol/tenancy/models/branch_input.dart' as _il2pvpfo;
 import 'package:plataforma_os_client/src/protocol/tenancy/models/cost_center.dart' as _itoq0gfy;
@@ -802,6 +806,41 @@ class EndpointVisits extends EndpointStaff {
   );
 }
 
+/// `technicianSync.*` — sincronização do app do técnico (docs/06 §6). Erros:
+/// `FORBIDDEN`, `VALIDATION_FAILED`, `DEVICE_NOT_REGISTERED`, `DEVICE_BLOCKED`.
+/// Recusas de cada mutação vêm no resultado, não como exceção.
+/// {@category Endpoint}
+class EndpointTechnicianSync extends EndpointStaff {
+  EndpointTechnicianSync(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'technicianSync';
+
+  /// Registra (ou atualiza) o aparelho; chamar ao entrar na empresa.
+  _ida.Future<void> registerDevice(_iam7n156.DeviceRegistration input) => caller.callServerEndpoint<void>(
+    'technicianSync',
+    'registerDevice',
+    {'input': input},
+  );
+
+  /// Recorte atual do técnico.
+  _ida.Future<_irdeaok0.SyncPullResult> pull(_isc.UuidValue deviceId) =>
+      caller.callServerEndpoint<_irdeaok0.SyncPullResult>(
+        'technicianSync',
+        'pull',
+        {'deviceId': deviceId},
+      );
+
+  /// Aplica as ações feitas no aparelho, na ordem, e devolve um resultado por
+  /// ação.
+  _ida.Future<List<_ief0slxz.SyncMutationResult>> push(_i65q2o7k.SyncPushRequest request) =>
+      caller.callServerEndpoint<List<_ief0slxz.SyncMutationResult>>(
+        'technicianSync',
+        'push',
+        {'request': request},
+      );
+}
+
 /// `branches.*` — filiais. Leitura para a equipe; alteração com
 /// `settings.manage` (administrador). Erros: `FORBIDDEN`, `VALIDATION_FAILED`,
 /// `NOT_FOUND`, `VERSION_MISMATCH`, `DEFAULT_BRANCH_REQUIRED`.
@@ -1113,6 +1152,7 @@ class Client extends _isc.ServerpodClientShared {
     depreciation = EndpointDepreciation(this);
     technicians = EndpointTechnicians(this);
     visits = EndpointVisits(this);
+    technicianSync = EndpointTechnicianSync(this);
     branches = EndpointBranches(this);
     costCenters = EndpointCostCenters(this);
     workOrders = EndpointWorkOrders(this);
@@ -1141,6 +1181,8 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointVisits visits;
 
+  late final EndpointTechnicianSync technicianSync;
+
   late final EndpointBranches branches;
 
   late final EndpointCostCenters costCenters;
@@ -1162,6 +1204,7 @@ class Client extends _isc.ServerpodClientShared {
     'depreciation': depreciation,
     'technicians': technicians,
     'visits': visits,
+    'technicianSync': technicianSync,
     'branches': branches,
     'costCenters': costCenters,
     'workOrders': workOrders,

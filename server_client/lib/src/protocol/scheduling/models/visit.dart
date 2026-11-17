@@ -41,8 +41,9 @@ abstract class Visit implements _isc.SerializableModel, _isc.ProtocolSerializati
     this.checkInDistanceM,
     required this.checkInOffSite,
     this.checkInJustification,
+    bool? requireQrCheckIn,
     required this.version,
-  });
+  }) : requireQrCheckIn = requireQrCheckIn ?? false;
 
   factory Visit({
     required _isc.UuidValue id,
@@ -72,6 +73,7 @@ abstract class Visit implements _isc.SerializableModel, _isc.ProtocolSerializati
     double? checkInDistanceM,
     required bool checkInOffSite,
     String? checkInJustification,
+    bool? requireQrCheckIn,
     required int version,
   }) = _VisitImpl;
 
@@ -114,6 +116,9 @@ abstract class Visit implements _isc.SerializableModel, _isc.ProtocolSerializati
       checkInDistanceM: (jsonSerialization['checkInDistanceM'] as num?)?.toDouble(),
       checkInOffSite: _isc.BoolJsonExtension.fromJson(jsonSerialization['checkInOffSite']),
       checkInJustification: jsonSerialization['checkInJustification'] as String?,
+      requireQrCheckIn: jsonSerialization['requireQrCheckIn'] == null
+          ? null
+          : _isc.BoolJsonExtension.fromJson(jsonSerialization['requireQrCheckIn']),
       version: jsonSerialization['version'] as int,
     );
   }
@@ -172,6 +177,8 @@ abstract class Visit implements _isc.SerializableModel, _isc.ProtocolSerializati
 
   String? checkInJustification;
 
+  bool requireQrCheckIn;
+
   int version;
 
   /// Returns a shallow copy of this [Visit]
@@ -205,6 +212,7 @@ abstract class Visit implements _isc.SerializableModel, _isc.ProtocolSerializati
     double? checkInDistanceM,
     bool? checkInOffSite,
     String? checkInJustification,
+    bool? requireQrCheckIn,
     int? version,
   });
   @override
@@ -238,6 +246,7 @@ abstract class Visit implements _isc.SerializableModel, _isc.ProtocolSerializati
       if (checkInDistanceM != null) 'checkInDistanceM': checkInDistanceM,
       'checkInOffSite': checkInOffSite,
       if (checkInJustification != null) 'checkInJustification': checkInJustification,
+      'requireQrCheckIn': requireQrCheckIn,
       'version': version,
     };
   }
@@ -273,6 +282,7 @@ abstract class Visit implements _isc.SerializableModel, _isc.ProtocolSerializati
       if (checkInDistanceM != null) 'checkInDistanceM': checkInDistanceM,
       'checkInOffSite': checkInOffSite,
       if (checkInJustification != null) 'checkInJustification': checkInJustification,
+      'requireQrCheckIn': requireQrCheckIn,
       'version': version,
     };
   }
@@ -314,6 +324,7 @@ class _VisitImpl extends Visit {
     double? checkInDistanceM,
     required bool checkInOffSite,
     String? checkInJustification,
+    bool? requireQrCheckIn,
     required int version,
   }) : super._(
          id: id,
@@ -343,6 +354,7 @@ class _VisitImpl extends Visit {
          checkInDistanceM: checkInDistanceM,
          checkInOffSite: checkInOffSite,
          checkInJustification: checkInJustification,
+         requireQrCheckIn: requireQrCheckIn,
          version: version,
        );
 
@@ -378,6 +390,7 @@ class _VisitImpl extends Visit {
     Object? checkInDistanceM = _Undefined,
     bool? checkInOffSite,
     Object? checkInJustification = _Undefined,
+    bool? requireQrCheckIn,
     int? version,
   }) {
     return Visit(
@@ -408,6 +421,7 @@ class _VisitImpl extends Visit {
       checkInDistanceM: checkInDistanceM is double? ? checkInDistanceM : this.checkInDistanceM,
       checkInOffSite: checkInOffSite ?? this.checkInOffSite,
       checkInJustification: checkInJustification is String? ? checkInJustification : this.checkInJustification,
+      requireQrCheckIn: requireQrCheckIn ?? this.requireQrCheckIn,
       version: version ?? this.version,
     );
   }

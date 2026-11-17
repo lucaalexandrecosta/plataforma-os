@@ -4,19 +4,16 @@ import 'package:go_router/go_router.dart';
 import 'package:plataforma_os_client/plataforma_os_client.dart';
 
 import '../../labels.dart';
+import '../../local/field_store.dart';
+import '../../local/providers.dart';
 import '../../session/session.dart';
-import '../common/errors.dart';
 import '../common/format.dart';
+import 'sync_widgets.dart';
 import 'visit_card.dart';
 
-/// Relógio do app; os testes fixam o "agora".
-final clockProvider = Provider<DateTime Function()>((ref) => DateTime.now);
-
-/// Janela da agenda: de D−2 (atrasadas) a D+14 (docs/06, questão 4).
-const agendaDaysBack = 2;
-const agendaDaysAhead = 14;
-
-/// Minha agenda: em andamento no topo, atrasadas e depois dia a dia.
+/// Minha agenda, lida do banco local: em andamento no topo, atrasadas e
+/// depois dia a dia. Funciona sem sinal; o sync roda ao abrir, ao puxar a
+/// lista, depois de cada ação e a cada 5 minutos.
 class AgendaPage extends ConsumerStatefulWidget {
   const AgendaPage({super.key});
 
@@ -25,47 +22,23 @@ class AgendaPage extends ConsumerStatefulWidget {
 }
 
 class _AgendaPageState extends ConsumerState<AgendaPage> {
-  late Future<_Agenda> _future;
+  FieldStore? _syncedStore;
 
-  @override
-  void initState() {
-    super.initState();
-    _future = _load();
-  }
-
-  Future<_Agenda> _load() async {
-    final gateway = ref.read(gatewayProvider);
-    final today = startOfDay(ref.read(clockProvider)());
-    final technician = await gateway.myTechnician();
-    if (technician == null) return _Agenda(null, const [], today);
-    final visits = await gateway.myVisits(
-      today.subtract(const Duration(days: agendaDaysBack)),
-      today.add(const Duration(days: agendaDaysAhead + 1)),
-    );
-    return _Agenda(technician, visits, today);
-  }
-
-  Future<void> _reload() async {
-    final next = _load();
-    setState(() {
-      _future = next;
-    });
-    try {
-      await next;
-    } on Object {
-      // O FutureBuilder mostra o erro.
-    }
-  }
-
-  Future<void> _open(Visit visit) async {
-    await context.push('/agenda/visita/${visit.id}');
-    if (mounted) await _reload();
+  /// Sync inicial de cada banco aberto (ao entrar ou trocar de empresa).
+  void _firstSync(FieldStore store) {
+    if (identical(_syncedStore, store)) return;
+    _syncedStore = store;
+    WidgetsBinding.instance.addPostFrameCallback((_) => runSync(context, ref, store));
   }
 
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(sessionProvider);
+    final store = ref.watch(storeProvider);
     final me = session is SignedIn ? session.me : null;
+    if (store == null) return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    _firstSync(store);
+    final today = startOfDay(ref.watch(clockProvider)());
     return Scaffold(
       appBar: AppBar(
         title: Column(
@@ -76,7 +49,7 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
           ],
         ),
         actions: [
-          IconButton(tooltip: 'Atualizar', icon: const Icon(Icons.refresh), onPressed: _reload),
+          SyncButton(store: store),
           PopupMenuButton<String>(
             key: const Key('user-menu'),
             icon: const Icon(Icons.account_circle),
@@ -93,45 +66,55 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
           ),
         ],
       ),
-      body: FutureBuilder<_Agenda>(
-        future: _future,
-        builder: (context, snap) {
-          if (snap.hasError) return ErrorPanel(error: snap.error!, onRetry: _reload);
-          final agenda = snap.data;
-          if (agenda == null) return const Center(child: CircularProgressIndicator());
-          if (agenda.technician == null) {
-            return const _Message(
-              icon: Icons.link_off,
-              text: 'Seu acesso não está ligado a um técnico desta empresa. Peça ao despacho para fazer o vínculo.',
-            );
-          }
-          final sections = agenda.sections();
-          return RefreshIndicator(
-            onRefresh: _reload,
-            child: sections.isEmpty
-                ? ListView(
-                    children: const [
-                      SizedBox(height: 120),
-                      _Message(icon: Icons.event_available, text: 'Nenhuma visita na sua agenda nos próximos dias.'),
-                    ],
-                  )
-                : ListView(
-                    padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
-                    children: [
-                      for (final (title, visits, daily) in sections) ...[
-                        Padding(
-                          padding: const EdgeInsets.fromLTRB(4, 16, 4, 4),
-                          child: Text(title, style: Theme.of(context).textTheme.titleMedium),
+      body: StreamBuilder<SyncSummary>(
+        stream: store.watchSummary(),
+        initialData: store.summary,
+        builder: (context, summarySnap) {
+          final summary = summarySnap.data ?? const SyncSummary();
+          return StreamBuilder<List<Visit>>(
+            stream: store.watchVisits(),
+            builder: (context, snap) {
+              final visits = snap.data;
+              if (visits == null) return const Center(child: CircularProgressIndicator());
+              if (summary.error?.code == 'FORBIDDEN') {
+                return const _Message(
+                  icon: Icons.link_off,
+                  text: 'Seu acesso não está ligado a um técnico desta empresa. Peça ao despacho para fazer o vínculo.',
+                );
+              }
+              final sections = agendaSections(visits, today);
+              final children = <Widget>[
+                if (summary.notices.isNotEmpty) NoticesCard(store: store, notices: summary.notices),
+                if (sections.isEmpty)
+                  summary.lastSyncAt == null && summary.error == null
+                      ? const _Message(icon: Icons.cloud_download, text: 'Baixando sua agenda…')
+                      : const _Message(
+                          icon: Icons.event_available,
+                          text: 'Nenhuma visita na sua agenda nos próximos dias.',
                         ),
-                        for (final v in visits)
-                          VisitCard(
-                            visit: v,
-                            onTap: () => _open(v),
-                            dayRelativeTo: daily ? null : agenda.today,
-                          ),
-                      ],
-                    ],
+                for (final (title, list, daily) in sections) ...[
+                  Padding(
+                    padding: const EdgeInsets.fromLTRB(4, 16, 4, 4),
+                    child: Text(title, style: Theme.of(context).textTheme.titleMedium),
                   ),
+                  for (final v in list)
+                    VisitCard(
+                      visit: v,
+                      pending: summary.pendingVisitIds.contains(v.id.uuid),
+                      onTap: () => context.push('/agenda/visita/${v.id}'),
+                      dayRelativeTo: daily ? null : today,
+                    ),
+                ],
+              ];
+              return RefreshIndicator(
+                onRefresh: () => runSync(context, ref, store),
+                child: ListView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: const EdgeInsets.fromLTRB(12, 8, 12, 24),
+                  children: children,
+                ),
+              );
+            },
           );
         },
       ),
@@ -139,33 +122,25 @@ class _AgendaPageState extends ConsumerState<AgendaPage> {
   }
 }
 
-class _Agenda {
-  _Agenda(this.technician, this.visits, this.today);
-
-  final Technician? technician;
-  final List<Visit> visits;
-  final DateTime today;
-
-  /// Em andamento; atrasadas (agendadas de dias passados); e cada dia de hoje
-  /// em diante, com as finalizadas do próprio dia. Canceladas ficam de fora.
-  /// O terceiro campo diz se a seção é de um dia só (o cartão omite o dia).
-  List<(String, List<Visit>, bool)> sections() {
-    final sorted = [...visits]..sort((a, b) => a.scheduledStart.compareTo(b.scheduledStart));
-    final active = sorted.where((v) => activeVisitStatuses.contains(v.status)).toList();
-    final late = sorted.where((v) => v.status == 'scheduled' && startOfDay(v.scheduledStart).isBefore(today)).toList();
-    final byDay = <DateTime, List<Visit>>{};
-    for (final v in sorted) {
-      if (v.status == 'cancelled' || activeVisitStatuses.contains(v.status)) continue;
-      final day = startOfDay(v.scheduledStart);
-      if (day.isBefore(today)) continue;
-      byDay.putIfAbsent(day, () => []).add(v);
-    }
-    return [
-      if (active.isNotEmpty) ('Em andamento', active, false),
-      if (late.isNotEmpty) ('Atrasadas', late, false),
-      for (final MapEntry(:key, :value) in byDay.entries) (formatDay(key, today), value, true),
-    ];
+/// Em andamento; atrasadas (agendadas de dias passados); e cada dia de hoje
+/// em diante, com as finalizadas do próprio dia. Canceladas ficam de fora.
+/// O terceiro campo diz se a seção é de um dia só (o cartão omite o dia).
+List<(String, List<Visit>, bool)> agendaSections(List<Visit> visits, DateTime today) {
+  final sorted = [...visits]..sort((a, b) => a.scheduledStart.compareTo(b.scheduledStart));
+  final active = sorted.where((v) => activeVisitStatuses.contains(v.status)).toList();
+  final late = sorted.where((v) => v.status == 'scheduled' && startOfDay(v.scheduledStart).isBefore(today)).toList();
+  final byDay = <DateTime, List<Visit>>{};
+  for (final v in sorted) {
+    if (v.status == 'cancelled' || activeVisitStatuses.contains(v.status)) continue;
+    final day = startOfDay(v.scheduledStart);
+    if (day.isBefore(today)) continue;
+    byDay.putIfAbsent(day, () => []).add(v);
   }
+  return [
+    if (active.isNotEmpty) ('Em andamento', active, false),
+    if (late.isNotEmpty) ('Atrasadas', late, false),
+    for (final MapEntry(:key, :value) in byDay.entries) (formatDay(key, today), value, true),
+  ];
 }
 
 class _Message extends StatelessWidget {
@@ -176,17 +151,15 @@ class _Message extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Center(
-      child: Padding(
-        padding: const EdgeInsets.all(32),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
-            const SizedBox(height: 12),
-            Text(text, textAlign: TextAlign.center),
-          ],
-        ),
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(32, 96, 32, 32),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 48, color: Theme.of(context).colorScheme.onSurfaceVariant),
+          const SizedBox(height: 12),
+          Text(text, textAlign: TextAlign.center),
+        ],
       ),
     );
   }
