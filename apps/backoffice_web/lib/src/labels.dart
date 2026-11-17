@@ -74,4 +74,35 @@ const checkInMethodLabels = {'qr': 'QR code', 'gps': 'GPS', 'manual': 'Manual'};
 /// Status da OS em que dá para agendar visita (igual ao servidor).
 const schedulableWorkOrderStatuses = {'open', 'scheduled', 'on_hold', 'in_progress'};
 
+const depreciationMethodLabels = {
+  'straight_line': 'Linear',
+  'sum_of_years_digits': 'Soma dos dígitos dos anos',
+  'double_declining_balance': 'Saldo decrescente duplo',
+  'units_of_production': 'Unidades produzidas',
+};
+
+const depreciationStartRuleLabels = {
+  'pro_rata_days': 'Pró-rata pelos dias do mês',
+  'full_month': 'Mês cheio',
+  'next_month': 'A partir do mês seguinte',
+};
+
+const monthNames = [
+  'janeiro',
+  'fevereiro',
+  'março',
+  'abril',
+  'maio',
+  'junho',
+  'julho',
+  'agosto',
+  'setembro',
+  'outubro',
+  'novembro',
+  'dezembro',
+];
+
+/// "março/2026".
+String competence(int year, int month) => '${monthNames[month - 1]}/$year';
+
 String label(Map<String, String> labels, String? code) => code == null ? '—' : labels[code] ?? code;

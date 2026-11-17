@@ -236,6 +236,38 @@ class ServerGateway implements Gateway {
   Future<Visit> cancelVisit(Visit visit, String reason) =>
       _guard(() => _tenant.visits.cancel(visit.id, visit.version, reason));
 
+  // ----------------------------------------------------------- depreciação gerencial
+
+  @override
+  Future<DepreciationProfile?> depreciationProfile(UuidValue assetId) =>
+      _guard(() => _tenant.depreciation.profile(assetId));
+
+  @override
+  Future<DepreciationProfile> saveDepreciationProfile(
+    UuidValue assetId,
+    int? expectedVersion,
+    DepreciationProfileInput input,
+  ) => _guard(() => _tenant.depreciation.saveProfile(assetId, expectedVersion, input));
+
+  @override
+  Future<AssetDepreciation> depreciationSchedule(UuidValue assetId) =>
+      _guard(() => _tenant.depreciation.schedule(assetId));
+
+  @override
+  Future<DepreciationPosition> depreciationPosition(int year, int month, {UuidValue? costCenterId}) =>
+      _guard(() => _tenant.depreciation.position(year, month, costCenterId: costCenterId));
+
+  @override
+  Future<List<DepreciationClosing>> depreciationClosings() => _guard(() => _tenant.depreciation.closings());
+
+  @override
+  Future<DepreciationClosing> closeDepreciation(int year, int month) =>
+      _guard(() => _tenant.depreciation.close(year, month));
+
+  @override
+  Future<DepreciationClosing> reopenDepreciation(int year, int month, String reason) =>
+      _guard(() => _tenant.depreciation.reopen(year, month, reason));
+
   // ----------------------------------------------------------- erros
 
   /// Converte os erros do cliente em [GatewayException] com mensagem para a

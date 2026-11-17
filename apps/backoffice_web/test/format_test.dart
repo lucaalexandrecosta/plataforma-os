@@ -16,4 +16,15 @@ void main() {
     expect(formatDateTime(DateTime(2026, 1, 5, 9, 7)), '05/01/2026 09:07');
     expect(formatDate(null), '—');
   });
+
+  test('valor digitado em reais vira centavos', () {
+    expect(parseMoney('1.234,56'), 123456);
+    expect(parseMoney('R\$ 10,5'), 1050);
+    expect(parseMoney('1234.5'), 123450);
+    expect(parseMoney('200'), 20000);
+    expect(parseMoney(''), isNull);
+    expect(parseMoney('abc'), isNull);
+    expect(parseMoney('1,234'), isNull);
+    expect(moneyField(123456), '1.234,56');
+  });
 }
