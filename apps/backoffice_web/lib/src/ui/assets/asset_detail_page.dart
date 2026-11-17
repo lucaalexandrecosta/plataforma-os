@@ -12,6 +12,7 @@ import '../common/status_chip.dart';
 import '../depreciation/asset_depreciation_card.dart';
 import '../qr_tags/asset_tag_actions.dart';
 import '../work_orders/open_work_order_dialog.dart';
+import 'asset_dialog.dart';
 
 /// Ficha do bem: dados, aquisição e as OS do bem, com "Abrir OS".
 class AssetDetailPage extends ConsumerStatefulWidget {
@@ -66,10 +67,19 @@ class _AssetDetailPageState extends ConsumerState<AssetDetailPage> {
     if (created != null && mounted) context.go('/os/${created.workOrder.id}');
   }
 
+  Future<void> _edit(Asset asset) async {
+    final saved = await showDialog<Asset>(
+      context: context,
+      builder: (_) => AssetDialog(asset: asset),
+    );
+    if (saved != null && mounted) setState(_load);
+  }
+
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(sessionProvider);
     final canCreate = session is SignedIn && session.can('work_orders.create');
+    final canManage = session is SignedIn && session.can('assets.manage');
     return FutureBuilder<_AssetView>(
       future: _view,
       builder: (context, snap) {
@@ -99,6 +109,13 @@ class _AssetDetailPageState extends ConsumerState<AssetDetailPage> {
                   style: theme.textTheme.headlineSmall,
                 ),
                 Text(asset.productName, style: theme.textTheme.titleMedium),
+                if (canManage)
+                  OutlinedButton.icon(
+                    key: const Key('asset-edit'),
+                    onPressed: () => _edit(asset),
+                    icon: const Icon(Icons.edit_outlined),
+                    label: const Text('Editar'),
+                  ),
                 if (canCreate && asset.status != 'retired' && asset.isActive)
                   FilledButton.icon(
                     key: const Key('asset-open-wo'),

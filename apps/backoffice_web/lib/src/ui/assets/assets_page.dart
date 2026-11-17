@@ -7,6 +7,7 @@ import '../../labels.dart';
 import '../../session/session.dart';
 import '../common/errors.dart';
 import '../common/paged_table.dart';
+import 'asset_dialog.dart';
 
 /// Lista de bens com busca por patrimônio, série ou produto.
 class AssetsPage extends ConsumerStatefulWidget {
@@ -37,13 +38,29 @@ class _AssetsPageState extends ConsumerState<AssetsPage> {
     _page = ref.read(gatewayProvider).assets(search: _search.text, limit: PagerBar.pageSize, offset: _offset);
   }
 
+  Future<void> _new() async {
+    final saved = await showDialog<Asset>(context: context, builder: (_) => const AssetDialog());
+    if (saved != null && mounted) context.go('/bens/${saved.id}');
+  }
+
   @override
   Widget build(BuildContext context) {
+    final session = ref.watch(sessionProvider);
+    final canManage = session is SignedIn && session.can('assets.manage');
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: [
         PageHeader(
           title: 'Bens',
+          actions: [
+            if (canManage)
+              FilledButton.icon(
+                key: const Key('asset-new'),
+                onPressed: _new,
+                icon: const Icon(Icons.add),
+                label: const Text('Novo bem'),
+              ),
+          ],
           filters: [
             SizedBox(
               width: 320,

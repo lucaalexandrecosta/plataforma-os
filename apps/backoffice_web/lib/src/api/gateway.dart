@@ -62,6 +62,8 @@ abstract interface class Gateway {
   Future<ProductSummary> createProduct(ProductInput input);
   Future<AssetPage> assets({String? search, int limit, int offset});
   Future<Asset> asset(UuidValue id);
+  Future<Asset> createAsset(AssetInput input);
+  Future<Asset> updateAsset(Asset asset, AssetInput input);
 
   // ----------------------------------------------------------- OS
   Future<WorkOrderPage> workOrders({

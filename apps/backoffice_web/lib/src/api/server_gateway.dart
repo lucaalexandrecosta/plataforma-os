@@ -220,6 +220,13 @@ class ServerGateway implements Gateway {
   @override
   Future<Asset> asset(UuidValue id) => _guard(() => _tenant.assets.get(id));
 
+  @override
+  Future<Asset> createAsset(AssetInput input) => _guard(() => _tenant.assets.create(input));
+
+  @override
+  Future<Asset> updateAsset(Asset asset, AssetInput input) =>
+      _guard(() => _tenant.assets.update(asset.id, asset.version, input));
+
   // ----------------------------------------------------------- OS
 
   @override
