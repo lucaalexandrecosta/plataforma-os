@@ -28,6 +28,12 @@ import 'package:plataforma_os_client/src/protocol/patrimony/models/depreciation_
 import 'package:plataforma_os_client/src/protocol/patrimony/models/depreciation_position.dart' as _i8b4ltth;
 import 'package:plataforma_os_client/src/protocol/patrimony/models/depreciation_profile.dart' as _i0ewj4w5;
 import 'package:plataforma_os_client/src/protocol/patrimony/models/depreciation_profile_input.dart' as _ihghh0c1;
+import 'package:plataforma_os_client/src/protocol/scheduling/models/technician.dart' as _ikjr2b9x;
+import 'package:plataforma_os_client/src/protocol/scheduling/models/technician_input.dart' as _ixaduq6k;
+import 'package:plataforma_os_client/src/protocol/scheduling/models/visit.dart' as _isvtjvq7;
+import 'package:plataforma_os_client/src/protocol/scheduling/models/visit_check_in.dart' as _ias7e1vu;
+import 'package:plataforma_os_client/src/protocol/scheduling/models/visit_finish.dart' as _ikfe26w9;
+import 'package:plataforma_os_client/src/protocol/scheduling/models/visit_input.dart' as _ivjpdmyn;
 import 'package:plataforma_os_client/src/protocol/tenancy/models/branch.dart' as _ied3wtyg;
 import 'package:plataforma_os_client/src/protocol/tenancy/models/branch_input.dart' as _il2pvpfo;
 import 'package:plataforma_os_client/src/protocol/tenancy/models/cost_center.dart' as _itoq0gfy;
@@ -581,6 +587,212 @@ abstract class EndpointPublic extends _isc.EndpointRef {
   EndpointPublic(_isc.EndpointCaller caller) : super(caller);
 }
 
+/// `technicians.*` — técnicos próprios. Erros: `FORBIDDEN`,
+/// `VALIDATION_FAILED`, `NOT_FOUND`, `VERSION_MISMATCH`.
+/// {@category Endpoint}
+class EndpointTechnicians extends EndpointStaff {
+  EndpointTechnicians(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'technicians';
+
+  _ida.Future<List<_ikjr2b9x.Technician>> list({bool? includeInactive}) =>
+      caller.callServerEndpoint<List<_ikjr2b9x.Technician>>(
+        'technicians',
+        'list',
+        {'includeInactive': includeInactive},
+      );
+
+  /// Técnico ligado a quem está logado (app de campo), ou nulo.
+  _ida.Future<_ikjr2b9x.Technician?> mine() => caller.callServerEndpoint<_ikjr2b9x.Technician?>(
+    'technicians',
+    'mine',
+    {},
+  );
+
+  _ida.Future<_ikjr2b9x.Technician> create(_ixaduq6k.TechnicianInput input) =>
+      caller.callServerEndpoint<_ikjr2b9x.Technician>(
+        'technicians',
+        'create',
+        {'input': input},
+      );
+
+  _ida.Future<_ikjr2b9x.Technician> update(
+    _isc.UuidValue id,
+    int expectedVersion,
+    _ixaduq6k.TechnicianInput input,
+  ) => caller.callServerEndpoint<_ikjr2b9x.Technician>(
+    'technicians',
+    'update',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+      'input': input,
+    },
+  );
+}
+
+/// `visits.*` — agenda (despacho) e execução da visita pelo técnico. Toda
+/// mudança recebe a versão lida (`expectedVersion`) e devolve a visita com o
+/// status atual da OS. Erros: `FORBIDDEN`, `VALIDATION_FAILED`, `NOT_FOUND`,
+/// `VERSION_MISMATCH`, `INVALID_TRANSITION`, `WORK_ORDER_NOT_SCHEDULABLE`,
+/// `VISIT_NOT_SCHEDULED`, `ANOTHER_VISIT_ACTIVE`, `QR_ASSET_MISMATCH`,
+/// `CHECK_IN_REQUIRED`.
+/// {@category Endpoint}
+class EndpointVisits extends EndpointStaff {
+  EndpointVisits(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'visits';
+
+  /// Visitas que começam no período [from, to) (até 62 dias).
+  _ida.Future<List<_isvtjvq7.Visit>> agenda(
+    DateTime from,
+    DateTime to, {
+    _isc.UuidValue? technicianId,
+    bool? includeCancelled,
+  }) => caller.callServerEndpoint<List<_isvtjvq7.Visit>>(
+    'visits',
+    'agenda',
+    {
+      'from': from,
+      'to': to,
+      'technicianId': technicianId,
+      'includeCancelled': includeCancelled,
+    },
+  );
+
+  /// Visitas do técnico logado no período, mais as que estão em andamento.
+  _ida.Future<List<_isvtjvq7.Visit>> mine(
+    DateTime from,
+    DateTime to,
+  ) => caller.callServerEndpoint<List<_isvtjvq7.Visit>>(
+    'visits',
+    'mine',
+    {
+      'from': from,
+      'to': to,
+    },
+  );
+
+  _ida.Future<List<_isvtjvq7.Visit>> ofWorkOrder(_isc.UuidValue workOrderId) =>
+      caller.callServerEndpoint<List<_isvtjvq7.Visit>>(
+        'visits',
+        'ofWorkOrder',
+        {'workOrderId': workOrderId},
+      );
+
+  _ida.Future<_isvtjvq7.Visit> get(_isc.UuidValue id) => caller.callServerEndpoint<_isvtjvq7.Visit>(
+    'visits',
+    'get',
+    {'id': id},
+  );
+
+  _ida.Future<_isvtjvq7.Visit> schedule(
+    _isc.UuidValue workOrderId,
+    _ivjpdmyn.VisitInput input,
+  ) => caller.callServerEndpoint<_isvtjvq7.Visit>(
+    'visits',
+    'schedule',
+    {
+      'workOrderId': workOrderId,
+      'input': input,
+    },
+  );
+
+  _ida.Future<_isvtjvq7.Visit> reschedule(
+    _isc.UuidValue id,
+    int expectedVersion,
+    _ivjpdmyn.VisitInput input,
+  ) => caller.callServerEndpoint<_isvtjvq7.Visit>(
+    'visits',
+    'reschedule',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+      'input': input,
+    },
+  );
+
+  _ida.Future<_isvtjvq7.Visit> cancel(
+    _isc.UuidValue id,
+    int expectedVersion,
+    String reason,
+  ) => caller.callServerEndpoint<_isvtjvq7.Visit>(
+    'visits',
+    'cancel',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+      'reason': reason,
+    },
+  );
+
+  _ida.Future<_isvtjvq7.Visit> startTravel(
+    _isc.UuidValue id,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_isvtjvq7.Visit>(
+    'visits',
+    'startTravel',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  _ida.Future<_isvtjvq7.Visit> checkIn(
+    _isc.UuidValue id,
+    int expectedVersion,
+    _ias7e1vu.VisitCheckIn input,
+  ) => caller.callServerEndpoint<_isvtjvq7.Visit>(
+    'visits',
+    'checkIn',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+      'input': input,
+    },
+  );
+
+  _ida.Future<_isvtjvq7.Visit> pause(
+    _isc.UuidValue id,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_isvtjvq7.Visit>(
+    'visits',
+    'pause',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  _ida.Future<_isvtjvq7.Visit> resume(
+    _isc.UuidValue id,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_isvtjvq7.Visit>(
+    'visits',
+    'resume',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  _ida.Future<_isvtjvq7.Visit> finish(
+    _isc.UuidValue id,
+    int expectedVersion,
+    _ikfe26w9.VisitFinish input,
+  ) => caller.callServerEndpoint<_isvtjvq7.Visit>(
+    'visits',
+    'finish',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+      'input': input,
+    },
+  );
+}
+
 /// `branches.*` — filiais. Leitura para a equipe; alteração com
 /// `settings.manage` (administrador). Erros: `FORBIDDEN`, `VALIDATION_FAILED`,
 /// `NOT_FOUND`, `VERSION_MISMATCH`, `DEFAULT_BRANCH_REQUIRED`.
@@ -890,6 +1102,8 @@ class Client extends _isc.ServerpodClientShared {
     refreshJwtTokens = EndpointRefreshJwtTokens(this);
     users = EndpointUsers(this);
     depreciation = EndpointDepreciation(this);
+    technicians = EndpointTechnicians(this);
+    visits = EndpointVisits(this);
     branches = EndpointBranches(this);
     costCenters = EndpointCostCenters(this);
     workOrders = EndpointWorkOrders(this);
@@ -914,6 +1128,10 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointDepreciation depreciation;
 
+  late final EndpointTechnicians technicians;
+
+  late final EndpointVisits visits;
+
   late final EndpointBranches branches;
 
   late final EndpointCostCenters costCenters;
@@ -933,6 +1151,8 @@ class Client extends _isc.ServerpodClientShared {
     'refreshJwtTokens': refreshJwtTokens,
     'users': users,
     'depreciation': depreciation,
+    'technicians': technicians,
+    'visits': visits,
     'branches': branches,
     'costCenters': costCenters,
     'workOrders': workOrders,

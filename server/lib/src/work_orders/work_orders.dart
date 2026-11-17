@@ -11,5 +11,5 @@ export '../generated/protocol.dart'
         WorkOrderStatusChange,
         WorkOrderType,
         WorkOrderTypeInput;
-export 'internal/work_orders.dart' show WorkOrders;
+export 'internal/work_orders.dart' show WorkOrderForVisit, WorkOrders;
 export 'tables.dart' show workOrdersOwnership;

@@ -12,6 +12,7 @@
 --   bruno.despacho@frio-sul.test  dispatcher    em frio-sul
 --   carla.admin@forno-norte.test  tenant_admin  em forno-norte
 --   davi.consultor@dev.test       manager nos DOIS tenants (troca de tenant)
+--   eduardo.tecnico@frio-sul.test technician    em frio-sul (técnico T01)
 --
 -- Roda como superusuário (dev/CI), depois da migração inicial. Idempotente:
 -- pode ser reaplicado (ON CONFLICT DO NOTHING). Nunca rodar em produção.
@@ -37,7 +38,8 @@ INSERT INTO app.users (id, user_type, idp_subject, full_name, email, email_verif
   ('0197f000-0100-7000-8000-000000000001', 'staff', NULL, 'Ana Admin',      'ana.admin@frio-sul.test',      now(), 'active'),
   ('0197f000-0100-7000-8000-000000000002', 'staff', NULL, 'Bruno Despacho', 'bruno.despacho@frio-sul.test', now(), 'active'),
   ('0197f000-0100-7000-8000-000000000003', 'staff', NULL, 'Carla Admin',    'carla.admin@forno-norte.test', now(), 'active'),
-  ('0197f000-0100-7000-8000-000000000004', 'staff', NULL, 'Davi Consultor', 'davi.consultor@dev.test',      now(), 'active')
+  ('0197f000-0100-7000-8000-000000000004', 'staff', NULL, 'Davi Consultor', 'davi.consultor@dev.test',      now(), 'active'),
+  ('0197f000-0100-7000-8000-000000000005', 'staff', NULL, 'Eduardo Técnico', 'eduardo.tecnico@frio-sul.test', now(), 'active')
 ON CONFLICT (id) DO NOTHING;
 
 -- =============================================================== tenant A: frio-sul
@@ -60,13 +62,15 @@ ON CONFLICT (id) DO NOTHING;
 INSERT INTO app.tenant_memberships (id, tenant_id, user_id, status, joined_at) VALUES
   ('0197f000-0001-7200-8000-000000000001', '0197f000-0001-7000-8000-000000000001', '0197f000-0100-7000-8000-000000000001', 'active', now()),
   ('0197f000-0001-7200-8000-000000000002', '0197f000-0001-7000-8000-000000000001', '0197f000-0100-7000-8000-000000000002', 'active', now()),
-  ('0197f000-0001-7200-8000-000000000004', '0197f000-0001-7000-8000-000000000001', '0197f000-0100-7000-8000-000000000004', 'active', now())
+  ('0197f000-0001-7200-8000-000000000004', '0197f000-0001-7000-8000-000000000001', '0197f000-0100-7000-8000-000000000004', 'active', now()),
+  ('0197f000-0001-7200-8000-000000000005', '0197f000-0001-7000-8000-000000000001', '0197f000-0100-7000-8000-000000000005', 'active', now())
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO app.tenant_membership_roles (tenant_id, membership_id, role_code) VALUES
   ('0197f000-0001-7000-8000-000000000001', '0197f000-0001-7200-8000-000000000001', 'tenant_admin'),
   ('0197f000-0001-7000-8000-000000000001', '0197f000-0001-7200-8000-000000000002', 'dispatcher'),
-  ('0197f000-0001-7000-8000-000000000001', '0197f000-0001-7200-8000-000000000004', 'manager')
+  ('0197f000-0001-7000-8000-000000000001', '0197f000-0001-7200-8000-000000000004', 'manager'),
+  ('0197f000-0001-7000-8000-000000000001', '0197f000-0001-7200-8000-000000000005', 'technician')
 ON CONFLICT (tenant_id, membership_id, role_code) DO NOTHING;
 
 INSERT INTO app.customers (id, tenant_id, code, name, trade_name, document_type, document_number, phone) VALUES
@@ -94,8 +98,9 @@ INSERT INTO app.work_order_types (id, tenant_id, code, name, category) VALUES
   ('0197f000-0001-7500-8000-000000000002', '0197f000-0001-7000-8000-000000000001', 'INS', 'Instalação', 'installation')
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO app.technicians (id, tenant_id, code, name) VALUES
-  ('0197f000-0001-7600-8000-000000000001', '0197f000-0001-7000-8000-000000000001', 'T01', 'Eduardo Técnico')
+INSERT INTO app.technicians (id, tenant_id, code, name, user_id) VALUES
+  ('0197f000-0001-7600-8000-000000000001', '0197f000-0001-7000-8000-000000000001', 'T01', 'Eduardo Técnico',
+   '0197f000-0100-7000-8000-000000000005')
 ON CONFLICT (id) DO NOTHING;
 
 -- Etiquetas QR em estado "generated" (short code = 7 caracteres + verificador).
