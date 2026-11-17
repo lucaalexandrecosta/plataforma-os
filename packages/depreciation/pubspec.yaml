@@ -1,0 +1,19 @@
+name: plataforma_os_depreciation
+description: >-
+  Motor de depreciação (Dart puro), portado do Painel de Depreciação e
+  espelhando a memória de cálculo F670 do ERP Senior. Roda igual no backoffice
+  (recálculo na tela) e no servidor (fechamento da competência).
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.12.0
+
+dependencies:
+  decimal: ^3.2.1
+  meta: ^1.16.0
+  rational: ^2.2.3
+
+dev_dependencies:
+  lints: ^6.0.0
+  test: ^1.26.0

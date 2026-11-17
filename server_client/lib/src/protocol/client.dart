@@ -23,6 +23,11 @@ import 'package:plataforma_os_client/src/protocol/identity_access/models/assigna
 import 'package:plataforma_os_client/src/protocol/identity_access/models/me_info.dart' as _i8cz5om6;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/tenant_token.dart' as _ii663qav;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/tenant_user.dart' as _i8ihd43z;
+import 'package:plataforma_os_client/src/protocol/patrimony/models/asset_depreciation.dart' as _irg3uuam;
+import 'package:plataforma_os_client/src/protocol/patrimony/models/depreciation_closing.dart' as _iqiiy4eg;
+import 'package:plataforma_os_client/src/protocol/patrimony/models/depreciation_position.dart' as _i8b4ltth;
+import 'package:plataforma_os_client/src/protocol/patrimony/models/depreciation_profile.dart' as _i0ewj4w5;
+import 'package:plataforma_os_client/src/protocol/patrimony/models/depreciation_profile_input.dart' as _ihghh0c1;
 import 'package:plataforma_os_client/src/protocol/scheduling/models/technician.dart' as _ikjr2b9x;
 import 'package:plataforma_os_client/src/protocol/scheduling/models/technician_input.dart' as _ixaduq6k;
 import 'package:plataforma_os_client/src/protocol/scheduling/models/visit.dart' as _isvtjvq7;
@@ -471,6 +476,99 @@ class EndpointUsers extends EndpointStaff {
         'remove',
         {'membershipId': membershipId},
       );
+}
+
+/// `depreciation.*` — ficha patrimonial, memória de cálculo, posição mensal e
+/// fechamento da competência (livro gerencial). Valores em centavos. Erros:
+/// `FORBIDDEN`, `VALIDATION_FAILED`, `NOT_FOUND`, `VERSION_MISMATCH`,
+/// `PROFILE_EXISTS`, `COST_REQUIRED`, `PERIOD_IN_FUTURE`, `ALREADY_CLOSED`,
+/// `PERIOD_OUT_OF_ORDER`, `NOT_CLOSED`, `NOT_LATEST_CLOSING`.
+/// {@category Endpoint}
+class EndpointDepreciation extends EndpointStaff {
+  EndpointDepreciation(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'depreciation';
+
+  /// Ficha do bem, ou nulo se ainda não tem.
+  _ida.Future<_i0ewj4w5.DepreciationProfile?> profile(_isc.UuidValue assetId) =>
+      caller.callServerEndpoint<_i0ewj4w5.DepreciationProfile?>(
+        'depreciation',
+        'profile',
+        {'assetId': assetId},
+      );
+
+  /// Cria ([expectedVersion] nulo) ou altera a ficha.
+  _ida.Future<_i0ewj4w5.DepreciationProfile> saveProfile(
+    _isc.UuidValue assetId,
+    int? expectedVersion,
+    _ihghh0c1.DepreciationProfileInput input,
+  ) => caller.callServerEndpoint<_i0ewj4w5.DepreciationProfile>(
+    'depreciation',
+    'saveProfile',
+    {
+      'assetId': assetId,
+      'expectedVersion': expectedVersion,
+      'input': input,
+    },
+  );
+
+  /// Memória de cálculo mês a mês.
+  _ida.Future<_irg3uuam.AssetDepreciation> schedule(_isc.UuidValue assetId) =>
+      caller.callServerEndpoint<_irg3uuam.AssetDepreciation>(
+        'depreciation',
+        'schedule',
+        {'assetId': assetId},
+      );
+
+  _ida.Future<_i8b4ltth.DepreciationPosition> position(
+    int year,
+    int month, {
+    _isc.UuidValue? branchId,
+    _isc.UuidValue? costCenterId,
+  }) => caller.callServerEndpoint<_i8b4ltth.DepreciationPosition>(
+    'depreciation',
+    'position',
+    {
+      'year': year,
+      'month': month,
+      'branchId': branchId,
+      'costCenterId': costCenterId,
+    },
+  );
+
+  _ida.Future<List<_iqiiy4eg.DepreciationClosing>> closings() =>
+      caller.callServerEndpoint<List<_iqiiy4eg.DepreciationClosing>>(
+        'depreciation',
+        'closings',
+        {},
+      );
+
+  _ida.Future<_iqiiy4eg.DepreciationClosing> close(
+    int year,
+    int month,
+  ) => caller.callServerEndpoint<_iqiiy4eg.DepreciationClosing>(
+    'depreciation',
+    'close',
+    {
+      'year': year,
+      'month': month,
+    },
+  );
+
+  _ida.Future<_iqiiy4eg.DepreciationClosing> reopen(
+    int year,
+    int month,
+    String reason,
+  ) => caller.callServerEndpoint<_iqiiy4eg.DepreciationClosing>(
+    'depreciation',
+    'reopen',
+    {
+      'year': year,
+      'month': month,
+      'reason': reason,
+    },
+  );
 }
 
 /// Classes-base por tipo de token (docs/08 §2.2): um token de contato nunca
@@ -1012,6 +1110,7 @@ class Client extends _isc.ServerpodClientShared {
     me = EndpointMe(this);
     refreshJwtTokens = EndpointRefreshJwtTokens(this);
     users = EndpointUsers(this);
+    depreciation = EndpointDepreciation(this);
     technicians = EndpointTechnicians(this);
     visits = EndpointVisits(this);
     branches = EndpointBranches(this);
@@ -1036,6 +1135,8 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointUsers users;
 
+  late final EndpointDepreciation depreciation;
+
   late final EndpointTechnicians technicians;
 
   late final EndpointVisits visits;
@@ -1058,6 +1159,7 @@ class Client extends _isc.ServerpodClientShared {
     'me': me,
     'refreshJwtTokens': refreshJwtTokens,
     'users': users,
+    'depreciation': depreciation,
     'technicians': technicians,
     'visits': visits,
     'branches': branches,

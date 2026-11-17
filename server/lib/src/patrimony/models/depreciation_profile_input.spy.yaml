@@ -1,0 +1,12 @@
+# Dados editáveis da ficha patrimonial (depreciation.saveProfile).
+class: DepreciationProfileInput
+fields:
+  method: String
+  annualRate: String
+  startDate: DateTime
+  startRule: String?
+  depreciableCost: int?
+  residualValue: int?
+  totalCapacity: String?
+  monthlyProduction: String?
+  notes: String?

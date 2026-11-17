@@ -49,9 +49,10 @@ jobs:
           (cd server && serverpod generate)
           git diff --exit-code -- server/lib/src/generated server_client/lib server/test/integration/test_tools \
             || (echo "::error::Rode 'serverpod generate' e versione o código gerado." && exit 1)
-      - run: dart format --output=none --set-exit-if-changed packages server/lib/server.dart server/bin server/test/unit server/test/e2e server/lib/src/platform server/lib/src/tenancy server/lib/src/identity_access server/lib/src/catalog server/lib/src/assets server/lib/src/work_orders server/lib/src/scheduling apps/backoffice_web
+      - run: dart format --output=none --set-exit-if-changed packages server/lib/server.dart server/bin server/test/unit server/test/e2e server/lib/src/platform server/lib/src/tenancy server/lib/src/identity_access server/lib/src/catalog server/lib/src/assets server/lib/src/work_orders server/lib/src/scheduling server/lib/src/patrimony apps/backoffice_web
       - run: dart analyze --fatal-infos packages server server_client
       - run: dart test packages/core
+      - run: dart test packages/depreciation
       - run: dart test test/unit
         working-directory: server
       - name: Backoffice web (análise, testes de widget e build)

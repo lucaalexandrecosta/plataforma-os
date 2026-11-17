@@ -1,0 +1,14 @@
+# Fechamento de competência (app.depreciation_closings).
+class: DepreciationClosing
+fields:
+  id: UuidValue
+  year: int
+  month: int
+  # closed ou reopened.
+  status: String
+  assetCount: int
+  totalAmount: int
+  closedAt: DateTime
+  closedByName: String?
+  reopenedAt: DateTime?
+  reopenReason: String?

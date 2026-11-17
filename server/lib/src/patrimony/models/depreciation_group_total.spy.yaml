@@ -1,0 +1,11 @@
+# Totais da posição por centro de custo, por filial ou geral (centavos). id e
+# name nulos = "sem centro de custo"/"sem filial" ou o total geral.
+class: DepreciationGroupTotal
+fields:
+  id: UuidValue?
+  name: String?
+  assetCount: int
+  cost: int
+  monthlyAmount: int
+  accumulated: int
+  netBookValue: int

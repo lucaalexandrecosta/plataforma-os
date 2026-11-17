@@ -1,0 +1,8 @@
+# Memória de cálculo do bem: ficha, base e linhas mês a mês até o fim da vida
+# útil ou a baixa.
+class: AssetDepreciation
+fields:
+  profile: DepreciationProfile
+  cost: int
+  residualValue: int
+  lines: List<DepreciationLine>
