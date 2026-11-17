@@ -109,6 +109,19 @@ void main() {
     }
   });
 
+  test('auth.myTenants lista só as empresas do login, e só com a sessão de login', () async {
+    final davi = await loginSession('davi.consultor@dev.test');
+    final tenants = await withToken(davi).auth.myTenants();
+    expect(tenants.map((t) => t.slug), unorderedEquals(['frio-sul', 'forno-norte']));
+
+    final ana = await loginSession('ana.admin@frio-sul.test');
+    expect((await withToken(ana).auth.myTenants()).map((t) => t.slug), ['frio-sul']);
+
+    final tenantToken = (await withToken(ana).auth.selectTenant('frio-sul')).accessToken;
+    await expectLater(withToken(tenantToken).auth.myTenants(), apiError('UNAUTHENTICATED'));
+    await expectLater(Client(apiUrl).auth.myTenants(), throwsA(isA<ServerpodClientException>()));
+  });
+
   test('app do técnico: despachante entra, administradora não', () async {
     final bruno = await loginSession('bruno.despacho@frio-sul.test');
     final selected = await withToken(bruno).auth.selectTenant('frio-sul', technicianApp: true);

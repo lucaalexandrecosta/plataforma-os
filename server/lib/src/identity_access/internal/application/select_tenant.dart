@@ -23,17 +23,8 @@ import 'memberships.dart';
 ///   registro de dispositivos;
 /// * conferência de host `<slug>.<dominio>` × tenant (`TENANT_MISMATCH`).
 Future<TenantToken> selectTenant(Session session, {required String tenantSlug, required bool technicianApp}) async {
-  final login = session.authenticated;
-  // Token de tenant (com contexto) não serve aqui: só a sessão de login.
-  if (login == null || session.contextOrNull != null) throw ApiErrors.unauthenticated(session);
-  session.attachContext(RequestContext.anonymous(correlationId: session.correlationId));
-
-  final subject = login.userIdentifier;
-  final user = await Memberships.findUserByIdpSubject(session, subject) ?? await _linkByEmail(session, subject);
-  if (user == null || user.status != 'active') throw ApiErrors.forbidden(session);
-
-  // Identificado, ainda sem tenant: a RLS libera só os próprios vínculos.
-  session.attachContext(RequestContext.userWithoutTenant(userId: user.userId, correlationId: session.correlationId));
+  final login = session.authenticated!;
+  final user = await _loginUser(session);
 
   final tenant = await TenantDirectory.findBySlug(session, tenantSlug);
   if (tenant == null) throw ApiErrors.forbidden(session);
@@ -81,6 +72,38 @@ Future<TenantToken> selectTenant(Session session, {required String tenantSlug, r
     tenant: TenantDirectory.summary(tenant),
     roles: roles,
   );
+}
+
+/// Empresas em que a sessão de login pode entrar (vínculo com papel, empresa
+/// operacional), para a tela de escolha logo depois do login.
+Future<List<TenantSummary>> myTenants(Session session) async {
+  final user = await _loginUser(session);
+  final memberships = await Memberships.ofUser(session, user.userId);
+  final withRole = <UuidValue>{
+    for (final m in memberships)
+      if ((await Memberships.rolesOf(session, m.id)).isNotEmpty) m.tenantId,
+  };
+  final tenants = await TenantDirectory.getMany(session, withRole);
+  return [
+    for (final t in tenants)
+      if (TenantDirectory.isOperational(t)) TenantDirectory.summary(t),
+  ]..sort((a, b) => a.displayName.compareTo(b.displayName));
+}
+
+/// Usuário da equipe por trás da sessão de login, já com o contexto
+/// "identificado, sem tenant" (a RLS libera só os próprios vínculos).
+Future<({UuidValue userId, String status})> _loginUser(Session session) async {
+  final login = session.authenticated;
+  // Token de tenant (com contexto) não serve aqui: só a sessão de login.
+  if (login == null || session.contextOrNull != null) throw ApiErrors.unauthenticated(session);
+  session.attachContext(RequestContext.anonymous(correlationId: session.correlationId));
+
+  final subject = login.userIdentifier;
+  final user = await Memberships.findUserByIdpSubject(session, subject) ?? await _linkByEmail(session, subject);
+  if (user == null || user.status != 'active') throw ApiErrors.forbidden(session);
+
+  session.attachContext(RequestContext.userWithoutTenant(userId: user.userId, correlationId: session.correlationId));
+  return user;
 }
 
 /// Primeiro acesso: liga a conta de e-mail (já verificada pelo código) ao

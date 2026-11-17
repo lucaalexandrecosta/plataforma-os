@@ -247,6 +247,15 @@ class EndpointAuth extends _isc.EndpointRef {
       'technicianApp': technicianApp,
     },
   );
+
+  /// Empresas em que o usuário da sessão de login pode entrar, em ordem de
+  /// nome. Erros: `UNAUTHENTICATED`, `FORBIDDEN` (usuário inativo ou sem
+  /// convite).
+  _ida.Future<List<_i11upz4e.TenantSummary>> myTenants() => caller.callServerEndpoint<List<_i11upz4e.TenantSummary>>(
+    'auth',
+    'myTenants',
+    {},
+  );
 }
 
 /// `emailIdp.*` — login por e-mail e senha (módulo do Serverpod).
