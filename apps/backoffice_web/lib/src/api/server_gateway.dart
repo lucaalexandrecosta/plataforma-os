@@ -197,6 +197,45 @@ class ServerGateway implements Gateway {
   Future<WorkOrder> reopenWorkOrder(WorkOrder wo, String reason) =>
       _guard(() => _tenant.workOrders.reopen(wo.id, wo.version, reason));
 
+  // ----------------------------------------------------------- agenda
+
+  @override
+  Future<List<Technician>> technicians({bool includeInactive = false}) =>
+      _guard(() => _tenant.technicians.list(includeInactive: includeInactive ? true : null));
+
+  @override
+  Future<Technician> createTechnician(TechnicianInput input) => _guard(() => _tenant.technicians.create(input));
+
+  @override
+  Future<Technician> updateTechnician(Technician technician, TechnicianInput input) =>
+      _guard(() => _tenant.technicians.update(technician.id, technician.version, input));
+
+  @override
+  Future<List<Visit>> agenda(DateTime from, DateTime to, {UuidValue? technicianId, bool includeCancelled = false}) =>
+      _guard(
+        () => _tenant.visits.agenda(
+          from.toUtc(),
+          to.toUtc(),
+          technicianId: technicianId,
+          includeCancelled: includeCancelled ? true : null,
+        ),
+      );
+
+  @override
+  Future<List<Visit>> visitsOfWorkOrder(UuidValue workOrderId) => _guard(() => _tenant.visits.ofWorkOrder(workOrderId));
+
+  @override
+  Future<Visit> scheduleVisit(UuidValue workOrderId, VisitInput input) =>
+      _guard(() => _tenant.visits.schedule(workOrderId, input));
+
+  @override
+  Future<Visit> rescheduleVisit(Visit visit, VisitInput input) =>
+      _guard(() => _tenant.visits.reschedule(visit.id, visit.version, input));
+
+  @override
+  Future<Visit> cancelVisit(Visit visit, String reason) =>
+      _guard(() => _tenant.visits.cancel(visit.id, visit.version, reason));
+
   // ----------------------------------------------------------- erros
 
   /// Converte os erros do cliente em [GatewayException] com mensagem para a

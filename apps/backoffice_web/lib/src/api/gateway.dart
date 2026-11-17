@@ -47,6 +47,18 @@ abstract interface class Gateway {
   Future<WorkOrder> closeWorkOrder(WorkOrder wo);
   Future<WorkOrder> cancelWorkOrder(WorkOrder wo, String reason, String? note);
   Future<WorkOrder> reopenWorkOrder(WorkOrder wo, String reason);
+
+  // ----------------------------------------------------------- agenda
+  Future<List<Technician>> technicians({bool includeInactive});
+  Future<Technician> createTechnician(TechnicianInput input);
+  Future<Technician> updateTechnician(Technician technician, TechnicianInput input);
+
+  /// Visitas que começam em [from, to) (até 62 dias).
+  Future<List<Visit>> agenda(DateTime from, DateTime to, {UuidValue? technicianId, bool includeCancelled});
+  Future<List<Visit>> visitsOfWorkOrder(UuidValue workOrderId);
+  Future<Visit> scheduleVisit(UuidValue workOrderId, VisitInput input);
+  Future<Visit> rescheduleVisit(Visit visit, VisitInput input);
+  Future<Visit> cancelVisit(Visit visit, String reason);
 }
 
 /// Erro para mostrar à pessoa. [code] é o código do catálogo de erros do

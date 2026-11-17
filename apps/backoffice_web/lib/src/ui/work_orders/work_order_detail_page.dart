@@ -7,6 +7,8 @@ import 'package:serverpod_client/serverpod_client.dart' show UuidValue;
 import '../../api/gateway.dart';
 import '../../labels.dart';
 import '../../session/session.dart';
+import '../agenda/visit_dialog.dart';
+import '../agenda/visit_tile.dart';
 import '../common/errors.dart';
 import '../common/format.dart';
 import '../common/status_chip.dart';
@@ -25,12 +27,19 @@ class WorkOrderDetailPage extends ConsumerStatefulWidget {
 
 class _WorkOrderDetailPageState extends ConsumerState<WorkOrderDetailPage> {
   late Future<WorkOrderDetail> _detail;
+  late Future<List<Visit>> _visits;
   var _busy = false;
 
   @override
   void initState() {
     super.initState();
-    _detail = ref.read(gatewayProvider).workOrder(widget.id);
+    _load();
+  }
+
+  void _load() {
+    final g = ref.read(gatewayProvider);
+    _detail = g.workOrder(widget.id);
+    _visits = g.visitsOfWorkOrder(widget.id);
   }
 
   @override
@@ -39,9 +48,17 @@ class _WorkOrderDetailPageState extends ConsumerState<WorkOrderDetailPage> {
     if (old.id != widget.id) _reload();
   }
 
-  void _reload() => setState(() {
-    _detail = ref.read(gatewayProvider).workOrder(widget.id);
-  });
+  void _reload() => setState(_load);
+
+  Future<void> _scheduleVisit(WorkOrder wo) async {
+    final saved = await showDialog<Visit>(
+      context: context,
+      builder: (_) => VisitDialog(workOrderId: wo.id, workOrderNumber: wo.number),
+    );
+    if (saved == null || !mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Visita agendada.')));
+    _reload();
+  }
 
   /// Roda a ação e recarrega (o histórico vem do servidor). Se outra pessoa
   /// mexeu antes, avisa e mostra a versão nova.
@@ -75,6 +92,13 @@ class _WorkOrderDetailPageState extends ConsumerState<WorkOrderDetailPage> {
     final execute = session.can('work_orders.update') || session.can('visits.execute');
     final s = wo.status;
     return [
+      if (session.can('visits.schedule') && schedulableWorkOrderStatuses.contains(s))
+        FilledButton.tonalIcon(
+          key: const Key('act-schedule'),
+          icon: const Icon(Icons.event),
+          label: const Text('Agendar visita'),
+          onPressed: () => _scheduleVisit(wo),
+        ),
       if (execute && const {'open', 'scheduled', 'on_hold'}.contains(s))
         FilledButton.icon(
           key: const Key('act-start'),
@@ -218,7 +242,13 @@ class _WorkOrderDetailPageState extends ConsumerState<WorkOrderDetailPage> {
             const SizedBox(height: 16),
             LayoutBuilder(
               builder: (context, box) {
-                final data = _Section(title: 'Dados', children: _fields(context, wo));
+                final data = Column(
+                  children: [
+                    _Section(title: 'Dados', children: _fields(context, wo)),
+                    const SizedBox(height: 16),
+                    _Section(title: 'Visitas', children: [_visitList()]),
+                  ],
+                );
                 final history = _Section(title: 'Histórico', children: _history(context, detail.history));
                 if (box.maxWidth < 900) return Column(children: [data, const SizedBox(height: 16), history]);
                 return Row(
@@ -236,6 +266,20 @@ class _WorkOrderDetailPageState extends ConsumerState<WorkOrderDetailPage> {
       },
     );
   }
+
+  Widget _visitList() => FutureBuilder<List<Visit>>(
+    future: _visits,
+    builder: (context, snap) {
+      if (snap.hasError) return Text(errorMessage(snap.error!));
+      if (!snap.hasData) return const LinearProgressIndicator();
+      if (snap.data!.isEmpty) return const Text('Nenhuma visita agendada.');
+      return Column(
+        children: [
+          for (final v in snap.data!) VisitTile(visit: v, showWorkOrder: false, onChanged: _reload),
+        ],
+      );
+    },
+  );
 
   List<Widget> _fields(BuildContext context, WorkOrder wo) => [
     FieldRow('Tipo', wo.workOrderTypeName),
