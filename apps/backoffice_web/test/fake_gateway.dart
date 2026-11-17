@@ -460,6 +460,39 @@ class FakeGateway implements Gateway {
   @override
   Future<Asset> asset(UuidValue id) async => currentAsset;
 
+  AssetInput? lastAssetInput;
+
+  Asset _assetFrom(AssetInput input, {required UuidValue id, required int version, String source = 'local'}) {
+    final product = productList.where((p) => p.id == input.productId).firstOrNull;
+    return Asset.fromJson({
+      ...input.toJson(),
+      'id': id.uuid,
+      'productName': product?.name ?? currentAsset.productName,
+      'status': 'in_stock',
+      'ownershipType': input.ownershipType ?? 'tenant_loan',
+      'source': source,
+      'version': version,
+    });
+  }
+
+  @override
+  Future<Asset> createAsset(AssetInput input) async {
+    _maybeFail('createAsset');
+    lastAssetInput = input;
+    return currentAsset = _assetFrom(
+      input,
+      id: UuidValue.fromString('00000000-0000-4000-8000-0000000000b9'),
+      version: 1,
+    );
+  }
+
+  @override
+  Future<Asset> updateAsset(Asset asset, AssetInput input) async {
+    _maybeFail('updateAsset');
+    lastAssetInput = input;
+    return currentAsset = _assetFrom(input, id: asset.id, version: asset.version + 1, source: asset.source);
+  }
+
   // OS
   @override
   Future<WorkOrderPage> workOrders({
