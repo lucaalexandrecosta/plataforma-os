@@ -1,0 +1,11 @@
+# Posição da depreciação gerencial numa competência. closed = lida do
+# fechamento; senão calculada na hora com as fichas atuais.
+class: DepreciationPosition
+fields:
+  year: int
+  month: int
+  closed: bool
+  items: List<DepreciationPositionItem>
+  byCostCenter: List<DepreciationGroupTotal>
+  byBranch: List<DepreciationGroupTotal>
+  total: DepreciationGroupTotal

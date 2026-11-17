@@ -13,6 +13,7 @@ environment:
 workspace:
   - apps/backoffice_web
   - packages/core
+  - packages/depreciation
   - server
   - server_client
 

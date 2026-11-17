@@ -1,0 +1,14 @@
+# Posição de um bem numa competência (centavos).
+class: DepreciationPositionItem
+fields:
+  assetId: UuidValue
+  assetLabel: String
+  productName: String
+  branchId: UuidValue?
+  branchName: String?
+  costCenterId: UuidValue?
+  costCenterName: String?
+  cost: int
+  monthlyAmount: int
+  accumulated: int
+  netBookValue: int
