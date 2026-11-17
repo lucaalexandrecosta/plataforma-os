@@ -59,6 +59,21 @@ abstract interface class Gateway {
   Future<Visit> scheduleVisit(UuidValue workOrderId, VisitInput input);
   Future<Visit> rescheduleVisit(Visit visit, VisitInput input);
   Future<Visit> cancelVisit(Visit visit, String reason);
+
+  // ----------------------------------------------------------- depreciação gerencial
+  Future<DepreciationProfile?> depreciationProfile(UuidValue assetId);
+
+  /// [expectedVersion] nulo cria a ficha; com valor, altera.
+  Future<DepreciationProfile> saveDepreciationProfile(
+    UuidValue assetId,
+    int? expectedVersion,
+    DepreciationProfileInput input,
+  );
+  Future<AssetDepreciation> depreciationSchedule(UuidValue assetId);
+  Future<DepreciationPosition> depreciationPosition(int year, int month, {UuidValue? costCenterId});
+  Future<List<DepreciationClosing>> depreciationClosings();
+  Future<DepreciationClosing> closeDepreciation(int year, int month);
+  Future<DepreciationClosing> reopenDepreciation(int year, int month, String reason);
 }
 
 /// Erro para mostrar à pessoa. [code] é o código do catálogo de erros do
