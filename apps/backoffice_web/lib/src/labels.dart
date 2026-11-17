@@ -106,3 +106,27 @@ const monthNames = [
 String competence(int year, int month) => '${monthNames[month - 1]}/$year';
 
 String label(Map<String, String> labels, String? code) => code == null ? '—' : labels[code] ?? code;
+
+const membershipStatusLabels = {
+  'invited': 'Convidado',
+  'active': 'Ativo',
+  'suspended': 'Suspenso',
+  'removed': 'Removido',
+};
+
+const qrTagStatusLabels = {
+  'generated': 'Gerada',
+  'printed': 'Impressa',
+  'bound': 'Vinculada',
+  'revoked': 'Revogada',
+};
+
+const qrRevokeReasonLabels = {
+  'damaged': 'Danificada',
+  'lost': 'Perdida',
+  'replaced': 'Substituída',
+  'asset_retired': 'Bem baixado',
+  'misprint': 'Erro de impressão',
+  'security': 'Segurança',
+  'other': 'Outro',
+};

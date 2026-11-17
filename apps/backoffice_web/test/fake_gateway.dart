@@ -18,6 +18,11 @@ class FakeGateway implements Gateway {
     'depreciation.read',
     'depreciation.manage',
     'depreciation.close',
+    'users.manage',
+    'qr_tags.manage',
+    'qr_tags.unbind',
+    'settings.manage',
+    'catalog.manage',
   ];
 
   static final frioSul = TenantSummary(
@@ -143,21 +148,317 @@ class FakeGateway implements Gateway {
   @override
   void signOut() => calls.add('signOut');
 
-  // cadastros
-  @override
-  Future<List<Branch>> branches() async => const [];
+  // usuários
+  static final roleList = [
+    AssignableRole(code: 'dispatcher', name: 'Despacho', description: 'Agenda visitas'),
+    AssignableRole(code: 'technician', name: 'Técnico'),
+    AssignableRole(code: 'tenant_admin', name: 'Administrador'),
+  ];
+
+  final userList = <TenantUser>[
+    TenantUser(
+      membershipId: UuidValue.fromString('00000000-0000-4000-8000-0000000001e1'),
+      userId: UuidValue.fromString('00000000-0000-4000-8000-0000000000e1'),
+      fullName: 'Ana Admin',
+      email: 'ana@frio-sul.test',
+      status: MembershipStatus.active,
+      roles: const ['tenant_admin'],
+      hasLogin: true,
+      lastAccessAt: DateTime(2026, 11, 17, 9, 30),
+    ),
+    TenantUser(
+      membershipId: UuidValue.fromString('00000000-0000-4000-8000-0000000001e2'),
+      userId: UuidValue.fromString('00000000-0000-4000-8000-0000000000e2'),
+      fullName: 'Bruno Despacho',
+      email: 'bruno@frio-sul.test',
+      status: MembershipStatus.active,
+      roles: const ['dispatcher'],
+      hasLogin: true,
+    ),
+  ];
+
+  List<String>? lastInviteRoles;
+
+  TenantUser _replaceUser(TenantUser u) {
+    userList[userList.indexWhere((x) => x.membershipId == u.membershipId)] = u;
+    return u;
+  }
 
   @override
-  Future<List<CostCenter>> costCenters() async => const [];
+  Future<List<AssignableRole>> assignableRoles() async {
+    _maybeFail('assignableRoles');
+    return roleList;
+  }
+
+  @override
+  Future<List<TenantUser>> users() async {
+    _maybeFail('users');
+    return [
+      for (final u in userList)
+        if (u.status != MembershipStatus.removed) u,
+    ];
+  }
+
+  @override
+  Future<TenantUser> inviteUser(String email, String fullName, List<String> roles) async {
+    _maybeFail('inviteUser');
+    lastInviteRoles = roles;
+    final n = userList.length + 1;
+    final u = TenantUser(
+      membershipId: UuidValue.fromString('00000000-0000-4000-8000-0000000001e$n'),
+      userId: UuidValue.fromString('00000000-0000-4000-8000-0000000000e$n'),
+      fullName: fullName.trim(),
+      email: email.trim(),
+      status: MembershipStatus.invited,
+      roles: roles,
+      hasLogin: false,
+    );
+    userList.add(u);
+    return u;
+  }
+
+  @override
+  Future<TenantUser> setUserRoles(TenantUser user, List<String> roles) async {
+    _maybeFail('setUserRoles');
+    return _replaceUser(user.copyWith(roles: roles));
+  }
+
+  @override
+  Future<TenantUser> suspendUser(TenantUser user) async {
+    _maybeFail('suspendUser');
+    return _replaceUser(user.copyWith(status: MembershipStatus.suspended));
+  }
+
+  @override
+  Future<TenantUser> reactivateUser(TenantUser user) async {
+    _maybeFail('reactivateUser');
+    return _replaceUser(user.copyWith(status: MembershipStatus.active));
+  }
+
+  @override
+  Future<TenantUser> removeUser(TenantUser user) async {
+    _maybeFail('removeUser');
+    return _replaceUser(user.copyWith(status: MembershipStatus.removed));
+  }
+
+  // etiquetas QR
+  Asset currentAsset = asset1;
+  final batchList = <QrTagBatch>[];
+  final tagList = <QrTag>[];
+  int printedBatches = 0;
+
+  QrTag _tag(String scanned) {
+    final i = tagList.indexWhere((t) => t.shortCode == scanned.trim().toUpperCase() || t.url == scanned.trim());
+    if (i < 0) throw const GatewayException('Etiqueta não encontrada.', code: 'NOT_FOUND');
+    return tagList[i];
+  }
+
+  QrTag _replaceTag(QrTag t) {
+    tagList[tagList.indexWhere((x) => x.id == t.id)] = t;
+    return t;
+  }
+
+  @override
+  Future<List<QrTagBatch>> qrBatches() async {
+    _maybeFail('qrBatches');
+    return [
+      for (final b in batchList.reversed)
+        b.copyWith(boundCount: tagList.where((t) => t.batchId == b.id && t.status == 'bound').length),
+    ];
+  }
+
+  @override
+  Future<QrTagBatch> generateQrBatch(int quantity, {String? notes}) async {
+    _maybeFail('generateQrBatch');
+    final n = batchList.length + 1;
+    final batch = QrTagBatch(
+      id: UuidValue.fromString('00000000-0000-4000-8000-0000000002${n.toString().padLeft(2, '0')}'),
+      code: 'LOTE-${n.toString().padLeft(4, '0')}',
+      quantity: quantity,
+      notes: notes == null || notes.trim().isEmpty ? null : notes.trim(),
+      boundCount: 0,
+      createdAt: DateTime(2026, 11, 17, 10),
+    );
+    batchList.add(batch);
+    for (var i = 0; i < quantity; i++) {
+      final k = tagList.length + 1;
+      final code = 'Q${k.toString().padLeft(3, '0')}-${n.toString().padLeft(4, '0')}';
+      tagList.add(
+        QrTag(
+          id: UuidValue.fromString('00000000-0000-4000-8001-${k.toString().padLeft(12, '0')}'),
+          shortCode: code,
+          url: 'https://qr.example/q/$code',
+          status: 'generated',
+          batchId: batch.id,
+          printCount: 0,
+        ),
+      );
+    }
+    return batch;
+  }
+
+  @override
+  Future<List<QrTag>> qrBatchTags(UuidValue batchId) async {
+    _maybeFail('qrBatchTags');
+    return [
+      for (final t in tagList)
+        if (t.batchId == batchId) t,
+    ];
+  }
+
+  @override
+  Future<QrTagBatch> markQrBatchPrinted(UuidValue batchId) async {
+    _maybeFail('markQrBatchPrinted');
+    printedBatches++;
+    for (final t in [...tagList]) {
+      if (t.batchId == batchId) {
+        _replaceTag(
+          t.copyWith(status: t.status == 'generated' ? 'printed' : t.status, printCount: t.printCount + 1),
+        );
+      }
+    }
+    final i = batchList.indexWhere((b) => b.id == batchId);
+    return batchList[i] = batchList[i].copyWith(printedAt: DateTime(2026, 11, 17, 11));
+  }
+
+  @override
+  Future<QrTag> resolveQrTag(String scanned) async {
+    _maybeFail('resolveQrTag');
+    return _tag(scanned);
+  }
+
+  @override
+  Future<QrTag> bindQrTag(String scanned, UuidValue assetId) async {
+    _maybeFail('bindQrTag');
+    final t = _tag(scanned);
+    if (t.status == 'bound') {
+      throw const GatewayException('Esta etiqueta já está em outro bem.', code: 'TAG_ALREADY_BOUND');
+    }
+    currentAsset = currentAsset.copyWith(qrShortCode: t.shortCode);
+    return _replaceTag(t.copyWith(status: 'bound', assetId: assetId, assetLabel: currentAsset.assetTag));
+  }
+
+  @override
+  Future<QrTag> unbindQrTag(QrTag tag) async {
+    _maybeFail('unbindQrTag');
+    currentAsset = Asset.fromJson({...currentAsset.toJson()}..remove('qrShortCode'));
+    return _replaceTag(
+      QrTag.fromJson(
+        {...tag.toJson(), 'status': 'printed'}
+          ..remove('assetId')
+          ..remove('assetLabel'),
+      ),
+    );
+  }
+
+  @override
+  Future<QrTag> revokeQrTag(QrTag tag, String reason, {String? note}) async {
+    _maybeFail('revokeQrTag');
+    if (tag.assetId != null || currentAsset.qrShortCode == tag.shortCode) {
+      currentAsset = Asset.fromJson({...currentAsset.toJson()}..remove('qrShortCode'));
+    }
+    return _replaceTag(tag.copyWith(status: 'revoked', revokedReason: reason));
+  }
+
+  // cadastros
+  @override
+  Future<List<Branch>> branches({bool includeInactive = false}) async {
+    _maybeFail('branches');
+    return [
+      for (final b in branchList)
+        if (includeInactive || b.isActive) b,
+    ];
+  }
+
+  final branchList = <Branch>[];
+  final costCenterList = <CostCenter>[];
+  final productList = <ProductSummary>[];
+
+  @override
+  Future<Branch> createBranch(BranchInput input) async {
+    _maybeFail('createBranch');
+    if (branchList.any((b) => b.code == input.code)) {
+      throw const GatewayException(
+        'Revise os campos destacados.',
+        code: 'VALIDATION_FAILED',
+        fieldErrors: {'code': 'Já existe uma filial com este código.'},
+      );
+    }
+    final b = Branch.fromJson({
+      ...input.toJson(),
+      'id': '00000000-0000-4000-8000-0000000003${(branchList.length + 1).toString().padLeft(2, '0')}',
+      'version': 1,
+    });
+    branchList.add(b);
+    return b;
+  }
+
+  @override
+  Future<Branch> updateBranch(Branch branch, BranchInput input) async {
+    _maybeFail('updateBranch');
+    final b = Branch.fromJson({...input.toJson(), 'id': branch.id.uuid, 'version': branch.version + 1});
+    branchList[branchList.indexWhere((x) => x.id == b.id)] = b;
+    return b;
+  }
+
+  @override
+  Future<List<CostCenter>> costCenters({bool includeInactive = false}) async {
+    _maybeFail('costCenters');
+    return [
+      for (final c in costCenterList)
+        if (includeInactive || c.isActive) c,
+    ];
+  }
+
+  @override
+  Future<CostCenter> createCostCenter(CostCenterInput input) async {
+    _maybeFail('createCostCenter');
+    final c = CostCenter.fromJson({
+      ...input.toJson(),
+      'id': '00000000-0000-4000-8000-0000000004${(costCenterList.length + 1).toString().padLeft(2, '0')}',
+      'version': 1,
+    });
+    costCenterList.add(c);
+    return c;
+  }
+
+  @override
+  Future<CostCenter> updateCostCenter(CostCenter costCenter, CostCenterInput input) async {
+    _maybeFail('updateCostCenter');
+    final c = CostCenter.fromJson({...input.toJson(), 'id': costCenter.id.uuid, 'version': costCenter.version + 1});
+    costCenterList[costCenterList.indexWhere((x) => x.id == c.id)] = c;
+    return c;
+  }
+
+  @override
+  Future<List<ProductSummary>> products({String? search}) async {
+    _maybeFail('products');
+    return productList;
+  }
+
+  @override
+  Future<ProductSummary> createProduct(ProductInput input) async {
+    _maybeFail('createProduct');
+    final p = ProductSummary(
+      id: UuidValue.fromString(
+        '00000000-0000-4000-8000-0000000005${(productList.length + 1).toString().padLeft(2, '0')}',
+      ),
+      code: input.code,
+      name: input.name,
+      isActive: true,
+    );
+    productList.add(p);
+    return p;
+  }
 
   @override
   Future<AssetPage> assets({String? search, int limit = 50, int offset = 0}) async {
     _maybeFail('assets');
-    return AssetPage(items: [asset1], total: 1);
+    return AssetPage(items: [currentAsset], total: 1);
   }
 
   @override
-  Future<Asset> asset(UuidValue id) async => asset1;
+  Future<Asset> asset(UuidValue id) async => currentAsset;
 
   // OS
   @override

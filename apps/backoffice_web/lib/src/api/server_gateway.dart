@@ -132,11 +132,86 @@ class ServerGateway implements Gateway {
 
   // ----------------------------------------------------------- cadastros
 
+  // ----------------------------------------------------------- usuários
   @override
-  Future<List<Branch>> branches() => _guard(() => _tenant.branches.list());
+  Future<List<AssignableRole>> assignableRoles() => _guard(() => _tenant.users.roles());
 
   @override
-  Future<List<CostCenter>> costCenters() => _guard(() => _tenant.costCenters.list());
+  Future<List<TenantUser>> users() => _guard(() => _tenant.users.list());
+
+  @override
+  Future<TenantUser> inviteUser(String email, String fullName, List<String> roles) =>
+      _guard(() => _tenant.users.invite(email.trim(), fullName.trim(), roles));
+
+  @override
+  Future<TenantUser> setUserRoles(TenantUser user, List<String> roles) =>
+      _guard(() => _tenant.users.setRoles(user.membershipId, roles));
+
+  @override
+  Future<TenantUser> suspendUser(TenantUser user) => _guard(() => _tenant.users.suspend(user.membershipId));
+
+  @override
+  Future<TenantUser> reactivateUser(TenantUser user) => _guard(() => _tenant.users.reactivate(user.membershipId));
+
+  @override
+  Future<TenantUser> removeUser(TenantUser user) => _guard(() => _tenant.users.remove(user.membershipId));
+
+  // ----------------------------------------------------------- etiquetas QR
+  @override
+  Future<List<QrTagBatch>> qrBatches() => _guard(() => _tenant.qrTags.listBatches());
+
+  @override
+  Future<QrTagBatch> generateQrBatch(int quantity, {String? notes}) =>
+      _guard(() => _tenant.qrTags.generateBatch(quantity, notes: _blankToNull(notes)));
+
+  @override
+  Future<List<QrTag>> qrBatchTags(UuidValue batchId) => _guard(() => _tenant.qrTags.batchTags(batchId));
+
+  @override
+  Future<QrTagBatch> markQrBatchPrinted(UuidValue batchId) => _guard(() => _tenant.qrTags.markBatchPrinted(batchId));
+
+  @override
+  Future<QrTag> resolveQrTag(String scanned) => _guard(() => _tenant.qrTags.resolve(scanned.trim()));
+
+  @override
+  Future<QrTag> bindQrTag(String scanned, UuidValue assetId) =>
+      _guard(() => _tenant.qrTags.bind(scanned.trim(), assetId));
+
+  @override
+  Future<QrTag> unbindQrTag(QrTag tag) => _guard(() => _tenant.qrTags.unbind(tag.id));
+
+  @override
+  Future<QrTag> revokeQrTag(QrTag tag, String reason, {String? note}) =>
+      _guard(() => _tenant.qrTags.revoke(tag.id, reason, note: _blankToNull(note)));
+
+  @override
+  Future<List<Branch>> branches({bool includeInactive = false}) =>
+      _guard(() => _tenant.branches.list(includeInactive: includeInactive ? true : null));
+
+  @override
+  Future<Branch> createBranch(BranchInput input) => _guard(() => _tenant.branches.create(input));
+
+  @override
+  Future<Branch> updateBranch(Branch branch, BranchInput input) =>
+      _guard(() => _tenant.branches.update(branch.id, branch.version, input));
+
+  @override
+  Future<List<CostCenter>> costCenters({bool includeInactive = false}) =>
+      _guard(() => _tenant.costCenters.list(includeInactive: includeInactive ? true : null));
+
+  @override
+  Future<CostCenter> createCostCenter(CostCenterInput input) => _guard(() => _tenant.costCenters.create(input));
+
+  @override
+  Future<CostCenter> updateCostCenter(CostCenter costCenter, CostCenterInput input) =>
+      _guard(() => _tenant.costCenters.update(costCenter.id, costCenter.version, input));
+
+  @override
+  Future<List<ProductSummary>> products({String? search}) =>
+      _guard(() => _tenant.products.list(search: _blankToNull(search)));
+
+  @override
+  Future<ProductSummary> createProduct(ProductInput input) => _guard(() => _tenant.products.create(input));
 
   @override
   Future<AssetPage> assets({String? search, int limit = 50, int offset = 0}) =>
