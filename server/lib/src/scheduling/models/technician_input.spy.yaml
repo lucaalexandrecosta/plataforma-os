@@ -1,0 +1,11 @@
+# Dados editáveis do técnico (technicians.create e update). userId = pessoa
+# com acesso ativo à empresa (o login do app de campo).
+class: TechnicianInput
+fields:
+  code: String
+  name: String
+  email: String?
+  phone: String?
+  userId: UuidValue?
+  branchId: UuidValue?
+  isActive: bool

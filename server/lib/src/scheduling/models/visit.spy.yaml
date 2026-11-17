@@ -1,0 +1,36 @@
+# Visita de uma OS (app.work_order_visits) com o resumo da OS para a agenda e
+# para o app de campo.
+class: Visit
+fields:
+  id: UuidValue
+  workOrderId: UuidValue
+  workOrderNumber: String
+  # Status da OS depois da última ação na visita.
+  workOrderStatus: String
+  workOrderPriority: String
+  problemDescription: String?
+  assetLabel: String?
+  productName: String?
+  customerName: String?
+  branchName: String?
+  visitNumber: int
+  technicianId: UuidValue?
+  technicianName: String?
+  # scheduled, en_route, on_site, paused, finished, cancelled.
+  status: String
+  # resolved, needs_return, customer_absent, not_executed.
+  outcome: String?
+  outcomeNotes: String?
+  scheduledStart: DateTime
+  scheduledEnd: DateTime
+  travelStartedAt: DateTime?
+  checkedInAt: DateTime?
+  finishedAt: DateTime?
+  cancelledAt: DateTime?
+  cancellationReason: String?
+  # qr, gps ou manual.
+  checkInMethod: String?
+  checkInDistanceM: double?
+  checkInOffSite: bool
+  checkInJustification: String?
+  version: int
