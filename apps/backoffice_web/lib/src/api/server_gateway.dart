@@ -197,6 +197,77 @@ class ServerGateway implements Gateway {
   Future<WorkOrder> reopenWorkOrder(WorkOrder wo, String reason) =>
       _guard(() => _tenant.workOrders.reopen(wo.id, wo.version, reason));
 
+  // ----------------------------------------------------------- agenda
+
+  @override
+  Future<List<Technician>> technicians({bool includeInactive = false}) =>
+      _guard(() => _tenant.technicians.list(includeInactive: includeInactive ? true : null));
+
+  @override
+  Future<Technician> createTechnician(TechnicianInput input) => _guard(() => _tenant.technicians.create(input));
+
+  @override
+  Future<Technician> updateTechnician(Technician technician, TechnicianInput input) =>
+      _guard(() => _tenant.technicians.update(technician.id, technician.version, input));
+
+  @override
+  Future<List<Visit>> agenda(DateTime from, DateTime to, {UuidValue? technicianId, bool includeCancelled = false}) =>
+      _guard(
+        () => _tenant.visits.agenda(
+          from.toUtc(),
+          to.toUtc(),
+          technicianId: technicianId,
+          includeCancelled: includeCancelled ? true : null,
+        ),
+      );
+
+  @override
+  Future<List<Visit>> visitsOfWorkOrder(UuidValue workOrderId) => _guard(() => _tenant.visits.ofWorkOrder(workOrderId));
+
+  @override
+  Future<Visit> scheduleVisit(UuidValue workOrderId, VisitInput input) =>
+      _guard(() => _tenant.visits.schedule(workOrderId, input));
+
+  @override
+  Future<Visit> rescheduleVisit(Visit visit, VisitInput input) =>
+      _guard(() => _tenant.visits.reschedule(visit.id, visit.version, input));
+
+  @override
+  Future<Visit> cancelVisit(Visit visit, String reason) =>
+      _guard(() => _tenant.visits.cancel(visit.id, visit.version, reason));
+
+  // ----------------------------------------------------------- depreciação gerencial
+
+  @override
+  Future<DepreciationProfile?> depreciationProfile(UuidValue assetId) =>
+      _guard(() => _tenant.depreciation.profile(assetId));
+
+  @override
+  Future<DepreciationProfile> saveDepreciationProfile(
+    UuidValue assetId,
+    int? expectedVersion,
+    DepreciationProfileInput input,
+  ) => _guard(() => _tenant.depreciation.saveProfile(assetId, expectedVersion, input));
+
+  @override
+  Future<AssetDepreciation> depreciationSchedule(UuidValue assetId) =>
+      _guard(() => _tenant.depreciation.schedule(assetId));
+
+  @override
+  Future<DepreciationPosition> depreciationPosition(int year, int month, {UuidValue? costCenterId}) =>
+      _guard(() => _tenant.depreciation.position(year, month, costCenterId: costCenterId));
+
+  @override
+  Future<List<DepreciationClosing>> depreciationClosings() => _guard(() => _tenant.depreciation.closings());
+
+  @override
+  Future<DepreciationClosing> closeDepreciation(int year, int month) =>
+      _guard(() => _tenant.depreciation.close(year, month));
+
+  @override
+  Future<DepreciationClosing> reopenDepreciation(int year, int month, String reason) =>
+      _guard(() => _tenant.depreciation.reopen(year, month, reason));
+
   // ----------------------------------------------------------- erros
 
   /// Converte os erros do cliente em [GatewayException] com mensagem para a

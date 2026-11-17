@@ -5,8 +5,11 @@ import 'package:go_router/go_router.dart';
 import 'package:serverpod_client/serverpod_client.dart' show UuidValue;
 
 import 'session/session.dart';
+import 'ui/agenda/agenda_page.dart';
+import 'ui/agenda/technicians_page.dart';
 import 'ui/assets/asset_detail_page.dart';
 import 'ui/assets/assets_page.dart';
+import 'ui/depreciation/depreciation_page.dart';
 import 'ui/login_page.dart';
 import 'ui/shell.dart';
 import 'ui/work_orders/work_order_detail_page.dart';
@@ -53,6 +56,9 @@ final routerProvider = Provider<GoRouter>((ref) {
               ),
             ],
           ),
+          GoRoute(path: '/agenda', builder: (context, state) => const AgendaPage()),
+          GoRoute(path: '/tecnicos', builder: (context, state) => const TechniciansPage()),
+          GoRoute(path: '/depreciacao', builder: (context, state) => const DepreciationPage()),
           GoRoute(
             path: '/bens',
             builder: (context, state) => const AssetsPage(),

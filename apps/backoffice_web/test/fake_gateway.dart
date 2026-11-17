@@ -14,6 +14,10 @@ class FakeGateway implements Gateway {
     'work_orders.close',
     'work_orders.reopen',
     'assets.manage',
+    'visits.schedule',
+    'depreciation.read',
+    'depreciation.manage',
+    'depreciation.close',
   ];
 
   static final frioSul = TenantSummary(
@@ -237,5 +241,262 @@ class FakeGateway implements Gateway {
   Future<WorkOrder> reopenWorkOrder(WorkOrder wo, String reason) async {
     _maybeFail('reopenWorkOrder');
     return _replace(wo, 'open');
+  }
+
+  // agenda
+  final technicianList = <Technician>[
+    Technician(
+      id: UuidValue.fromString('00000000-0000-4000-8000-0000000000d1'),
+      code: 'T01',
+      name: 'Eduardo Técnico',
+      isActive: true,
+      version: 1,
+    ),
+  ];
+  final visitList = <Visit>[];
+  VisitInput? lastVisitInput;
+  DateTime? lastAgendaFrom;
+  DateTime? lastAgendaTo;
+
+  static Visit sampleVisit(WorkOrder wo, Technician t, DateTime start, {int number = 1, String status = 'scheduled'}) =>
+      Visit(
+        id: UuidValue.fromString('00000000-0000-4000-9000-${number.toString().padLeft(12, '0')}'),
+        workOrderId: wo.id,
+        workOrderNumber: wo.number,
+        workOrderStatus: 'scheduled',
+        workOrderPriority: wo.priority,
+        problemDescription: wo.problemDescription,
+        assetLabel: wo.assetLabel,
+        productName: wo.productName,
+        visitNumber: number,
+        technicianId: t.id,
+        technicianName: t.name,
+        status: status,
+        scheduledStart: start,
+        scheduledEnd: start.add(const Duration(hours: 2)),
+        checkInOffSite: false,
+        version: 1,
+      );
+
+  @override
+  Future<List<Technician>> technicians({bool includeInactive = false}) async {
+    _maybeFail('technicians');
+    return [
+      for (final t in technicianList)
+        if (includeInactive || t.isActive) t,
+    ];
+  }
+
+  @override
+  Future<Technician> createTechnician(TechnicianInput input) async {
+    _maybeFail('createTechnician');
+    final t = Technician(
+      id: UuidValue.fromString('00000000-0000-4000-8000-0000000000d${technicianList.length + 1}'),
+      code: input.code,
+      name: input.name,
+      email: input.email,
+      phone: input.phone,
+      isActive: input.isActive,
+      version: 1,
+    );
+    technicianList.add(t);
+    return t;
+  }
+
+  @override
+  Future<Technician> updateTechnician(Technician technician, TechnicianInput input) async {
+    _maybeFail('updateTechnician');
+    final t = technician.copyWith(
+      code: input.code,
+      name: input.name,
+      isActive: input.isActive,
+      version: technician.version + 1,
+    );
+    technicianList[technicianList.indexWhere((x) => x.id == t.id)] = t;
+    return t;
+  }
+
+  @override
+  Future<List<Visit>> agenda(
+    DateTime from,
+    DateTime to, {
+    UuidValue? technicianId,
+    bool includeCancelled = false,
+  }) async {
+    _maybeFail('agenda');
+    lastAgendaFrom = from;
+    lastAgendaTo = to;
+    return [
+      for (final v in visitList)
+        if (!v.scheduledStart.isBefore(from) &&
+            v.scheduledStart.isBefore(to) &&
+            (includeCancelled || v.status != 'cancelled'))
+          v,
+    ];
+  }
+
+  @override
+  Future<List<Visit>> visitsOfWorkOrder(UuidValue workOrderId) async => [
+    for (final v in visitList)
+      if (v.workOrderId == workOrderId) v,
+  ];
+
+  @override
+  Future<Visit> scheduleVisit(UuidValue workOrderId, VisitInput input) async {
+    _maybeFail('scheduleVisit');
+    lastVisitInput = input;
+    final wo = workOrderList.singleWhere((w) => w.id == workOrderId);
+    final t = technicianList.singleWhere((x) => x.id == input.technicianId);
+    final v = sampleVisit(
+      wo,
+      t,
+      input.scheduledStart,
+      number: visitList.length + 1,
+    ).copyWith(scheduledEnd: input.scheduledEnd);
+    visitList.add(v);
+    _replace(wo, 'scheduled');
+    return v;
+  }
+
+  @override
+  Future<Visit> rescheduleVisit(Visit visit, VisitInput input) async {
+    _maybeFail('rescheduleVisit');
+    lastVisitInput = input;
+    final v = visit.copyWith(
+      scheduledStart: input.scheduledStart,
+      scheduledEnd: input.scheduledEnd,
+      version: visit.version + 1,
+    );
+    visitList[visitList.indexWhere((x) => x.id == v.id)] = v;
+    return v;
+  }
+
+  String? lastVisitCancelReason;
+
+  @override
+  Future<Visit> cancelVisit(Visit visit, String reason) async {
+    _maybeFail('cancelVisit');
+    lastVisitCancelReason = reason;
+    final v = visit.copyWith(status: 'cancelled', cancellationReason: reason, version: visit.version + 1);
+    visitList[visitList.indexWhere((x) => x.id == v.id)] = v;
+    return v;
+  }
+
+  // depreciação
+  DepreciationProfile? profile;
+  DepreciationProfileInput? lastProfileInput;
+  int? lastProfileVersion;
+  final closingList = <DepreciationClosing>[];
+
+  @override
+  Future<DepreciationProfile?> depreciationProfile(UuidValue assetId) async => profile;
+
+  @override
+  Future<DepreciationProfile> saveDepreciationProfile(
+    UuidValue assetId,
+    int? expectedVersion,
+    DepreciationProfileInput input,
+  ) async {
+    _maybeFail('saveDepreciationProfile');
+    lastProfileInput = input;
+    lastProfileVersion = expectedVersion;
+    return profile = DepreciationProfile(
+      assetId: assetId,
+      method: input.method,
+      annualRate: input.annualRate.replaceAll(',', '.'),
+      startDate: input.startDate,
+      startRule: input.startRule ?? 'pro_rata_days',
+      depreciableCost: input.depreciableCost,
+      effectiveCost: input.depreciableCost ?? asset1.acquisitionCost,
+      residualValue: input.residualValue ?? 0,
+      notes: input.notes,
+      version: (expectedVersion ?? 0) + 1,
+    );
+  }
+
+  @override
+  Future<AssetDepreciation> depreciationSchedule(UuidValue assetId) async => AssetDepreciation(
+    profile: profile!,
+    cost: 123456,
+    residualValue: 0,
+    lines: [
+      DepreciationLine(
+        year: 2026,
+        month: 1,
+        amount: 1029,
+        accumulated: 1029,
+        netBookValue: 122427,
+        rule: 'linear',
+        disposed: false,
+      ),
+    ],
+  );
+
+  bool _isClosed(int year, int month) =>
+      closingList.any((c) => c.year == year && c.month == month && c.status == 'closed');
+
+  @override
+  Future<DepreciationPosition> depreciationPosition(int year, int month, {UuidValue? costCenterId}) async {
+    _maybeFail('depreciationPosition');
+    final total = DepreciationGroupTotal(
+      assetCount: 1,
+      cost: 123456,
+      monthlyAmount: 1029,
+      accumulated: 2058,
+      netBookValue: 121398,
+    );
+    return DepreciationPosition(
+      year: year,
+      month: month,
+      closed: _isClosed(year, month),
+      items: [
+        DepreciationPositionItem(
+          assetId: asset1.id,
+          assetLabel: 'PAT-001',
+          productName: 'Freezer horizontal',
+          costCenterName: '1.01 · Produção',
+          cost: 123456,
+          monthlyAmount: 1029,
+          accumulated: 2058,
+          netBookValue: 121398,
+        ),
+      ],
+      byCostCenter: [total.copyWith(name: '1.01 · Produção')],
+      byBranch: [total],
+      total: total,
+    );
+  }
+
+  @override
+  Future<List<DepreciationClosing>> depreciationClosings() async => closingList;
+
+  @override
+  Future<DepreciationClosing> closeDepreciation(int year, int month) async {
+    _maybeFail('closeDepreciation');
+    final c = DepreciationClosing(
+      id: UuidValue.fromString('00000000-0000-4000-a000-${(year * 100 + month).toString().padLeft(12, '0')}'),
+      year: year,
+      month: month,
+      status: 'closed',
+      assetCount: 1,
+      totalAmount: 1029,
+      closedAt: DateTime.utc(2026, 11, 17, 12),
+      closedByName: 'Ana Admin',
+    );
+    closingList.insert(0, c);
+    return c;
+  }
+
+  @override
+  Future<DepreciationClosing> reopenDepreciation(int year, int month, String reason) async {
+    _maybeFail('reopenDepreciation');
+    final i = closingList.indexWhere((c) => c.year == year && c.month == month && c.status == 'closed');
+    final c = closingList[i].copyWith(
+      status: 'reopened',
+      reopenedAt: DateTime.utc(2026, 11, 17, 13),
+      reopenReason: reason,
+    );
+    closingList[i] = c;
+    return c;
   }
 }

@@ -47,6 +47,33 @@ abstract interface class Gateway {
   Future<WorkOrder> closeWorkOrder(WorkOrder wo);
   Future<WorkOrder> cancelWorkOrder(WorkOrder wo, String reason, String? note);
   Future<WorkOrder> reopenWorkOrder(WorkOrder wo, String reason);
+
+  // ----------------------------------------------------------- agenda
+  Future<List<Technician>> technicians({bool includeInactive});
+  Future<Technician> createTechnician(TechnicianInput input);
+  Future<Technician> updateTechnician(Technician technician, TechnicianInput input);
+
+  /// Visitas que começam em [from, to) (até 62 dias).
+  Future<List<Visit>> agenda(DateTime from, DateTime to, {UuidValue? technicianId, bool includeCancelled});
+  Future<List<Visit>> visitsOfWorkOrder(UuidValue workOrderId);
+  Future<Visit> scheduleVisit(UuidValue workOrderId, VisitInput input);
+  Future<Visit> rescheduleVisit(Visit visit, VisitInput input);
+  Future<Visit> cancelVisit(Visit visit, String reason);
+
+  // ----------------------------------------------------------- depreciação gerencial
+  Future<DepreciationProfile?> depreciationProfile(UuidValue assetId);
+
+  /// [expectedVersion] nulo cria a ficha; com valor, altera.
+  Future<DepreciationProfile> saveDepreciationProfile(
+    UuidValue assetId,
+    int? expectedVersion,
+    DepreciationProfileInput input,
+  );
+  Future<AssetDepreciation> depreciationSchedule(UuidValue assetId);
+  Future<DepreciationPosition> depreciationPosition(int year, int month, {UuidValue? costCenterId});
+  Future<List<DepreciationClosing>> depreciationClosings();
+  Future<DepreciationClosing> closeDepreciation(int year, int month);
+  Future<DepreciationClosing> reopenDepreciation(int year, int month, String reason);
 }
 
 /// Erro para mostrar à pessoa. [code] é o código do catálogo de erros do

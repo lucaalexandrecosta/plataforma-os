@@ -11,9 +11,24 @@ class AppShell extends ConsumerWidget {
   final String location;
   final Widget child;
 
-  static const _sections = [
-    (path: '/os', label: 'Ordens de serviço', icon: Icons.assignment_outlined, selected: Icons.assignment),
-    (path: '/bens', label: 'Bens', icon: Icons.inventory_2_outlined, selected: Icons.inventory_2),
+  static const _allSections = [
+    (path: '/os', label: 'Ordens de serviço', icon: Icons.assignment_outlined, selected: Icons.assignment, needs: null),
+    (path: '/agenda', label: 'Agenda', icon: Icons.event_outlined, selected: Icons.event, needs: null),
+    (path: '/bens', label: 'Bens', icon: Icons.inventory_2_outlined, selected: Icons.inventory_2, needs: null),
+    (
+      path: '/depreciacao',
+      label: 'Depreciação',
+      icon: Icons.trending_down_outlined,
+      selected: Icons.trending_down,
+      needs: 'depreciation.read',
+    ),
+    (
+      path: '/tecnicos',
+      label: 'Técnicos',
+      icon: Icons.engineering_outlined,
+      selected: Icons.engineering,
+      needs: 'visits.schedule',
+    ),
   ];
 
   @override
@@ -21,7 +36,11 @@ class AppShell extends ConsumerWidget {
     final state = ref.watch(sessionProvider);
     if (state is! SignedIn) return const SizedBox.shrink();
     final me = state.me;
-    final index = _sections.indexWhere((s) => location.startsWith(s.path));
+    final sections = [
+      for (final s in _allSections)
+        if (s.needs == null || state.can(s.needs!)) s,
+    ];
+    final index = sections.indexWhere((s) => location.startsWith(s.path));
     final wide = MediaQuery.sizeOf(context).width >= 900;
 
     return Scaffold(
@@ -64,9 +83,9 @@ class AppShell extends ConsumerWidget {
             extended: wide,
             selectedIndex: index < 0 ? null : index,
             labelType: wide ? NavigationRailLabelType.none : NavigationRailLabelType.all,
-            onDestinationSelected: (i) => context.go(_sections[i].path),
+            onDestinationSelected: (i) => context.go(sections[i].path),
             destinations: [
-              for (final s in _sections)
+              for (final s in sections)
                 NavigationRailDestination(icon: Icon(s.icon), selectedIcon: Icon(s.selected), label: Text(s.label)),
             ],
           ),

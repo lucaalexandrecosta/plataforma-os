@@ -9,6 +9,7 @@ import '../../session/session.dart';
 import '../common/errors.dart';
 import '../common/format.dart';
 import '../common/status_chip.dart';
+import '../depreciation/asset_depreciation_card.dart';
 import '../work_orders/open_work_order_dialog.dart';
 
 /// Ficha do bem: dados, aquisição e as OS do bem, com "Abrir OS".
@@ -135,6 +136,10 @@ class _AssetDetailPageState extends ConsumerState<AssetDetailPage> {
                 ),
               ),
             ),
+            if (session is SignedIn && session.can('depreciation.read')) ...[
+              const SizedBox(height: 16),
+              AssetDepreciationCard(asset: asset),
+            ],
             const SizedBox(height: 16),
             Text('Ordens de serviço do bem', style: theme.textTheme.titleMedium),
             const SizedBox(height: 8),
