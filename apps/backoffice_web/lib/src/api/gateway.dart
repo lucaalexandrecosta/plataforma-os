@@ -23,9 +23,43 @@ abstract interface class Gateway {
   /// Esquece os tokens (ficam só em memória).
   void signOut();
 
+  // ----------------------------------------------------------- usuários
+  /// Perfis que o administrador pode atribuir.
+  Future<List<AssignableRole>> assignableRoles();
+
+  /// Pessoas com acesso à empresa (convidadas, ativas e suspensas).
+  Future<List<TenantUser>> users();
+  Future<TenantUser> inviteUser(String email, String fullName, List<String> roles);
+  Future<TenantUser> setUserRoles(TenantUser user, List<String> roles);
+  Future<TenantUser> suspendUser(TenantUser user);
+  Future<TenantUser> reactivateUser(TenantUser user);
+  Future<TenantUser> removeUser(TenantUser user);
+
+  // ----------------------------------------------------------- etiquetas QR
+  Future<List<QrTagBatch>> qrBatches();
+
+  /// Gera de 1 a 500 etiquetas num lote novo.
+  Future<QrTagBatch> generateQrBatch(int quantity, {String? notes});
+  Future<List<QrTag>> qrBatchTags(UuidValue batchId);
+  Future<QrTagBatch> markQrBatchPrinted(UuidValue batchId);
+
+  /// Etiqueta pelo código curto, token ou URL.
+  Future<QrTag> resolveQrTag(String scanned);
+  Future<QrTag> bindQrTag(String scanned, UuidValue assetId);
+  Future<QrTag> unbindQrTag(QrTag tag);
+  Future<QrTag> revokeQrTag(QrTag tag, String reason, {String? note});
+
   // ----------------------------------------------------------- cadastros
-  Future<List<Branch>> branches();
-  Future<List<CostCenter>> costCenters();
+  Future<List<Branch>> branches({bool includeInactive});
+  Future<Branch> createBranch(BranchInput input);
+  Future<Branch> updateBranch(Branch branch, BranchInput input);
+  Future<List<CostCenter>> costCenters({bool includeInactive});
+  Future<CostCenter> createCostCenter(CostCenterInput input);
+  Future<CostCenter> updateCostCenter(CostCenter costCenter, CostCenterInput input);
+
+  /// Equipamentos ativos; [search] procura no código e no nome.
+  Future<List<ProductSummary>> products({String? search});
+  Future<ProductSummary> createProduct(ProductInput input);
   Future<AssetPage> assets({String? search, int limit, int offset});
   Future<Asset> asset(UuidValue id);
 

@@ -29,6 +29,27 @@ class AppShell extends ConsumerWidget {
       selected: Icons.engineering,
       needs: 'visits.schedule',
     ),
+    (
+      path: '/cadastros',
+      label: 'Cadastros',
+      icon: Icons.domain_outlined,
+      selected: Icons.domain,
+      needs: 'settings.manage|catalog.manage|assets.manage',
+    ),
+    (
+      path: '/etiquetas',
+      label: 'Etiquetas QR',
+      icon: Icons.qr_code_2_outlined,
+      selected: Icons.qr_code_2,
+      needs: 'qr_tags.manage',
+    ),
+    (
+      path: '/usuarios',
+      label: 'Usuários',
+      icon: Icons.manage_accounts_outlined,
+      selected: Icons.manage_accounts,
+      needs: 'users.manage',
+    ),
   ];
 
   @override
@@ -38,7 +59,7 @@ class AppShell extends ConsumerWidget {
     final me = state.me;
     final sections = [
       for (final s in _allSections)
-        if (s.needs == null || state.can(s.needs!)) s,
+        if (s.needs == null || s.needs!.split('|').any(state.can)) s,
     ];
     final index = sections.indexWhere((s) => location.startsWith(s.path));
     final wide = MediaQuery.sizeOf(context).width >= 900;

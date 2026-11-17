@@ -10,6 +10,7 @@ import '../common/errors.dart';
 import '../common/format.dart';
 import '../common/status_chip.dart';
 import '../depreciation/asset_depreciation_card.dart';
+import '../qr_tags/asset_tag_actions.dart';
 import '../work_orders/open_work_order_dialog.dart';
 
 /// Ficha do bem: dados, aquisição e as OS do bem, com "Abrir OS".
@@ -119,6 +120,10 @@ class _AssetDetailPageState extends ConsumerState<AssetDetailPage> {
                     FieldRow('Propriedade', label(ownershipLabels, asset.ownershipType)),
                     FieldRow('Número de série', asset.serialNumber),
                     FieldRow('Etiqueta QR', asset.qrShortCode),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 8),
+                      child: AssetTagActions(asset: asset, onChanged: () => setState(_load)),
+                    ),
                     FieldRow(
                       'Filial',
                       branch == null ? null : '${branch.code} · ${branch.tradeName ?? branch.legalName}',

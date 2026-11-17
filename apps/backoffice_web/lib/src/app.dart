@@ -11,7 +11,10 @@ import 'ui/assets/asset_detail_page.dart';
 import 'ui/assets/assets_page.dart';
 import 'ui/depreciation/depreciation_page.dart';
 import 'ui/login_page.dart';
+import 'ui/master_data/master_data_page.dart';
+import 'ui/qr_tags/qr_tags_page.dart';
 import 'ui/shell.dart';
+import 'ui/users/users_page.dart';
 import 'ui/work_orders/work_order_detail_page.dart';
 import 'ui/work_orders/work_orders_page.dart';
 
@@ -58,6 +61,9 @@ final routerProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(path: '/agenda', builder: (context, state) => const AgendaPage()),
           GoRoute(path: '/tecnicos', builder: (context, state) => const TechniciansPage()),
+          GoRoute(path: '/cadastros', builder: (context, state) => const MasterDataPage()),
+          GoRoute(path: '/etiquetas', builder: (context, state) => const QrTagsPage()),
+          GoRoute(path: '/usuarios', builder: (context, state) => const UsersPage()),
           GoRoute(path: '/depreciacao', builder: (context, state) => const DepreciationPage()),
           GoRoute(
             path: '/bens',
