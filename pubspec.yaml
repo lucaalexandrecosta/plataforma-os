@@ -1,7 +1,7 @@
 # Raiz do Dart pub workspace (docs/02 §6.1). Um único pubspec.lock para o
 # repositório; pacotes internos nunca são publicados.
 #
-# Os apps Flutter entram na lista "workspace" quando são criados (etapas 4 a 6
+# Os apps Flutter (apps/backoffice_web, apps/field_app) entram na lista "workspace" quando são criados (etapas 4 a 6
 # do guia, docs/13 §4); com eles, o `pub get` da raiz exige o SDK do Flutter.
 # packages/ui_kit e packages/sync_engine idem.
 name: plataforma_os_workspace
@@ -12,6 +12,7 @@ environment:
 
 workspace:
   - apps/backoffice_web
+  - apps/field_app
   - packages/core
   - packages/depreciation
   - server
