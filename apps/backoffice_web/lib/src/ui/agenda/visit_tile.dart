@@ -92,11 +92,16 @@ class VisitTile extends ConsumerWidget {
     final canSchedule = session is SignedIn && session.can('visits.schedule');
     final canReschedule = canSchedule && visit.status == 'scheduled';
     final canCancel = canSchedule && const {'scheduled', 'en_route'}.contains(visit.status);
-    final window = '${formatTime(visit.scheduledStart)}–${formatTime(visit.scheduledEnd)}';
+    final nextDays = startOfDay(
+      visit.scheduledEnd.toLocal(),
+    ).difference(startOfDay(visit.scheduledStart.toLocal())).inDays;
+    final window =
+        '${formatTime(visit.scheduledStart)}–${formatTime(visit.scheduledEnd)}${nextDays > 0 ? ' (+$nextDays)' : ''}';
+    final assetText = [visit.assetLabel, visit.productName].whereType<String>().join(' · ');
     final details = <String>[
       if (showWorkOrder) ...[
         'OS ${visit.workOrderNumber}',
-        if (visit.assetLabel != null) [visit.assetLabel, visit.productName].whereType<String>().join(' · '),
+        if (visit.problemDescription != null && assetText.isNotEmpty) assetText,
         if (visit.customerName != null) visit.customerName!,
       ] else ...[
         formatDay(visit.scheduledStart.toLocal()),
@@ -104,7 +109,7 @@ class VisitTile extends ConsumerWidget {
       ],
       if (visit.outcome != null) label(visitOutcomeLabels, visit.outcome),
       if (visit.checkInMethod != null)
-        'Check-in ${label(checkInMethodLabels, visit.checkInMethod).toLowerCase()}'
+        'Check-in por ${label(checkInMethodLabels, visit.checkInMethod)}'
             '${visit.checkInOffSite ? ' fora do local' : ''}',
       if (visit.cancellationReason != null) 'Motivo: ${visit.cancellationReason}',
     ];
