@@ -24,7 +24,10 @@ abstract class WorkOrderType implements _isc.SerializableModel, _isc.ProtocolSer
     required this.version,
     this.defaultChecklistTemplateId,
     this.defaultChecklistName,
-  });
+    bool? requirePhotos,
+    bool? requireSignature,
+  }) : requirePhotos = requirePhotos ?? false,
+       requireSignature = requireSignature ?? false;
 
   factory WorkOrderType({
     required _isc.UuidValue id,
@@ -37,6 +40,8 @@ abstract class WorkOrderType implements _isc.SerializableModel, _isc.ProtocolSer
     required int version,
     _isc.UuidValue? defaultChecklistTemplateId,
     String? defaultChecklistName,
+    bool? requirePhotos,
+    bool? requireSignature,
   }) = _WorkOrderTypeImpl;
 
   factory WorkOrderType.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -53,6 +58,12 @@ abstract class WorkOrderType implements _isc.SerializableModel, _isc.ProtocolSer
           ? null
           : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['defaultChecklistTemplateId']),
       defaultChecklistName: jsonSerialization['defaultChecklistName'] as String?,
+      requirePhotos: jsonSerialization['requirePhotos'] == null
+          ? null
+          : _isc.BoolJsonExtension.fromJson(jsonSerialization['requirePhotos']),
+      requireSignature: jsonSerialization['requireSignature'] == null
+          ? null
+          : _isc.BoolJsonExtension.fromJson(jsonSerialization['requireSignature']),
     );
   }
 
@@ -76,6 +87,10 @@ abstract class WorkOrderType implements _isc.SerializableModel, _isc.ProtocolSer
 
   String? defaultChecklistName;
 
+  bool requirePhotos;
+
+  bool requireSignature;
+
   /// Returns a shallow copy of this [WorkOrderType]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
@@ -90,6 +105,8 @@ abstract class WorkOrderType implements _isc.SerializableModel, _isc.ProtocolSer
     int? version,
     _isc.UuidValue? defaultChecklistTemplateId = const _isc.$UndefinedUuidValue(),
     String? defaultChecklistName,
+    bool? requirePhotos,
+    bool? requireSignature,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -105,6 +122,8 @@ abstract class WorkOrderType implements _isc.SerializableModel, _isc.ProtocolSer
       'version': version,
       if (defaultChecklistTemplateId != null) 'defaultChecklistTemplateId': defaultChecklistTemplateId?.toJson(),
       if (defaultChecklistName != null) 'defaultChecklistName': defaultChecklistName,
+      'requirePhotos': requirePhotos,
+      'requireSignature': requireSignature,
     };
   }
 
@@ -122,6 +141,8 @@ abstract class WorkOrderType implements _isc.SerializableModel, _isc.ProtocolSer
       'version': version,
       if (defaultChecklistTemplateId != null) 'defaultChecklistTemplateId': defaultChecklistTemplateId?.toJson(),
       if (defaultChecklistName != null) 'defaultChecklistName': defaultChecklistName,
+      'requirePhotos': requirePhotos,
+      'requireSignature': requireSignature,
     };
   }
 
@@ -145,6 +166,8 @@ class _WorkOrderTypeImpl extends WorkOrderType {
     required int version,
     _isc.UuidValue? defaultChecklistTemplateId,
     String? defaultChecklistName,
+    bool? requirePhotos,
+    bool? requireSignature,
   }) : super._(
          id: id,
          code: code,
@@ -156,6 +179,8 @@ class _WorkOrderTypeImpl extends WorkOrderType {
          version: version,
          defaultChecklistTemplateId: defaultChecklistTemplateId,
          defaultChecklistName: defaultChecklistName,
+         requirePhotos: requirePhotos,
+         requireSignature: requireSignature,
        );
 
   /// Returns a shallow copy of this [WorkOrderType]
@@ -173,6 +198,8 @@ class _WorkOrderTypeImpl extends WorkOrderType {
     int? version,
     _isc.UuidValue? defaultChecklistTemplateId = const _isc.$UndefinedUuidValue(),
     Object? defaultChecklistName = _Undefined,
+    bool? requirePhotos,
+    bool? requireSignature,
   }) {
     return WorkOrderType(
       id: id ?? this.id,
@@ -187,6 +214,8 @@ class _WorkOrderTypeImpl extends WorkOrderType {
           ? this.defaultChecklistTemplateId
           : defaultChecklistTemplateId,
       defaultChecklistName: defaultChecklistName is String? ? defaultChecklistName : this.defaultChecklistName,
+      requirePhotos: requirePhotos ?? this.requirePhotos,
+      requireSignature: requireSignature ?? this.requireSignature,
     );
   }
 }

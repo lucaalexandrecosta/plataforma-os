@@ -2236,6 +2236,609 @@ class ChecklistDraftsCompanion extends UpdateCompanion<ChecklistDraft> {
   }
 }
 
+class $LocalAttachmentsTable extends LocalAttachments with TableInfo<$LocalAttachmentsTable, LocalAttachment> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalAttachmentsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _visitIdMeta = const VerificationMeta(
+    'visitId',
+  );
+  @override
+  late final GeneratedColumn<String> visitId = GeneratedColumn<String>(
+    'visit_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _kindMeta = const VerificationMeta('kind');
+  @override
+  late final GeneratedColumn<String> kind = GeneratedColumn<String>(
+    'kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _photoStageMeta = const VerificationMeta(
+    'photoStage',
+  );
+  @override
+  late final GeneratedColumn<String> photoStage = GeneratedColumn<String>(
+    'photo_stage',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _contentTypeMeta = const VerificationMeta(
+    'contentType',
+  );
+  @override
+  late final GeneratedColumn<String> contentType = GeneratedColumn<String>(
+    'content_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _bytesMeta = const VerificationMeta('bytes');
+  @override
+  late final GeneratedColumn<Uint8List> bytes = GeneratedColumn<Uint8List>(
+    'bytes',
+    aliasedName,
+    false,
+    type: DriftSqlType.blob,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _capturedAtMeta = const VerificationMeta(
+    'capturedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> capturedAt = GeneratedColumn<DateTime>(
+    'captured_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _uploadAttemptsMeta = const VerificationMeta(
+    'uploadAttempts',
+  );
+  @override
+  late final GeneratedColumn<int> uploadAttempts = GeneratedColumn<int>(
+    'upload_attempts',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _lastErrorMeta = const VerificationMeta(
+    'lastError',
+  );
+  @override
+  late final GeneratedColumn<String> lastError = GeneratedColumn<String>(
+    'last_error',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    visitId,
+    kind,
+    photoStage,
+    contentType,
+    bytes,
+    capturedAt,
+    status,
+    uploadAttempts,
+    lastError,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_attachments';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalAttachment> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('visit_id')) {
+      context.handle(
+        _visitIdMeta,
+        visitId.isAcceptableOrUnknown(data['visit_id']!, _visitIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_visitIdMeta);
+    }
+    if (data.containsKey('kind')) {
+      context.handle(
+        _kindMeta,
+        kind.isAcceptableOrUnknown(data['kind']!, _kindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_kindMeta);
+    }
+    if (data.containsKey('photo_stage')) {
+      context.handle(
+        _photoStageMeta,
+        photoStage.isAcceptableOrUnknown(data['photo_stage']!, _photoStageMeta),
+      );
+    }
+    if (data.containsKey('content_type')) {
+      context.handle(
+        _contentTypeMeta,
+        contentType.isAcceptableOrUnknown(
+          data['content_type']!,
+          _contentTypeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_contentTypeMeta);
+    }
+    if (data.containsKey('bytes')) {
+      context.handle(
+        _bytesMeta,
+        bytes.isAcceptableOrUnknown(data['bytes']!, _bytesMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_bytesMeta);
+    }
+    if (data.containsKey('captured_at')) {
+      context.handle(
+        _capturedAtMeta,
+        capturedAt.isAcceptableOrUnknown(data['captured_at']!, _capturedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_capturedAtMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('upload_attempts')) {
+      context.handle(
+        _uploadAttemptsMeta,
+        uploadAttempts.isAcceptableOrUnknown(
+          data['upload_attempts']!,
+          _uploadAttemptsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('last_error')) {
+      context.handle(
+        _lastErrorMeta,
+        lastError.isAcceptableOrUnknown(data['last_error']!, _lastErrorMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  LocalAttachment map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalAttachment(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      visitId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}visit_id'],
+      )!,
+      kind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}kind'],
+      )!,
+      photoStage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}photo_stage'],
+      ),
+      contentType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content_type'],
+      )!,
+      bytes: attachedDatabase.typeMapping.read(
+        DriftSqlType.blob,
+        data['${effectivePrefix}bytes'],
+      )!,
+      capturedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}captured_at'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      uploadAttempts: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}upload_attempts'],
+      )!,
+      lastError: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_error'],
+      ),
+    );
+  }
+
+  @override
+  $LocalAttachmentsTable createAlias(String alias) {
+    return $LocalAttachmentsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalAttachment extends DataClass implements Insertable<LocalAttachment> {
+  final String id;
+  final String visitId;
+  final String kind;
+  final String? photoStage;
+  final String contentType;
+  final Uint8List bytes;
+  final DateTime capturedAt;
+  final String status;
+  final int uploadAttempts;
+  final String? lastError;
+  const LocalAttachment({
+    required this.id,
+    required this.visitId,
+    required this.kind,
+    this.photoStage,
+    required this.contentType,
+    required this.bytes,
+    required this.capturedAt,
+    required this.status,
+    required this.uploadAttempts,
+    this.lastError,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['visit_id'] = Variable<String>(visitId);
+    map['kind'] = Variable<String>(kind);
+    if (!nullToAbsent || photoStage != null) {
+      map['photo_stage'] = Variable<String>(photoStage);
+    }
+    map['content_type'] = Variable<String>(contentType);
+    map['bytes'] = Variable<Uint8List>(bytes);
+    map['captured_at'] = Variable<DateTime>(capturedAt);
+    map['status'] = Variable<String>(status);
+    map['upload_attempts'] = Variable<int>(uploadAttempts);
+    if (!nullToAbsent || lastError != null) {
+      map['last_error'] = Variable<String>(lastError);
+    }
+    return map;
+  }
+
+  LocalAttachmentsCompanion toCompanion(bool nullToAbsent) {
+    return LocalAttachmentsCompanion(
+      id: Value(id),
+      visitId: Value(visitId),
+      kind: Value(kind),
+      photoStage: photoStage == null && nullToAbsent ? const Value.absent() : Value(photoStage),
+      contentType: Value(contentType),
+      bytes: Value(bytes),
+      capturedAt: Value(capturedAt),
+      status: Value(status),
+      uploadAttempts: Value(uploadAttempts),
+      lastError: lastError == null && nullToAbsent ? const Value.absent() : Value(lastError),
+    );
+  }
+
+  factory LocalAttachment.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalAttachment(
+      id: serializer.fromJson<String>(json['id']),
+      visitId: serializer.fromJson<String>(json['visitId']),
+      kind: serializer.fromJson<String>(json['kind']),
+      photoStage: serializer.fromJson<String?>(json['photoStage']),
+      contentType: serializer.fromJson<String>(json['contentType']),
+      bytes: serializer.fromJson<Uint8List>(json['bytes']),
+      capturedAt: serializer.fromJson<DateTime>(json['capturedAt']),
+      status: serializer.fromJson<String>(json['status']),
+      uploadAttempts: serializer.fromJson<int>(json['uploadAttempts']),
+      lastError: serializer.fromJson<String?>(json['lastError']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'visitId': serializer.toJson<String>(visitId),
+      'kind': serializer.toJson<String>(kind),
+      'photoStage': serializer.toJson<String?>(photoStage),
+      'contentType': serializer.toJson<String>(contentType),
+      'bytes': serializer.toJson<Uint8List>(bytes),
+      'capturedAt': serializer.toJson<DateTime>(capturedAt),
+      'status': serializer.toJson<String>(status),
+      'uploadAttempts': serializer.toJson<int>(uploadAttempts),
+      'lastError': serializer.toJson<String?>(lastError),
+    };
+  }
+
+  LocalAttachment copyWith({
+    String? id,
+    String? visitId,
+    String? kind,
+    Value<String?> photoStage = const Value.absent(),
+    String? contentType,
+    Uint8List? bytes,
+    DateTime? capturedAt,
+    String? status,
+    int? uploadAttempts,
+    Value<String?> lastError = const Value.absent(),
+  }) => LocalAttachment(
+    id: id ?? this.id,
+    visitId: visitId ?? this.visitId,
+    kind: kind ?? this.kind,
+    photoStage: photoStage.present ? photoStage.value : this.photoStage,
+    contentType: contentType ?? this.contentType,
+    bytes: bytes ?? this.bytes,
+    capturedAt: capturedAt ?? this.capturedAt,
+    status: status ?? this.status,
+    uploadAttempts: uploadAttempts ?? this.uploadAttempts,
+    lastError: lastError.present ? lastError.value : this.lastError,
+  );
+  LocalAttachment copyWithCompanion(LocalAttachmentsCompanion data) {
+    return LocalAttachment(
+      id: data.id.present ? data.id.value : this.id,
+      visitId: data.visitId.present ? data.visitId.value : this.visitId,
+      kind: data.kind.present ? data.kind.value : this.kind,
+      photoStage: data.photoStage.present ? data.photoStage.value : this.photoStage,
+      contentType: data.contentType.present ? data.contentType.value : this.contentType,
+      bytes: data.bytes.present ? data.bytes.value : this.bytes,
+      capturedAt: data.capturedAt.present ? data.capturedAt.value : this.capturedAt,
+      status: data.status.present ? data.status.value : this.status,
+      uploadAttempts: data.uploadAttempts.present ? data.uploadAttempts.value : this.uploadAttempts,
+      lastError: data.lastError.present ? data.lastError.value : this.lastError,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalAttachment(')
+          ..write('id: $id, ')
+          ..write('visitId: $visitId, ')
+          ..write('kind: $kind, ')
+          ..write('photoStage: $photoStage, ')
+          ..write('contentType: $contentType, ')
+          ..write('bytes: $bytes, ')
+          ..write('capturedAt: $capturedAt, ')
+          ..write('status: $status, ')
+          ..write('uploadAttempts: $uploadAttempts, ')
+          ..write('lastError: $lastError')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    visitId,
+    kind,
+    photoStage,
+    contentType,
+    $driftBlobEquality.hash(bytes),
+    capturedAt,
+    status,
+    uploadAttempts,
+    lastError,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is LocalAttachment &&
+          other.id == this.id &&
+          other.visitId == this.visitId &&
+          other.kind == this.kind &&
+          other.photoStage == this.photoStage &&
+          other.contentType == this.contentType &&
+          $driftBlobEquality.equals(other.bytes, this.bytes) &&
+          other.capturedAt == this.capturedAt &&
+          other.status == this.status &&
+          other.uploadAttempts == this.uploadAttempts &&
+          other.lastError == this.lastError);
+}
+
+class LocalAttachmentsCompanion extends UpdateCompanion<LocalAttachment> {
+  final Value<String> id;
+  final Value<String> visitId;
+  final Value<String> kind;
+  final Value<String?> photoStage;
+  final Value<String> contentType;
+  final Value<Uint8List> bytes;
+  final Value<DateTime> capturedAt;
+  final Value<String> status;
+  final Value<int> uploadAttempts;
+  final Value<String?> lastError;
+  final Value<int> rowid;
+  const LocalAttachmentsCompanion({
+    this.id = const Value.absent(),
+    this.visitId = const Value.absent(),
+    this.kind = const Value.absent(),
+    this.photoStage = const Value.absent(),
+    this.contentType = const Value.absent(),
+    this.bytes = const Value.absent(),
+    this.capturedAt = const Value.absent(),
+    this.status = const Value.absent(),
+    this.uploadAttempts = const Value.absent(),
+    this.lastError = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalAttachmentsCompanion.insert({
+    required String id,
+    required String visitId,
+    required String kind,
+    this.photoStage = const Value.absent(),
+    required String contentType,
+    required Uint8List bytes,
+    required DateTime capturedAt,
+    required String status,
+    this.uploadAttempts = const Value.absent(),
+    this.lastError = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       visitId = Value(visitId),
+       kind = Value(kind),
+       contentType = Value(contentType),
+       bytes = Value(bytes),
+       capturedAt = Value(capturedAt),
+       status = Value(status);
+  static Insertable<LocalAttachment> custom({
+    Expression<String>? id,
+    Expression<String>? visitId,
+    Expression<String>? kind,
+    Expression<String>? photoStage,
+    Expression<String>? contentType,
+    Expression<Uint8List>? bytes,
+    Expression<DateTime>? capturedAt,
+    Expression<String>? status,
+    Expression<int>? uploadAttempts,
+    Expression<String>? lastError,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (visitId != null) 'visit_id': visitId,
+      if (kind != null) 'kind': kind,
+      if (photoStage != null) 'photo_stage': photoStage,
+      if (contentType != null) 'content_type': contentType,
+      if (bytes != null) 'bytes': bytes,
+      if (capturedAt != null) 'captured_at': capturedAt,
+      if (status != null) 'status': status,
+      if (uploadAttempts != null) 'upload_attempts': uploadAttempts,
+      if (lastError != null) 'last_error': lastError,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalAttachmentsCompanion copyWith({
+    Value<String>? id,
+    Value<String>? visitId,
+    Value<String>? kind,
+    Value<String?>? photoStage,
+    Value<String>? contentType,
+    Value<Uint8List>? bytes,
+    Value<DateTime>? capturedAt,
+    Value<String>? status,
+    Value<int>? uploadAttempts,
+    Value<String?>? lastError,
+    Value<int>? rowid,
+  }) {
+    return LocalAttachmentsCompanion(
+      id: id ?? this.id,
+      visitId: visitId ?? this.visitId,
+      kind: kind ?? this.kind,
+      photoStage: photoStage ?? this.photoStage,
+      contentType: contentType ?? this.contentType,
+      bytes: bytes ?? this.bytes,
+      capturedAt: capturedAt ?? this.capturedAt,
+      status: status ?? this.status,
+      uploadAttempts: uploadAttempts ?? this.uploadAttempts,
+      lastError: lastError ?? this.lastError,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (visitId.present) {
+      map['visit_id'] = Variable<String>(visitId.value);
+    }
+    if (kind.present) {
+      map['kind'] = Variable<String>(kind.value);
+    }
+    if (photoStage.present) {
+      map['photo_stage'] = Variable<String>(photoStage.value);
+    }
+    if (contentType.present) {
+      map['content_type'] = Variable<String>(contentType.value);
+    }
+    if (bytes.present) {
+      map['bytes'] = Variable<Uint8List>(bytes.value);
+    }
+    if (capturedAt.present) {
+      map['captured_at'] = Variable<DateTime>(capturedAt.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (uploadAttempts.present) {
+      map['upload_attempts'] = Variable<int>(uploadAttempts.value);
+    }
+    if (lastError.present) {
+      map['last_error'] = Variable<String>(lastError.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalAttachmentsCompanion(')
+          ..write('id: $id, ')
+          ..write('visitId: $visitId, ')
+          ..write('kind: $kind, ')
+          ..write('photoStage: $photoStage, ')
+          ..write('contentType: $contentType, ')
+          ..write('bytes: $bytes, ')
+          ..write('capturedAt: $capturedAt, ')
+          ..write('status: $status, ')
+          ..write('uploadAttempts: $uploadAttempts, ')
+          ..write('lastError: $lastError, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$FieldDatabase extends GeneratedDatabase {
   _$FieldDatabase(QueryExecutor e) : super(e);
   $FieldDatabaseManager get managers => $FieldDatabaseManager(this);
@@ -2254,6 +2857,9 @@ abstract class _$FieldDatabase extends GeneratedDatabase {
   late final $ChecklistDraftsTable checklistDrafts = $ChecklistDraftsTable(
     this,
   );
+  late final $LocalAttachmentsTable localAttachments = $LocalAttachmentsTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables => allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
@@ -2265,6 +2871,7 @@ abstract class _$FieldDatabase extends GeneratedDatabase {
     syncState,
     localChecklists,
     checklistDrafts,
+    localAttachments,
   ];
 }
 
@@ -3540,6 +4147,304 @@ typedef $$ChecklistDraftsTableProcessedTableManager =
       ChecklistDraft,
       PrefetchHooks Function()
     >;
+typedef $$LocalAttachmentsTableCreateCompanionBuilder =
+    LocalAttachmentsCompanion Function({
+      required String id,
+      required String visitId,
+      required String kind,
+      Value<String?> photoStage,
+      required String contentType,
+      required Uint8List bytes,
+      required DateTime capturedAt,
+      required String status,
+      Value<int> uploadAttempts,
+      Value<String?> lastError,
+      Value<int> rowid,
+    });
+typedef $$LocalAttachmentsTableUpdateCompanionBuilder =
+    LocalAttachmentsCompanion Function({
+      Value<String> id,
+      Value<String> visitId,
+      Value<String> kind,
+      Value<String?> photoStage,
+      Value<String> contentType,
+      Value<Uint8List> bytes,
+      Value<DateTime> capturedAt,
+      Value<String> status,
+      Value<int> uploadAttempts,
+      Value<String?> lastError,
+      Value<int> rowid,
+    });
+
+class $$LocalAttachmentsTableFilterComposer extends Composer<_$FieldDatabase, $LocalAttachmentsTable> {
+  $$LocalAttachmentsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get visitId => $composableBuilder(
+    column: $table.visitId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get photoStage => $composableBuilder(
+    column: $table.photoStage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contentType => $composableBuilder(
+    column: $table.contentType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<Uint8List> get bytes => $composableBuilder(
+    column: $table.bytes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get capturedAt => $composableBuilder(
+    column: $table.capturedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get uploadAttempts => $composableBuilder(
+    column: $table.uploadAttempts,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastError => $composableBuilder(
+    column: $table.lastError,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalAttachmentsTableOrderingComposer extends Composer<_$FieldDatabase, $LocalAttachmentsTable> {
+  $$LocalAttachmentsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get visitId => $composableBuilder(
+    column: $table.visitId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get kind => $composableBuilder(
+    column: $table.kind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get photoStage => $composableBuilder(
+    column: $table.photoStage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contentType => $composableBuilder(
+    column: $table.contentType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get bytes => $composableBuilder(
+    column: $table.bytes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get capturedAt => $composableBuilder(
+    column: $table.capturedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get uploadAttempts => $composableBuilder(
+    column: $table.uploadAttempts,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastError => $composableBuilder(
+    column: $table.lastError,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalAttachmentsTableAnnotationComposer extends Composer<_$FieldDatabase, $LocalAttachmentsTable> {
+  $$LocalAttachmentsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id => $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get visitId => $composableBuilder(column: $table.visitId, builder: (column) => column);
+
+  GeneratedColumn<String> get kind => $composableBuilder(column: $table.kind, builder: (column) => column);
+
+  GeneratedColumn<String> get photoStage => $composableBuilder(
+    column: $table.photoStage,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get contentType => $composableBuilder(
+    column: $table.contentType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<Uint8List> get bytes => $composableBuilder(column: $table.bytes, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get capturedAt => $composableBuilder(
+    column: $table.capturedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status => $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<int> get uploadAttempts => $composableBuilder(
+    column: $table.uploadAttempts,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get lastError => $composableBuilder(column: $table.lastError, builder: (column) => column);
+}
+
+class $$LocalAttachmentsTableTableManager
+    extends
+        RootTableManager<
+          _$FieldDatabase,
+          $LocalAttachmentsTable,
+          LocalAttachment,
+          $$LocalAttachmentsTableFilterComposer,
+          $$LocalAttachmentsTableOrderingComposer,
+          $$LocalAttachmentsTableAnnotationComposer,
+          $$LocalAttachmentsTableCreateCompanionBuilder,
+          $$LocalAttachmentsTableUpdateCompanionBuilder,
+          (
+            LocalAttachment,
+            BaseReferences<_$FieldDatabase, $LocalAttachmentsTable, LocalAttachment>,
+          ),
+          LocalAttachment,
+          PrefetchHooks Function()
+        > {
+  $$LocalAttachmentsTableTableManager(
+    _$FieldDatabase db,
+    $LocalAttachmentsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () => $$LocalAttachmentsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$LocalAttachmentsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$LocalAttachmentsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> visitId = const Value.absent(),
+                Value<String> kind = const Value.absent(),
+                Value<String?> photoStage = const Value.absent(),
+                Value<String> contentType = const Value.absent(),
+                Value<Uint8List> bytes = const Value.absent(),
+                Value<DateTime> capturedAt = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<int> uploadAttempts = const Value.absent(),
+                Value<String?> lastError = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalAttachmentsCompanion(
+                id: id,
+                visitId: visitId,
+                kind: kind,
+                photoStage: photoStage,
+                contentType: contentType,
+                bytes: bytes,
+                capturedAt: capturedAt,
+                status: status,
+                uploadAttempts: uploadAttempts,
+                lastError: lastError,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String visitId,
+                required String kind,
+                Value<String?> photoStage = const Value.absent(),
+                required String contentType,
+                required Uint8List bytes,
+                required DateTime capturedAt,
+                required String status,
+                Value<int> uploadAttempts = const Value.absent(),
+                Value<String?> lastError = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalAttachmentsCompanion.insert(
+                id: id,
+                visitId: visitId,
+                kind: kind,
+                photoStage: photoStage,
+                contentType: contentType,
+                bytes: bytes,
+                capturedAt: capturedAt,
+                status: status,
+                uploadAttempts: uploadAttempts,
+                lastError: lastError,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$LocalAttachmentsTable, LocalAttachment>(table),
+                  BaseReferences<_$FieldDatabase, $LocalAttachmentsTable, LocalAttachment>(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalAttachmentsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$FieldDatabase,
+      $LocalAttachmentsTable,
+      LocalAttachment,
+      $$LocalAttachmentsTableFilterComposer,
+      $$LocalAttachmentsTableOrderingComposer,
+      $$LocalAttachmentsTableAnnotationComposer,
+      $$LocalAttachmentsTableCreateCompanionBuilder,
+      $$LocalAttachmentsTableUpdateCompanionBuilder,
+      (
+        LocalAttachment,
+        BaseReferences<_$FieldDatabase, $LocalAttachmentsTable, LocalAttachment>,
+      ),
+      LocalAttachment,
+      PrefetchHooks Function()
+    >;
 
 class $FieldDatabaseManager {
   final _$FieldDatabase _db;
@@ -3555,4 +4460,6 @@ class $FieldDatabaseManager {
       $$LocalChecklistsTableTableManager(_db, _db.localChecklists);
   $$ChecklistDraftsTableTableManager get checklistDrafts =>
       $$ChecklistDraftsTableTableManager(_db, _db.checklistDrafts);
+  $$LocalAttachmentsTableTableManager get localAttachments =>
+      $$LocalAttachmentsTableTableManager(_db, _db.localAttachments);
 }

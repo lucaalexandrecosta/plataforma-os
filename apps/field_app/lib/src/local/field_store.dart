@@ -1,12 +1,14 @@
 import 'dart:async';
 import 'dart:convert';
 
+import 'package:crypto/crypto.dart';
 import 'package:drift/drift.dart';
 import 'package:flutter/foundation.dart';
 import 'package:plataforma_os_client/plataforma_os_client.dart';
 import 'package:uuid/uuid.dart';
 
 import '../api/gateway.dart';
+import 'attachment_rules.dart';
 import 'checklist_rules.dart';
 import 'database.dart';
 import 'visit_rules.dart';
@@ -19,6 +21,7 @@ const appVersion = '0.2.0';
 class SyncSummary {
   const SyncSummary({
     this.pending = 0,
+    this.pendingUploads = 0,
     this.pendingVisitIds = const {},
     this.notices = const [],
     this.lastSyncAt,
@@ -28,6 +31,9 @@ class SyncSummary {
 
   /// Ações ainda não enviadas.
   final int pending;
+
+  /// Fotos e assinaturas cujo arquivo ainda não chegou ao servidor.
+  final int pendingUploads;
   final Set<String> pendingVisitIds;
 
   /// Avisos não lidos (recusas, visitas canceladas ou transferidas).
@@ -86,6 +92,13 @@ class FieldStore {
         .asyncMap((_) => checklist(visitId));
   }
 
+  /// Fotos e assinatura capturadas na visita, na ordem da captura.
+  Stream<List<LocalAttachment>> watchAttachments(UuidValue visitId) =>
+      (db.select(db.localAttachments)
+            ..where((a) => a.visitId.equals(visitId.uuid))
+            ..orderBy([(a) => OrderingTerm(expression: a.capturedAt)]))
+          .watch();
+
   Future<VisitChecklistState?> checklist(UuidValue visitId) async {
     final row = await (db.select(db.localChecklists)..where((c) => c.visitId.equals(visitId.uuid))).getSingleOrNull();
     if (row == null) return null;
@@ -131,6 +144,17 @@ class FieldStore {
       final checklist = await this.checklist(visit.id);
       if (checklist != null && !checklist.submitted) {
         throw const GatewayException('Envie o checklist antes de concluir a visita.', code: 'CHECKLIST_REQUIRED');
+      }
+      final row = await (db.select(db.localVisits)..where((v) => v.id.equals(visit.id.uuid))).getSingleOrNull();
+      final photos =
+          await (db.select(db.localAttachments)..where(
+                (a) => a.visitId.equals(visit.id.uuid) & a.kind.equals('photo') & a.status.isNotValue(attachmentFailed),
+              ))
+              .get();
+      if (row != null) {
+        if (missingEvidence(_visit(row.json), [for (final p in photos) p.photoStage]) case final missing?) {
+          throw GatewayException(missing, code: 'EVIDENCE_REQUIRED');
+        }
       }
     }
     final updated = await db.transaction(() async {
@@ -231,6 +255,60 @@ class FieldStore {
     unawaited(sync().catchError((_) {}));
   }
 
+  /// Guarda a foto no aparelho e põe o registro na fila; o arquivo vai
+  /// depois, quando houver sinal (docs/06 §6.10).
+  Future<void> addPhoto(Visit visit, String stage, Uint8List bytes) async {
+    final now = await _serverNow();
+    await db.transaction(() async {
+      await _requireOnSite(visit.id.uuid, allowFinished: true);
+      final png = bytes.length > 4 && bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47;
+      await _addAttachment(visit, 'photo', png ? 'image/png' : 'image/jpeg', bytes, now, stage: stage);
+    });
+    await _refreshSummary();
+    unawaited(sync().catchError((_) {}));
+  }
+
+  /// Guarda a assinatura (PNG) e quem assinou; vale na tela na hora.
+  Future<Visit> captureSignature(
+    Visit visit,
+    Uint8List png, {
+    required String signerName,
+    String? signerDocument,
+    required String signerRole,
+  }) async {
+    final name = signerName.trim();
+    if (name.isEmpty) {
+      throw const GatewayException(
+        'Informe o nome de quem assinou.',
+        code: 'VALIDATION_FAILED',
+        fieldErrors: {'signerName': 'Informe o nome.'},
+      );
+    }
+    final now = await _serverNow();
+    final updated = await db.transaction(() async {
+      await _requireOnSite(visit.id.uuid, allowFinished: true);
+      final id = await _addAttachment(visit, 'signature', 'image/png', png, now);
+      final document = signerDocument?.trim();
+      await _enqueue(
+        signatureCaptureType,
+        visit.id.uuid,
+        SignatureCapturePayload(
+          attachmentId: UuidValue.fromString(id),
+          signerName: name,
+          signerDocument: document == null || document.isEmpty ? null : document,
+          signerRole: signerRole,
+          signedAt: now,
+        ).toJson(),
+      );
+      await _rebuild(visit.id.uuid);
+      final row = await (db.select(db.localVisits)..where((v) => v.id.equals(visit.id.uuid))).getSingle();
+      return _visit(row.json);
+    });
+    await _refreshSummary();
+    unawaited(sync().catchError((_) {}));
+    return updated;
+  }
+
   Future<void> markNoticesRead() async {
     await (db.update(db.notices)..where((n) => n.read.equals(false))).write(const NoticesCompanion(read: Value(true)));
     await _refreshSummary();
@@ -249,6 +327,7 @@ class FieldStore {
     try {
       final deviceId = await _deviceId();
       await _push(deviceId);
+      await _upload();
       await _pull(deviceId);
       await _setState('last_sync_at', _clock().toUtc().toIso8601String());
       _emit(syncing: false, clearError: true);
@@ -317,6 +396,15 @@ class FieldStore {
           final refused = r.status == 'rejected' || r.status == 'conflict';
           if (refused) await _notice(sent.entityId, r);
           if (sent.type == checklistSubmitType) await _settleDraft(sent.entityId, refused: refused);
+          if (sent.type == attachmentRegisterType) {
+            final id = (jsonDecode(sent.payload) as Map<String, dynamic>)['attachmentId'] as String;
+            await (db.update(db.localAttachments)..where((a) => a.id.equals(id))).write(
+              LocalAttachmentsCompanion(
+                status: Value(refused ? attachmentFailed : attachmentRegistered),
+                lastError: Value(refused ? r.errorMessage : null),
+              ),
+            );
+          }
         }
         for (final id in touched) {
           await _rebuild(id);
@@ -352,6 +440,10 @@ class FieldStore {
         await _saveChecklist(c);
       }
       final visitIds = {for (final v in await db.select(db.localVisits).get()) v.id};
+      await (db.delete(db.localAttachments)..where(
+            (a) => a.visitId.isNotIn(visitIds) & a.status.isIn(const [attachmentUploaded, attachmentFailed]),
+          ))
+          .go();
       for (final d in await db.select(db.checklistDrafts).get()) {
         if (!visitIds.contains(d.visitId)) {
           await (db.delete(db.checklistDrafts)..where((x) => x.visitId.equals(d.visitId))).go();
@@ -407,6 +499,13 @@ class FieldStore {
             .get();
     final now = _clock();
     for (final m in pending) {
+      if (m.type == signatureCaptureType) {
+        visit = applySignature(
+          visit,
+          SignatureCapturePayload.fromJson(jsonDecode(m.payload) as Map<String, dynamic>),
+        );
+        continue;
+      }
       if (!m.type.startsWith('visit.')) continue;
       try {
         visit = applyVisitMutation(
@@ -420,6 +519,106 @@ class FieldStore {
       }
     }
     await _saveDisplayed(id, visit);
+  }
+
+  /// Envia os arquivos dos anexos já registrados (fila de uploads, docs/06
+  /// §6.10). Sem rede, para no primeiro erro; recusa do servidor fica
+  /// anotada no anexo e o próximo sync tenta de novo.
+  Future<void> _upload() async {
+    final ready =
+        await (db.select(db.localAttachments)
+              ..where((a) => a.status.equals(attachmentRegistered))
+              ..orderBy([(a) => OrderingTerm(expression: a.capturedAt)]))
+            .get();
+    for (final a in ready) {
+      final id = UuidValue.fromString(a.id);
+      try {
+        try {
+          final target = await _gateway.attachmentUploadUrl(id);
+          await _gateway.uploadFile(target, a.bytes);
+        } on GatewayException catch (e) {
+          if (e.code != 'ALREADY_UPLOADED') rethrow;
+        }
+        await _gateway.confirmAttachmentUpload(id);
+        await (db.update(db.localAttachments)..where((x) => x.id.equals(a.id))).write(
+          const LocalAttachmentsCompanion(status: Value(attachmentUploaded), lastError: Value(null)),
+        );
+      } on SessionLost {
+        rethrow;
+      } on GatewayException catch (e) {
+        await (db.update(db.localAttachments)..where((x) => x.id.equals(a.id))).write(
+          LocalAttachmentsCompanion.custom(
+            uploadAttempts: db.localAttachments.uploadAttempts + const Constant(1),
+            lastError: Variable(e.message),
+          ),
+        );
+        if (e.code == null) return; // sem conexão: tenta no próximo sync
+      }
+    }
+    await _refreshSummary();
+  }
+
+  Future<String> _addAttachment(
+    Visit visit,
+    String kind,
+    String contentType,
+    Uint8List bytes,
+    DateTime now, {
+    String? stage,
+  }) async {
+    final id = _uuid.v7();
+    await db
+        .into(db.localAttachments)
+        .insert(
+          LocalAttachmentsCompanion.insert(
+            id: id,
+            visitId: visit.id.uuid,
+            kind: kind,
+            photoStage: Value(stage),
+            contentType: contentType,
+            bytes: bytes,
+            capturedAt: now,
+            status: attachmentQueued,
+          ),
+        );
+    await _enqueue(
+      attachmentRegisterType,
+      visit.id.uuid,
+      AttachmentRegisterPayload(
+        attachmentId: UuidValue.fromString(id),
+        kind: kind,
+        photoStage: stage,
+        contentType: contentType,
+        sizeBytes: bytes.length,
+        sha256: sha256.convert(bytes).toString(),
+        capturedAt: now,
+      ).toJson(),
+    );
+    return id;
+  }
+
+  Future<void> _enqueue(String type, String visitId, Map<String, dynamic> payload) => db
+      .into(db.pendingMutations)
+      .insert(
+        PendingMutationsCompanion.insert(
+          mutationId: _uuid.v7(),
+          type: type,
+          entityId: visitId,
+          payload: jsonEncode(payload),
+          clientTimestamp: _clock().toUtc(),
+        ),
+      );
+
+  /// Fotos e assinatura só com a visita em execução (ou finalizada há pouco).
+  Future<void> _requireOnSite(String visitId, {bool allowFinished = false}) async {
+    final row = await (db.select(db.localVisits)..where((v) => v.id.equals(visitId))).getSingleOrNull();
+    final status = row == null ? null : _visit(row.json).status;
+    if (!const {'on_site', 'paused'}.contains(status) && !(allowFinished && status == 'finished')) {
+      throw const GatewayException(
+        'Fotos e assinatura são registradas durante a visita, após o check-in.',
+        code: 'CHECK_IN_REQUIRED',
+      );
+    }
   }
 
   Future<void> _saveChecklist(VisitChecklist c) => db
@@ -499,6 +698,9 @@ class FieldStore {
   Future<void> _refreshSummary() async {
     if (_closed) return;
     final pending = await db.select(db.pendingMutations).get();
+    final uploads = await (db.select(
+      db.localAttachments,
+    )..where((a) => a.status.isIn(const [attachmentQueued, attachmentRegistered]))).get();
     final notices =
         await (db.select(db.notices)
               ..where((n) => n.read.equals(false))
@@ -507,7 +709,8 @@ class FieldStore {
     final last = await _state('last_sync_at');
     _current = SyncSummary(
       pending: pending.length,
-      pendingVisitIds: {for (final m in pending) m.entityId},
+      pendingUploads: uploads.length,
+      pendingVisitIds: {for (final m in pending) m.entityId, for (final a in uploads) a.visitId},
       notices: notices,
       lastSyncAt: last == null ? null : DateTime.parse(last),
       syncing: _current.syncing,
@@ -520,6 +723,7 @@ class FieldStore {
     if (_closed) return;
     _current = SyncSummary(
       pending: _current.pending,
+      pendingUploads: _current.pendingUploads,
       pendingVisitIds: _current.pendingVisitIds,
       notices: _current.notices,
       lastSyncAt: _current.lastSyncAt,

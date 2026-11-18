@@ -74,6 +74,28 @@ class ChecklistDrafts extends Table {
   Set<Column<Object>> get primaryKey => {visitId};
 }
 
+/// Fotos e assinaturas capturadas no aparelho (docs/06 §6.10). O arquivo
+/// fica aqui até a visita sair do recorte, para a tela mostrar a miniatura
+/// mesmo sem sinal. [status]: `queued` (registro ainda na fila do sync),
+/// `registered` (servidor aceitou o registro; falta enviar o arquivo),
+/// `uploaded` (arquivo conferido pelo servidor) ou `failed` (registro
+/// recusado).
+class LocalAttachments extends Table {
+  TextColumn get id => text()();
+  TextColumn get visitId => text()();
+  TextColumn get kind => text()();
+  TextColumn get photoStage => text().nullable()();
+  TextColumn get contentType => text()();
+  BlobColumn get bytes => blob()();
+  DateTimeColumn get capturedAt => dateTime()();
+  TextColumn get status => text()();
+  IntColumn get uploadAttempts => integer().withDefault(const Constant(0))();
+  TextColumn get lastError => text().nullable()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {id};
+}
+
 /// Chave e valor: id do aparelho, último sync, desvio do relógio.
 class SyncState extends Table {
   TextColumn get key => text()();
@@ -88,7 +110,16 @@ class SyncState extends Table {
 /// Nesta etapa o SQLite não é cifrado; o SQLCipher com a chave no
 /// armazenamento seguro (docs/06 §6.12) entra com o login persistente.
 @DriftDatabase(
-  tables: [LocalVisits, LocalWorkOrders, PendingMutations, Notices, SyncState, LocalChecklists, ChecklistDrafts],
+  tables: [
+    LocalVisits,
+    LocalWorkOrders,
+    PendingMutations,
+    Notices,
+    SyncState,
+    LocalChecklists,
+    ChecklistDrafts,
+    LocalAttachments,
+  ],
 )
 class FieldDatabase extends _$FieldDatabase {
   FieldDatabase(super.executor);
@@ -98,7 +129,7 @@ class FieldDatabase extends _$FieldDatabase {
       FieldDatabase(driftDatabase(name: 'tenant_${tenantSlug.replaceAll(RegExp('[^a-z0-9_-]'), '_')}'));
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration => MigrationStrategy(
@@ -107,6 +138,7 @@ class FieldDatabase extends _$FieldDatabase {
         await m.createTable(localChecklists);
         await m.createTable(checklistDrafts);
       }
+      if (from < 3) await m.createTable(localAttachments);
     },
   );
 }

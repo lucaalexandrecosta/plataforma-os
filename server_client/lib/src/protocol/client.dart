@@ -42,6 +42,8 @@ import 'package:plataforma_os_client/src/protocol/patrimony/models/depreciation_
 import 'package:plataforma_os_client/src/protocol/patrimony/models/depreciation_position.dart' as _i8b4ltth;
 import 'package:plataforma_os_client/src/protocol/patrimony/models/depreciation_profile.dart' as _i0ewj4w5;
 import 'package:plataforma_os_client/src/protocol/patrimony/models/depreciation_profile_input.dart' as _ihghh0c1;
+import 'package:plataforma_os_client/src/protocol/scheduling/models/attachment.dart' as _ixilyq04;
+import 'package:plataforma_os_client/src/protocol/scheduling/models/attachment_upload.dart' as _ictou6wh;
 import 'package:plataforma_os_client/src/protocol/scheduling/models/technician.dart' as _ikjr2b9x;
 import 'package:plataforma_os_client/src/protocol/scheduling/models/technician_input.dart' as _ixaduq6k;
 import 'package:plataforma_os_client/src/protocol/scheduling/models/visit.dart' as _isvtjvq7;
@@ -884,6 +886,50 @@ abstract class EndpointPublic extends _isc.EndpointRef {
   EndpointPublic(_isc.EndpointCaller caller) : super(caller);
 }
 
+/// `attachments.*` — envio e download dos arquivos de fotos e assinaturas
+/// (docs/06 §6.10). O registro do anexo vem pela fila do sync
+/// (`attachment.register`); aqui só as chamadas que exigem rede. Erros:
+/// `FORBIDDEN`, `NOT_FOUND`, `STORAGE_UNAVAILABLE`, `ALREADY_UPLOADED`,
+/// `UPLOAD_MISSING`, `UPLOAD_MISMATCH`, `NOT_UPLOADED`.
+/// {@category Endpoint}
+class EndpointAttachments extends EndpointStaff {
+  EndpointAttachments(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'attachments';
+
+  /// URL pré-assinada (15 min) para o aparelho enviar o arquivo com PUT.
+  _ida.Future<_ictou6wh.AttachmentUpload> uploadUrl(_isc.UuidValue attachmentId) =>
+      caller.callServerEndpoint<_ictou6wh.AttachmentUpload>(
+        'attachments',
+        'uploadUrl',
+        {'attachmentId': attachmentId},
+      );
+
+  /// Confere o arquivo enviado (tamanho e sha256) e marca como enviado.
+  _ida.Future<_ixilyq04.Attachment> confirmUpload(_isc.UuidValue attachmentId) =>
+      caller.callServerEndpoint<_ixilyq04.Attachment>(
+        'attachments',
+        'confirmUpload',
+        {'attachmentId': attachmentId},
+      );
+
+  /// Fotos e assinaturas das visitas da OS.
+  _ida.Future<List<_ixilyq04.Attachment>> ofWorkOrder(_isc.UuidValue workOrderId) =>
+      caller.callServerEndpoint<List<_ixilyq04.Attachment>>(
+        'attachments',
+        'ofWorkOrder',
+        {'workOrderId': workOrderId},
+      );
+
+  /// URL pré-assinada (15 min) para baixar o arquivo.
+  _ida.Future<String> downloadUrl(_isc.UuidValue attachmentId) => caller.callServerEndpoint<String>(
+    'attachments',
+    'downloadUrl',
+    {'attachmentId': attachmentId},
+  );
+}
+
 /// `technicians.*` — técnicos próprios. Erros: `FORBIDDEN`,
 /// `VALIDATION_FAILED`, `NOT_FOUND`, `VERSION_MISMATCH`.
 /// {@category Endpoint}
@@ -1444,6 +1490,7 @@ class Client extends _isc.ServerpodClientShared {
     refreshJwtTokens = EndpointRefreshJwtTokens(this);
     users = EndpointUsers(this);
     depreciation = EndpointDepreciation(this);
+    attachments = EndpointAttachments(this);
     technicians = EndpointTechnicians(this);
     visits = EndpointVisits(this);
     technicianSync = EndpointTechnicianSync(this);
@@ -1475,6 +1522,8 @@ class Client extends _isc.ServerpodClientShared {
 
   late final EndpointDepreciation depreciation;
 
+  late final EndpointAttachments attachments;
+
   late final EndpointTechnicians technicians;
 
   late final EndpointVisits visits;
@@ -1502,6 +1551,7 @@ class Client extends _isc.ServerpodClientShared {
     'refreshJwtTokens': refreshJwtTokens,
     'users': users,
     'depreciation': depreciation,
+    'attachments': attachments,
     'technicians': technicians,
     'visits': visits,
     'technicianSync': technicianSync,

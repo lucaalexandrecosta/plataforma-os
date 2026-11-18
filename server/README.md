@@ -32,6 +32,10 @@ Login próprio (sem IdP externo): o módulo `serverpod_auth_idp` cuida de e-mail
 
 Códigos de primeiro acesso e troca de senha e convites da equipe saem por SMTP (Amazon SES ou outro provedor), em `lib/src/platform/email/`. Segredos: `smtpHost`, `smtpPort` (587), `smtpUsername`, `smtpPassword`, `emailFrom` (remetente verificado) e `backofficeUrl` (link dos convites); `smtpAllowInsecure: 'true'` só para servidor SMTP local. Sem `smtpHost`, em desenvolvimento e teste o e-mail vai para o log do servidor; nos outros modos o pedido falha em vez de engolir o código.
 
+## Arquivos (fotos e assinaturas)
+
+Os arquivos ficam num object storage S3-compatível (RustFS no `infra/local`, S3 em produção), em `t/<tenant_id>/attachments/...`. O aparelho registra o anexo pela fila do sync (`attachment.register`) e envia o arquivo direto ao storage por URL pré-assinada (`attachments.uploadUrl`, 15 min); `attachments.confirmUpload` confere tamanho e sha256. Segredos: `s3Endpoint`, `s3Bucket`, `s3AccessKey`, `s3SecretKey`, `s3Region` (padrão us-east-1) e `s3PublicEndpoint` quando os aparelhos enxergam o storage por outro endereço (ex.: `http://10.0.2.2:9000` no emulador Android). Em desenvolvimento e teste o bucket é criado no primeiro uso. Sem `s3Endpoint` o registro funciona e o envio responde `STORAGE_UNAVAILABLE`. Os testes e2e precisam do RustFS em `localhost:9000` (`docker compose -f infra/local/compose.yaml up -d s3`).
+
 ## Regras que valem desde já
 
 - O `tenant_id` nunca vem do cliente: só do token validado (`RequestContext`).

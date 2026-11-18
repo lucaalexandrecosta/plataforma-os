@@ -1,7 +1,10 @@
+import 'dart:typed_data';
+
 import 'package:drift/native.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plataforma_os_client/plataforma_os_client.dart';
 import 'package:plataforma_os_field/src/api/gateway.dart';
+import 'package:plataforma_os_field/src/local/attachment_rules.dart';
 import 'package:plataforma_os_field/src/local/checklist_rules.dart';
 import 'package:plataforma_os_field/src/local/database.dart';
 import 'package:plataforma_os_field/src/local/field_store.dart';
@@ -166,6 +169,91 @@ void main() {
       );
       expect(store.summary.pending, 0);
       expect(await store.checklist((await store.watchVisits().first).last.id), isNull);
+    });
+  });
+
+  group('fotos e assinatura', () {
+    final checkIn = VisitMutationPayload(
+      checkIn: VisitCheckIn(method: 'manual', justification: 'Sem etiqueta'),
+    );
+    final resolved = VisitMutationPayload(
+      finish: VisitFinish(outcome: 'resolved', notes: 'Feito'),
+    );
+    final jpeg = Uint8List.fromList([0xFF, 0xD8, ...List.generate(100, (i) => i)]);
+
+    Future<Visit> onSite() async {
+      gateway.visits.clear();
+      gateway.addVisit(1, DateTime(2026, 11, 17, 9), requirePhotos: true, requireSignature: true);
+      await store.sync();
+      final visit = (await store.watchVisits().first).first;
+      return store.act(visit, VisitMutation.checkIn, checkIn);
+    }
+
+    test('sem sinal: fotos e assinatura ficam no aparelho, liberam a conclusão e sobem depois', () async {
+      var visit = await onSite();
+      gateway.offline = true;
+      await expectLater(
+        store.act(visit, VisitMutation.finish, resolved),
+        throwsA(isA<GatewayException>().having((e) => e.message, 'message', contains('assinatura'))),
+      );
+
+      visit = await store.captureSignature(visit, jpeg, signerName: ' Marta ', signerRole: 'site_manager');
+      expect(visit.signerName, 'Marta');
+      await store.addPhoto(visit, 'before', jpeg);
+      await expectLater(
+        store.act(visit, VisitMutation.finish, resolved),
+        throwsA(isA<GatewayException>().having((e) => e.code, 'code', 'EVIDENCE_REQUIRED')),
+      );
+      await store.addPhoto(visit, 'after', jpeg);
+      await store.act(visit, VisitMutation.finish, resolved);
+      expect(store.summary.pendingUploads, 3);
+
+      gateway.offline = false;
+      await store.sync();
+      expect(gateway.pushed.map((m) => m.type), [
+        'visit.check_in',
+        attachmentRegisterType,
+        signatureCaptureType,
+        attachmentRegisterType,
+        attachmentRegisterType,
+        'visit.finish',
+      ]);
+      expect(gateway.visitNumber(1).status, 'finished');
+      expect(gateway.visitNumber(1).signerName, 'Marta');
+      expect(gateway.confirmed, hasLength(3));
+      expect(gateway.storedFiles.values.first, jpeg);
+      expect((store.summary.pending, store.summary.pendingUploads), (0, 0));
+      final local = await store.watchAttachments(visit.id).first;
+      expect(local.map((a) => (a.kind, a.photoStage, a.status)), [
+        ('signature', null, attachmentUploaded),
+        ('photo', 'before', attachmentUploaded),
+        ('photo', 'after', attachmentUploaded),
+      ]);
+    });
+
+    test('envio do arquivo falha: registro fica, arquivo tenta de novo no próximo sync', () async {
+      final visit = await onSite();
+      gateway.failNext['uploadFile'] = const GatewayException('Sem conexão para enviar o arquivo.');
+      await store.addPhoto(visit, 'evidence', jpeg);
+      await store.sync();
+      expect(store.summary.pending, 0);
+      expect(store.summary.pendingUploads, 1);
+      expect((await store.watchAttachments(visit.id).first).single.lastError, 'Sem conexão para enviar o arquivo.');
+
+      await store.sync();
+      expect(store.summary.pendingUploads, 0);
+      expect(gateway.confirmed, hasLength(1));
+    });
+
+    test('antes do check-in não tira foto', () async {
+      gateway.addVisit(3, DateTime(2026, 11, 18, 14));
+      await store.sync();
+      final visit = (await store.watchVisits().first).last;
+      await expectLater(
+        store.addPhoto(visit, 'before', jpeg),
+        throwsA(isA<GatewayException>().having((e) => e.code, 'code', 'CHECK_IN_REQUIRED')),
+      );
+      expect(store.summary.pending, 0);
     });
   });
 }

@@ -264,4 +264,39 @@ void main() {
     expect(find.text('Situação da OS: Concluída'), findsOneWidget);
     expect(gateway.visitNumber(1).outcome, 'resolved');
   });
+
+  testApp('fotos e assinatura: exigidas pelo tipo de OS, coletadas na visita e enviadas', (tester) async {
+    final gateway = FakeGateway()
+      ..addVisit(1, DateTime(2026, 11, 17, 9), status: 'on_site', requirePhotos: true, requireSignature: true);
+    await openVisit(tester, gateway, device: FakeDevice());
+    expect(find.text('Obrigatório para concluir: 1 foto de antes e 1 de depois e assinatura.'), findsOneWidget);
+
+    await tapKey(tester, 'act-finish');
+    await tester.enterText(find.byKey(const Key('finish-notes')), 'Troca do compressor');
+    await tapKey(tester, 'dialog-ok');
+    expect(find.text('Colete a assinatura antes de concluir a visita.'), findsOneWidget);
+
+    await tester.ensureVisible(find.byKey(const Key('photo-before')));
+    await tapKey(tester, 'photo-before');
+    await tapKey(tester, 'photo-after');
+    expect(find.text('Antes'), findsNWidgets(2)); // botão + miniatura
+    expect(gateway.confirmed, hasLength(2));
+
+    await tester.ensureVisible(find.byKey(const Key('act-sign')));
+    await tapKey(tester, 'act-sign');
+    await tapKey(tester, 'signature-save');
+    expect(find.text('Informe o nome.'), findsOneWidget);
+    await tester.enterText(find.byKey(const Key('signer-name')), 'Marta Gerente');
+    await tapKey(tester, 'signer-role-employee');
+    await tester.drag(find.byKey(const Key('signature-pad')), const Offset(120, 40));
+    await tester.pumpAndSettle();
+    await tapKey(tester, 'signature-save');
+    expect(find.text('Assinado por Marta Gerente'), findsOneWidget);
+    expect(gateway.visitNumber(1).signerRole, 'employee');
+
+    await tapKey(tester, 'act-finish');
+    await tester.enterText(find.byKey(const Key('finish-notes')), 'Troca do compressor');
+    await tapKey(tester, 'dialog-ok');
+    expect(find.text('Situação da OS: Concluída'), findsOneWidget);
+  });
 }

@@ -82,6 +82,14 @@ jobs:
         ports: ["5433:5432"]
         options: >-
           --health-cmd "pg_isready -U postgres" --health-interval 5s --health-timeout 3s --health-retries 20
+      # Object storage S3-compatível dos anexos (o mesmo do infra/local).
+      s3:
+        image: rustfs/rustfs:1.0.3
+        env:
+          RUSTFS_ACCESS_KEY: s3-dev
+          RUSTFS_SECRET_KEY: s3-dev-password
+          RUSTFS_ADDRESS: ":9000"
+        ports: ["9000:9000"]
     env:
       PGPASSWORD: postgres
     steps:
@@ -115,6 +123,7 @@ jobs:
       - name: Servidor (papel monolith) e teste e2e
         working-directory: server
         run: |
+          for i in $(seq 1 60); do curl -s -o /dev/null http://localhost:9000/ && break; sleep 1; done
           dart run bin/main.dart --mode test --role monolith > server.log 2>&1 &
           for i in $(seq 1 60); do curl -fs http://localhost:9080/ >/dev/null 2>&1 && break; sleep 1; done
           dart test test/e2e || (cat server.log && exit 1)

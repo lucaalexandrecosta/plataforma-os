@@ -37,3 +37,12 @@ fields:
   # justificativa.
   requireQrCheckIn: bool, default=false
   version: int
+  # Obrigatoriedades do tipo de OS ao concluir como resolvida.
+  requirePhotos: bool, default=false
+  requireSignature: bool, default=false
+  # Assinatura de quem recebeu o atendimento (signature.capture). signerRole:
+  # site_manager, employee ou other. O documento não sai do servidor.
+  signatureAttachmentId: UuidValue?
+  signerName: String?
+  signerRole: String?
+  signedAt: DateTime?

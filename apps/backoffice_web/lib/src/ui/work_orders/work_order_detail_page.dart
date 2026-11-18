@@ -11,6 +11,7 @@ import '../agenda/visit_dialog.dart';
 import '../agenda/visit_tile.dart';
 import '../common/errors.dart';
 import '../common/format.dart';
+import '../common/open_url.dart';
 import '../common/status_chip.dart';
 import 'reason_dialog.dart';
 
@@ -29,6 +30,7 @@ class _WorkOrderDetailPageState extends ConsumerState<WorkOrderDetailPage> {
   late Future<WorkOrderDetail> _detail;
   late Future<List<Visit>> _visits;
   late Future<List<VisitChecklist>> _checklists;
+  late Future<(List<Attachment>, List<Visit>)> _attachments;
   var _busy = false;
 
   @override
@@ -42,6 +44,7 @@ class _WorkOrderDetailPageState extends ConsumerState<WorkOrderDetailPage> {
     _detail = g.workOrder(widget.id);
     _visits = g.visitsOfWorkOrder(widget.id);
     _checklists = g.checklistsOfWorkOrder(widget.id);
+    _attachments = g.attachmentsOfWorkOrder(widget.id).then((list) async => (list, await _visits));
   }
 
   @override
@@ -250,6 +253,7 @@ class _WorkOrderDetailPageState extends ConsumerState<WorkOrderDetailPage> {
                     const SizedBox(height: 16),
                     _Section(title: 'Visitas', children: [_visitList()]),
                     _checklistList(),
+                    _attachmentList(),
                   ],
                 );
                 final history = _Section(title: 'Histórico', children: _history(context, detail.history));
@@ -280,6 +284,62 @@ class _WorkOrderDetailPageState extends ConsumerState<WorkOrderDetailPage> {
         children: [
           for (final v in snap.data!) VisitTile(visit: v, showWorkOrder: false, onChanged: _reload),
         ],
+      );
+    },
+  );
+
+  Future<void> _open(Attachment a) async {
+    try {
+      final url = await ref.read(gatewayProvider).attachmentDownloadUrl(a.id);
+      ref.read(openUrlProvider)(url);
+    } on GatewayException catch (e) {
+      if (mounted) reportError(context, ref, e);
+    }
+  }
+
+  /// Fotos e assinaturas das visitas (some quando não há nenhuma).
+  Widget _attachmentList() => FutureBuilder<(List<Attachment>, List<Visit>)>(
+    future: _attachments,
+    builder: (context, snap) {
+      if (snap.hasError) {
+        return Padding(padding: const EdgeInsets.only(top: 16), child: Text(errorMessage(snap.error!)));
+      }
+      final (list, visits) = snap.data ?? (const <Attachment>[], const <Visit>[]);
+      if (list.isEmpty) return const SizedBox.shrink();
+      final signers = {for (final v in visits) v.id: v};
+      return Padding(
+        padding: const EdgeInsets.only(top: 16),
+        child: _Section(
+          title: 'Fotos e assinatura',
+          children: [
+            for (final a in list)
+              ListTile(
+                key: Key('attachment-${a.id}'),
+                dense: true,
+                contentPadding: EdgeInsets.zero,
+                leading: Icon(a.kind == 'signature' ? Icons.draw : Icons.photo_outlined),
+                title: Text(switch (a.kind) {
+                  'signature' => switch (signers[a.visitId]) {
+                    final Visit v when v.signerName != null =>
+                      'Assinatura de ${v.signerName} (${label(signerRoleLabels, v.signerRole)})',
+                    _ => 'Assinatura',
+                  },
+                  _ => label(photoStageLabels, a.photoStage),
+                }),
+                subtitle: Text(
+                  [
+                    if (a.capturedAt != null) formatDateTime(a.capturedAt),
+                    ?a.capturedByName,
+                    if (a.uploadStatus != 'uploaded') 'aguardando envio do aparelho',
+                  ].join(' · '),
+                ),
+                trailing: TextButton(
+                  onPressed: a.uploadStatus == 'uploaded' ? () => _open(a) : null,
+                  child: const Text('Abrir'),
+                ),
+              ),
+          ],
+        ),
       );
     },
   );

@@ -34,6 +34,16 @@ abstract interface class Gateway {
 
   /// Envia as ações feitas no aparelho; um resultado por ação, na ordem.
   Future<List<SyncMutationResult>> push(SyncPushRequest request);
+
+  // ----------------------------------------------------------- anexos
+  /// Destino (URL pré-assinada) para enviar o arquivo de um anexo registrado.
+  Future<AttachmentUpload> attachmentUploadUrl(UuidValue attachmentId);
+
+  /// Envia o arquivo para a URL pré-assinada (PUT direto ao armazenamento).
+  Future<void> uploadFile(AttachmentUpload target, List<int> bytes);
+
+  /// Pede ao servidor para conferir o arquivo enviado.
+  Future<Attachment> confirmAttachmentUpload(UuidValue attachmentId);
 }
 
 /// Erro para mostrar à pessoa. [code] é o código do catálogo de erros do

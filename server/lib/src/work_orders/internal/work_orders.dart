@@ -542,9 +542,9 @@ abstract final class WorkOrders {
       session,
       () => session.db.unsafeExecute(
         'INSERT INTO app.work_order_types (id, tenant_id, code, name, category, default_priority, requires_asset, is_active, '
-        '                                 default_checklist_template_id) '
+        '                                 default_checklist_template_id, require_photos, require_signature) '
         'VALUES (@id::uuid, app.current_tenant_id(), @code, @name, @category, @priority, @requiresAsset, @isActive, '
-        '        @checklistId::uuid)',
+        '        @checklistId::uuid, @requirePhotos, @requireSignature)',
         parameters: QueryParameters.named({'id': id.uuid, ...params}),
       ),
     );
@@ -569,7 +569,8 @@ abstract final class WorkOrders {
       () => session.db.unsafeExecute(
         'UPDATE app.work_order_types SET code = @code, name = @name, category = @category, '
         '       default_priority = @priority, requires_asset = @requiresAsset, is_active = @isActive, '
-        '       default_checklist_template_id = @checklistId::uuid '
+        '       default_checklist_template_id = @checklistId::uuid, require_photos = @requirePhotos, '
+        '       require_signature = @requireSignature '
         ' WHERE id = @id::uuid AND version = @version',
         parameters: QueryParameters.named({'id': id.uuid, 'version': expectedVersion, ...params}),
       ),
@@ -583,7 +584,8 @@ abstract final class WorkOrders {
   static const _typeColumns =
       'id, code, name, category, default_priority, requires_asset, is_active, version, default_checklist_template_id, '
       '(SELECT ct.name FROM app.checklist_templates ct WHERE ct.tenant_id = work_order_types.tenant_id '
-      '   AND ct.id = work_order_types.default_checklist_template_id) AS default_checklist_name';
+      '   AND ct.id = work_order_types.default_checklist_template_id) AS default_checklist_name, '
+      'require_photos, require_signature';
   static const _categories = {
     'corrective',
     'preventive',
@@ -731,6 +733,8 @@ abstract final class WorkOrders {
       'priority': input.defaultPriority,
       'requiresAsset': input.requiresAsset,
       'isActive': input.isActive,
+      'requirePhotos': input.requirePhotos ?? false,
+      'requireSignature': input.requireSignature ?? false,
     };
   }
 
@@ -767,6 +771,8 @@ abstract final class WorkOrders {
     version: r[7] as int,
     defaultChecklistTemplateId: sqlUuidOrNull(r[8]),
     defaultChecklistName: r[9] as String?,
+    requirePhotos: r[10] as bool,
+    requireSignature: r[11] as bool,
   );
 
   static WorkOrder _map(List<Object?> r) => WorkOrder(

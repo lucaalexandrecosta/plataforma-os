@@ -8,6 +8,7 @@ import 'session/session.dart';
 import 'ui/login_page.dart';
 import 'ui/visits/agenda_page.dart';
 import 'ui/visits/checklist_page.dart';
+import 'ui/visits/signature_page.dart';
 import 'ui/visits/visit_page.dart';
 
 /// Rotas do app. O estado da sessão decide para onde ir: fora → `/entrar`;
@@ -49,6 +50,11 @@ final routerProvider = Provider<GoRouter>((ref) {
                 path: 'checklist',
                 builder: (context, state) =>
                     ChecklistPage(visitId: UuidValue.withValidation(state.pathParameters['id']!)),
+              ),
+              GoRoute(
+                path: 'assinatura',
+                builder: (context, state) =>
+                    SignaturePage(visitId: UuidValue.withValidation(state.pathParameters['id']!)),
               ),
             ],
           ),

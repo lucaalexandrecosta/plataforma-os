@@ -8,6 +8,7 @@ import '../../identity_access/identity_access.dart';
 import '../../platform/db/sql_values.dart';
 import '../../platform/errors/api_errors.dart';
 import '../../work_orders/work_orders.dart';
+import 'attachments.dart';
 import 'checklist_responses.dart';
 import 'technicians.dart';
 
@@ -39,7 +40,9 @@ abstract final class Visits {
       '       v.outcome_notes, v.scheduled_start, v.scheduled_end, v.travel_started_at, v.checked_in_at, '
       '       v.finished_at, v.cancelled_at, v.cancellation_reason, v.check_in_method, v.check_in_distance_m, '
       '       v.check_in_off_site, v.check_in_justification, v.version, '
-      '       coalesce(wt.require_qr_check_in, ts.require_qr_check_in, false) '
+      '       coalesce(wt.require_qr_check_in, ts.require_qr_check_in, false), '
+      '       wt.require_photos, wt.require_signature, v.signature_attachment_id, v.signer_name, v.signer_role, '
+      '       v.signed_at '
       '  FROM app.work_order_visits v '
       '  JOIN app.work_orders w ON w.tenant_id = v.tenant_id AND w.id = v.work_order_id '
       '  JOIN app.work_order_types wt ON wt.tenant_id = w.tenant_id AND wt.id = w.work_order_type_id '
@@ -365,8 +368,13 @@ abstract final class Visits {
     if (input.outcome == 'resolved' && notes == null) {
       throw ApiErrors.fieldError(session, 'notes', 'REQUIRED', 'Descreva o que foi feito.');
     }
-    if (input.outcome == 'resolved' && !await ChecklistResponses.isSatisfied(session, id)) {
-      throw ApiErrors.businessRule(session, 'CHECKLIST_REQUIRED', 'Envie o checklist antes de concluir a visita.');
+    if (input.outcome == 'resolved') {
+      if (!await ChecklistResponses.isSatisfied(session, id)) {
+        throw ApiErrors.businessRule(session, 'CHECKLIST_REQUIRED', 'Envie o checklist antes de concluir a visita.');
+      }
+      if (await Attachments.missingForFinish(session, visit) case final missing?) {
+        throw ApiErrors.businessRule(session, 'EVIDENCE_REQUIRED', missing);
+      }
     }
     if (input.outcome == 'needs_return' && holdReason != null && !_returnHoldReasons.contains(holdReason)) {
       throw ApiErrors.fieldError(session, 'holdReason', 'INVALID', 'Use "aguardando peça" ou "precisa de retorno".');
@@ -518,6 +526,35 @@ abstract final class Visits {
     }
   }
 
+  /// Grava a assinatura da visita (sem conferir versão: só acrescenta dados
+  /// ao que o técnico já fez). Quem chama valida a visita e o anexo.
+  static Future<Visit> recordSignature(
+    Session session,
+    UuidValue id, {
+    required UuidValue attachmentId,
+    required String signerName,
+    required String? signerDocument,
+    required String signerRole,
+    required DateTime signedAt,
+    required Transaction transaction,
+  }) async {
+    await session.db.unsafeExecute(
+      'UPDATE app.work_order_visits SET signature_attachment_id = @att::uuid, signer_name = @name, '
+      '       signer_document = @doc, signer_role = @role, signed_at = @at '
+      ' WHERE id = @id::uuid',
+      parameters: QueryParameters.named({
+        'id': id.uuid,
+        'att': attachmentId.uuid,
+        'name': signerName,
+        'doc': signerDocument,
+        'role': signerRole,
+        'at': signedAt.toUtc(),
+      }),
+      transaction: transaction,
+    );
+    return (await _find(session, id, transaction: transaction))!;
+  }
+
   static Future<Visit?> _find(Session session, UuidValue id, {Transaction? transaction}) async {
     final rows = await session.db.unsafeQuery(
       '$_select WHERE v.id = @id::uuid',
@@ -568,5 +605,11 @@ abstract final class Visits {
     checkInJustification: r[26] as String?,
     version: r[27] as int,
     requireQrCheckIn: r[28] as bool,
+    requirePhotos: r[29] as bool,
+    requireSignature: r[30] as bool,
+    signatureAttachmentId: sqlUuidOrNull(r[31]),
+    signerName: r[32] as String?,
+    signerRole: r[33] as String?,
+    signedAt: r[34] as DateTime?,
   );
 }

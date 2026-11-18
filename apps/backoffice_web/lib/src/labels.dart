@@ -178,3 +178,7 @@ const workOrderCategoryLabels = {
 };
 
 const checklistResponseStatusLabels = {'draft': 'Rascunho', 'submitted': 'Enviado'};
+
+const photoStageLabels = {'before': 'Foto de antes', 'after': 'Foto de depois', 'evidence': 'Evidência'};
+
+const signerRoleLabels = {'site_manager': 'Responsável pelo local', 'employee': 'Funcionário', 'other': 'Outro'};

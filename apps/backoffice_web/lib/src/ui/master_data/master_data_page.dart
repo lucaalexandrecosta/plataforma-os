@@ -676,6 +676,8 @@ class _WorkOrderTypeDialogState extends ConsumerState<WorkOrderTypeDialog>
   late var _requiresAsset = widget.type?.requiresAsset ?? true;
   late var _active = widget.type?.isActive ?? true;
   late UuidValue? _checklistId = widget.type?.defaultChecklistTemplateId;
+  late var _requirePhotos = widget.type?.requirePhotos ?? false;
+  late var _requireSignature = widget.type?.requireSignature ?? false;
 
   @override
   void dispose() {
@@ -693,6 +695,8 @@ class _WorkOrderTypeDialogState extends ConsumerState<WorkOrderTypeDialog>
       requiresAsset: _requiresAsset,
       isActive: _active,
       defaultChecklistTemplateId: _checklistId,
+      requirePhotos: _requirePhotos,
+      requireSignature: _requireSignature,
     );
     final current = widget.type;
     save((g) => current == null ? g.createWorkOrderType(input) : g.updateWorkOrderType(current, input));
@@ -766,6 +770,20 @@ class _WorkOrderTypeDialogState extends ConsumerState<WorkOrderTypeDialog>
           title: const Text('Exige bem na abertura'),
           value: _requiresAsset,
           onChanged: (v) => setState(() => _requiresAsset = v),
+        ),
+        SwitchListTile(
+          key: const Key('type-require-photos'),
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Exige fotos de antes e depois para concluir'),
+          value: _requirePhotos,
+          onChanged: (v) => setState(() => _requirePhotos = v),
+        ),
+        SwitchListTile(
+          key: const Key('type-require-signature'),
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Exige assinatura do cliente para concluir'),
+          value: _requireSignature,
+          onChanged: (v) => setState(() => _requireSignature = v),
         ),
         SwitchListTile(
           contentPadding: EdgeInsets.zero,

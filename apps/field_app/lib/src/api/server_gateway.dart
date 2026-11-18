@@ -1,3 +1,4 @@
+import 'package:http/http.dart' as http;
 import 'package:plataforma_os_client/plataforma_os_client.dart';
 import 'package:serverpod_auth_core_client/serverpod_auth_core_client.dart' show AuthSuccess;
 import 'package:serverpod_client/serverpod_client.dart';
@@ -142,6 +143,29 @@ class ServerGateway implements Gateway {
 
   @override
   Future<List<SyncMutationResult>> push(SyncPushRequest request) => _guard(() => _tenant.technicianSync.push(request));
+
+  @override
+  Future<AttachmentUpload> attachmentUploadUrl(UuidValue attachmentId) =>
+      _guard(() => _tenant.attachments.uploadUrl(attachmentId));
+
+  @override
+  Future<void> uploadFile(AttachmentUpload target, List<int> bytes) async {
+    final http.Response response;
+    try {
+      response = await http
+          .put(Uri.parse(target.url), headers: {'content-type': target.contentType}, body: bytes)
+          .timeout(const Duration(minutes: 2));
+    } on Exception {
+      throw const GatewayException('Sem conexão para enviar o arquivo. Ele fica no aparelho e vai depois.');
+    }
+    if (response.statusCode != 200) {
+      throw GatewayException('O armazenamento recusou o arquivo (${response.statusCode}).', code: 'UPLOAD_FAILED');
+    }
+  }
+
+  @override
+  Future<Attachment> confirmAttachmentUpload(UuidValue attachmentId) =>
+      _guard(() => _tenant.attachments.confirmUpload(attachmentId));
 
   // ----------------------------------------------------------- erros
 

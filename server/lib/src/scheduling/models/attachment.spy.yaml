@@ -1,0 +1,21 @@
+# Anexo de OS/visita (app.attachments): foto ou assinatura. O binário fica no
+# object storage; o download é por URL pré-assinada (attachments.downloadUrl).
+class: Attachment
+fields:
+  id: UuidValue
+  workOrderId: UuidValue?
+  visitId: UuidValue?
+  # photo ou signature.
+  kind: String
+  # before, after ou evidence (fotos da visita).
+  photoStage: String?
+  contentType: String
+  sizeBytes: int?
+  # pending, uploaded, failed.
+  uploadStatus: String
+  caption: String?
+  capturedAt: DateTime?
+  capturedByName: String?
+  latitude: double?
+  longitude: double?
+  createdAt: DateTime

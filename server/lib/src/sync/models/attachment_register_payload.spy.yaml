@@ -1,0 +1,16 @@
+# Payload de attachment.register (entityId é a visita): metadados do arquivo
+# capturado no aparelho. attachmentId é gerado no aparelho; sha256 em hex.
+class: AttachmentRegisterPayload
+fields:
+  attachmentId: UuidValue
+  # photo ou signature.
+  kind: String
+  # before, after ou evidence (só foto).
+  photoStage: String?
+  contentType: String
+  sizeBytes: int
+  sha256: String
+  capturedAt: DateTime
+  latitude: double?
+  longitude: double?
+  caption: String?

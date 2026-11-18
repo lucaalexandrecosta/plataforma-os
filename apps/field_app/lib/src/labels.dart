@@ -39,3 +39,7 @@ const priorityLabels = {'low': 'Baixa', 'normal': 'Normal', 'high': 'Alta', 'urg
 const checkInMethodLabels = {'qr': 'QR da etiqueta', 'gps': 'GPS', 'manual': 'Manual'};
 
 String label(Map<String, String> labels, String? code) => code == null ? '—' : labels[code] ?? code;
+
+const photoStageLabels = {'before': 'Antes', 'after': 'Depois', 'evidence': 'Evidência'};
+
+const signerRoleLabels = {'site_manager': 'Responsável pelo local', 'employee': 'Funcionário', 'other': 'Outro'};

@@ -125,6 +125,12 @@ abstract interface class Gateway {
   Future<List<Visit>> agenda(DateTime from, DateTime to, {UuidValue? technicianId, bool includeCancelled});
   Future<List<Visit>> visitsOfWorkOrder(UuidValue workOrderId);
 
+  /// Fotos e assinaturas das visitas da OS.
+  Future<List<Attachment>> attachmentsOfWorkOrder(UuidValue workOrderId);
+
+  /// Endereço temporário (15 min) para abrir o arquivo de um anexo.
+  Future<String> attachmentDownloadUrl(UuidValue attachmentId);
+
   /// Checklists respondidos nas visitas da OS.
   Future<List<VisitChecklist>> checklistsOfWorkOrder(UuidValue workOrderId);
   Future<Visit> scheduleVisit(UuidValue workOrderId, VisitInput input);
