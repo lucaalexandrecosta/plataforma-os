@@ -5,6 +5,8 @@ library;
 
 export '../generated/protocol.dart'
     show
+        Attachment,
+        AttachmentUpload,
         ChecklistAnswer,
         ChecklistResponse,
         Technician,
@@ -14,6 +16,7 @@ export '../generated/protocol.dart'
         VisitCheckIn,
         VisitFinish,
         VisitInput;
+export 'internal/attachments.dart' show Attachments;
 export 'internal/checklist_responses.dart' show ChecklistResponses;
 export 'internal/technicians.dart' show Technicians;
 export 'internal/visits.dart' show Visits;

@@ -45,6 +45,7 @@ import '../identity_access/endpoints/me_endpoint.dart' as _i2zd8mbu;
 import '../identity_access/endpoints/refresh_jwt_tokens_endpoint.dart' as _inemdtdo;
 import '../identity_access/endpoints/users_endpoint.dart' as _if041dc0;
 import '../patrimony/endpoints/depreciation_endpoint.dart' as _ik1wssz1;
+import '../scheduling/endpoints/attachments_endpoint.dart' as _irl7ucsp;
 import '../scheduling/endpoints/technicians_endpoint.dart' as _i7x07tna;
 import '../scheduling/endpoints/visits_endpoint.dart' as _i34c7in8;
 import '../sync/endpoints/technician_sync_endpoint.dart' as _i4wczera;
@@ -120,6 +121,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'depreciation',
+          null,
+        ),
+      'attachments': _irl7ucsp.AttachmentsEndpoint()
+        ..initialize(
+          server,
+          'attachments',
           null,
         ),
       'technicians': _i7x07tna.TechniciansEndpoint()
@@ -1577,6 +1584,84 @@ class Endpoints extends _is.EndpointDispatch {
                 params['year'],
                 params['month'],
                 params['reason'],
+              ),
+        ),
+      },
+    );
+    connectors['attachments'] = _is.EndpointConnector(
+      name: 'attachments',
+      endpoint: endpoints['attachments']!,
+      methodConnectors: {
+        'uploadUrl': _is.MethodConnector(
+          name: 'uploadUrl',
+          params: {
+            'attachmentId': _is.ParameterDescription(
+              name: 'attachmentId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['attachments'] as _irl7ucsp.AttachmentsEndpoint).uploadUrl(
+                session,
+                params['attachmentId'],
+              ),
+        ),
+        'confirmUpload': _is.MethodConnector(
+          name: 'confirmUpload',
+          params: {
+            'attachmentId': _is.ParameterDescription(
+              name: 'attachmentId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['attachments'] as _irl7ucsp.AttachmentsEndpoint).confirmUpload(
+                session,
+                params['attachmentId'],
+              ),
+        ),
+        'ofWorkOrder': _is.MethodConnector(
+          name: 'ofWorkOrder',
+          params: {
+            'workOrderId': _is.ParameterDescription(
+              name: 'workOrderId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['attachments'] as _irl7ucsp.AttachmentsEndpoint).ofWorkOrder(
+                session,
+                params['workOrderId'],
+              ),
+        ),
+        'downloadUrl': _is.MethodConnector(
+          name: 'downloadUrl',
+          params: {
+            'attachmentId': _is.ParameterDescription(
+              name: 'attachmentId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['attachments'] as _irl7ucsp.AttachmentsEndpoint).downloadUrl(
+                session,
+                params['attachmentId'],
               ),
         ),
       },

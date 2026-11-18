@@ -43,7 +43,15 @@ abstract class Visit implements _is.SerializableModel, _is.ProtocolSerialization
     this.checkInJustification,
     bool? requireQrCheckIn,
     required this.version,
-  }) : requireQrCheckIn = requireQrCheckIn ?? false;
+    bool? requirePhotos,
+    bool? requireSignature,
+    this.signatureAttachmentId,
+    this.signerName,
+    this.signerRole,
+    this.signedAt,
+  }) : requireQrCheckIn = requireQrCheckIn ?? false,
+       requirePhotos = requirePhotos ?? false,
+       requireSignature = requireSignature ?? false;
 
   factory Visit({
     required _is.UuidValue id,
@@ -75,6 +83,12 @@ abstract class Visit implements _is.SerializableModel, _is.ProtocolSerialization
     String? checkInJustification,
     bool? requireQrCheckIn,
     required int version,
+    bool? requirePhotos,
+    bool? requireSignature,
+    _is.UuidValue? signatureAttachmentId,
+    String? signerName,
+    String? signerRole,
+    DateTime? signedAt,
   }) = _VisitImpl;
 
   factory Visit.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -120,6 +134,20 @@ abstract class Visit implements _is.SerializableModel, _is.ProtocolSerialization
           ? null
           : _is.BoolJsonExtension.fromJson(jsonSerialization['requireQrCheckIn']),
       version: jsonSerialization['version'] as int,
+      requirePhotos: jsonSerialization['requirePhotos'] == null
+          ? null
+          : _is.BoolJsonExtension.fromJson(jsonSerialization['requirePhotos']),
+      requireSignature: jsonSerialization['requireSignature'] == null
+          ? null
+          : _is.BoolJsonExtension.fromJson(jsonSerialization['requireSignature']),
+      signatureAttachmentId: jsonSerialization['signatureAttachmentId'] == null
+          ? null
+          : _is.UuidValueJsonExtension.fromJson(jsonSerialization['signatureAttachmentId']),
+      signerName: jsonSerialization['signerName'] as String?,
+      signerRole: jsonSerialization['signerRole'] as String?,
+      signedAt: jsonSerialization['signedAt'] == null
+          ? null
+          : _is.DateTimeJsonExtension.fromJson(jsonSerialization['signedAt']),
     );
   }
 
@@ -181,6 +209,18 @@ abstract class Visit implements _is.SerializableModel, _is.ProtocolSerialization
 
   int version;
 
+  bool requirePhotos;
+
+  bool requireSignature;
+
+  _is.UuidValue? signatureAttachmentId;
+
+  String? signerName;
+
+  String? signerRole;
+
+  DateTime? signedAt;
+
   /// Returns a shallow copy of this [Visit]
   /// with some or all fields replaced by the given arguments.
   @_is.useResult
@@ -214,6 +254,12 @@ abstract class Visit implements _is.SerializableModel, _is.ProtocolSerialization
     String? checkInJustification,
     bool? requireQrCheckIn,
     int? version,
+    bool? requirePhotos,
+    bool? requireSignature,
+    _is.UuidValue? signatureAttachmentId = const _is.$UndefinedUuidValue(),
+    String? signerName,
+    String? signerRole,
+    DateTime? signedAt = const _is.$UndefinedDateTime(),
   });
   @override
   Map<String, dynamic> toJson() {
@@ -248,6 +294,12 @@ abstract class Visit implements _is.SerializableModel, _is.ProtocolSerialization
       if (checkInJustification != null) 'checkInJustification': checkInJustification,
       'requireQrCheckIn': requireQrCheckIn,
       'version': version,
+      'requirePhotos': requirePhotos,
+      'requireSignature': requireSignature,
+      if (signatureAttachmentId != null) 'signatureAttachmentId': signatureAttachmentId?.toJson(),
+      if (signerName != null) 'signerName': signerName,
+      if (signerRole != null) 'signerRole': signerRole,
+      if (signedAt != null) 'signedAt': signedAt?.toJson(),
     };
   }
 
@@ -284,6 +336,12 @@ abstract class Visit implements _is.SerializableModel, _is.ProtocolSerialization
       if (checkInJustification != null) 'checkInJustification': checkInJustification,
       'requireQrCheckIn': requireQrCheckIn,
       'version': version,
+      'requirePhotos': requirePhotos,
+      'requireSignature': requireSignature,
+      if (signatureAttachmentId != null) 'signatureAttachmentId': signatureAttachmentId?.toJson(),
+      if (signerName != null) 'signerName': signerName,
+      if (signerRole != null) 'signerRole': signerRole,
+      if (signedAt != null) 'signedAt': signedAt?.toJson(),
     };
   }
 
@@ -326,6 +384,12 @@ class _VisitImpl extends Visit {
     String? checkInJustification,
     bool? requireQrCheckIn,
     required int version,
+    bool? requirePhotos,
+    bool? requireSignature,
+    _is.UuidValue? signatureAttachmentId,
+    String? signerName,
+    String? signerRole,
+    DateTime? signedAt,
   }) : super._(
          id: id,
          workOrderId: workOrderId,
@@ -356,6 +420,12 @@ class _VisitImpl extends Visit {
          checkInJustification: checkInJustification,
          requireQrCheckIn: requireQrCheckIn,
          version: version,
+         requirePhotos: requirePhotos,
+         requireSignature: requireSignature,
+         signatureAttachmentId: signatureAttachmentId,
+         signerName: signerName,
+         signerRole: signerRole,
+         signedAt: signedAt,
        );
 
   /// Returns a shallow copy of this [Visit]
@@ -392,6 +462,12 @@ class _VisitImpl extends Visit {
     Object? checkInJustification = _Undefined,
     bool? requireQrCheckIn,
     int? version,
+    bool? requirePhotos,
+    bool? requireSignature,
+    _is.UuidValue? signatureAttachmentId = const _is.$UndefinedUuidValue(),
+    Object? signerName = _Undefined,
+    Object? signerRole = _Undefined,
+    DateTime? signedAt = const _is.$UndefinedDateTime(),
   }) {
     return Visit(
       id: id ?? this.id,
@@ -423,6 +499,14 @@ class _VisitImpl extends Visit {
       checkInJustification: checkInJustification is String? ? checkInJustification : this.checkInJustification,
       requireQrCheckIn: requireQrCheckIn ?? this.requireQrCheckIn,
       version: version ?? this.version,
+      requirePhotos: requirePhotos ?? this.requirePhotos,
+      requireSignature: requireSignature ?? this.requireSignature,
+      signatureAttachmentId: signatureAttachmentId is _is.UndefinedSentinel
+          ? this.signatureAttachmentId
+          : signatureAttachmentId,
+      signerName: signerName is String? ? signerName : this.signerName,
+      signerRole: signerRole is String? ? signerRole : this.signerRole,
+      signedAt: signedAt is _is.UndefinedSentinel ? this.signedAt : signedAt,
     );
   }
 }

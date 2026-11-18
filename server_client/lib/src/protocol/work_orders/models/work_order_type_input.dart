@@ -21,6 +21,8 @@ abstract class WorkOrderTypeInput implements _isc.SerializableModel, _isc.Protoc
     required this.requiresAsset,
     required this.isActive,
     this.defaultChecklistTemplateId,
+    this.requirePhotos,
+    this.requireSignature,
   });
 
   factory WorkOrderTypeInput({
@@ -31,6 +33,8 @@ abstract class WorkOrderTypeInput implements _isc.SerializableModel, _isc.Protoc
     required bool requiresAsset,
     required bool isActive,
     _isc.UuidValue? defaultChecklistTemplateId,
+    bool? requirePhotos,
+    bool? requireSignature,
   }) = _WorkOrderTypeInputImpl;
 
   factory WorkOrderTypeInput.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -44,6 +48,12 @@ abstract class WorkOrderTypeInput implements _isc.SerializableModel, _isc.Protoc
       defaultChecklistTemplateId: jsonSerialization['defaultChecklistTemplateId'] == null
           ? null
           : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['defaultChecklistTemplateId']),
+      requirePhotos: jsonSerialization['requirePhotos'] == null
+          ? null
+          : _isc.BoolJsonExtension.fromJson(jsonSerialization['requirePhotos']),
+      requireSignature: jsonSerialization['requireSignature'] == null
+          ? null
+          : _isc.BoolJsonExtension.fromJson(jsonSerialization['requireSignature']),
     );
   }
 
@@ -61,6 +71,10 @@ abstract class WorkOrderTypeInput implements _isc.SerializableModel, _isc.Protoc
 
   _isc.UuidValue? defaultChecklistTemplateId;
 
+  bool? requirePhotos;
+
+  bool? requireSignature;
+
   /// Returns a shallow copy of this [WorkOrderTypeInput]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
@@ -72,6 +86,8 @@ abstract class WorkOrderTypeInput implements _isc.SerializableModel, _isc.Protoc
     bool? requiresAsset,
     bool? isActive,
     _isc.UuidValue? defaultChecklistTemplateId = const _isc.$UndefinedUuidValue(),
+    bool? requirePhotos,
+    bool? requireSignature,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -84,6 +100,8 @@ abstract class WorkOrderTypeInput implements _isc.SerializableModel, _isc.Protoc
       'requiresAsset': requiresAsset,
       'isActive': isActive,
       if (defaultChecklistTemplateId != null) 'defaultChecklistTemplateId': defaultChecklistTemplateId?.toJson(),
+      if (requirePhotos != null) 'requirePhotos': requirePhotos,
+      if (requireSignature != null) 'requireSignature': requireSignature,
     };
   }
 
@@ -98,6 +116,8 @@ abstract class WorkOrderTypeInput implements _isc.SerializableModel, _isc.Protoc
       'requiresAsset': requiresAsset,
       'isActive': isActive,
       if (defaultChecklistTemplateId != null) 'defaultChecklistTemplateId': defaultChecklistTemplateId?.toJson(),
+      if (requirePhotos != null) 'requirePhotos': requirePhotos,
+      if (requireSignature != null) 'requireSignature': requireSignature,
     };
   }
 
@@ -106,6 +126,8 @@ abstract class WorkOrderTypeInput implements _isc.SerializableModel, _isc.Protoc
     return _isc.SerializationManager.encode(this);
   }
 }
+
+class _Undefined {}
 
 class _WorkOrderTypeInputImpl extends WorkOrderTypeInput {
   _WorkOrderTypeInputImpl({
@@ -116,6 +138,8 @@ class _WorkOrderTypeInputImpl extends WorkOrderTypeInput {
     required bool requiresAsset,
     required bool isActive,
     _isc.UuidValue? defaultChecklistTemplateId,
+    bool? requirePhotos,
+    bool? requireSignature,
   }) : super._(
          code: code,
          name: name,
@@ -124,6 +148,8 @@ class _WorkOrderTypeInputImpl extends WorkOrderTypeInput {
          requiresAsset: requiresAsset,
          isActive: isActive,
          defaultChecklistTemplateId: defaultChecklistTemplateId,
+         requirePhotos: requirePhotos,
+         requireSignature: requireSignature,
        );
 
   /// Returns a shallow copy of this [WorkOrderTypeInput]
@@ -138,6 +164,8 @@ class _WorkOrderTypeInputImpl extends WorkOrderTypeInput {
     bool? requiresAsset,
     bool? isActive,
     _isc.UuidValue? defaultChecklistTemplateId = const _isc.$UndefinedUuidValue(),
+    Object? requirePhotos = _Undefined,
+    Object? requireSignature = _Undefined,
   }) {
     return WorkOrderTypeInput(
       code: code ?? this.code,
@@ -149,6 +177,8 @@ class _WorkOrderTypeInputImpl extends WorkOrderTypeInput {
       defaultChecklistTemplateId: defaultChecklistTemplateId is _isc.UndefinedSentinel
           ? this.defaultChecklistTemplateId
           : defaultChecklistTemplateId,
+      requirePhotos: requirePhotos is bool? ? requirePhotos : this.requirePhotos,
+      requireSignature: requireSignature is bool? ? requireSignature : this.requireSignature,
     );
   }
 }

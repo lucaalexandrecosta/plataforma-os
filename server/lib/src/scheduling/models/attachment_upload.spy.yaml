@@ -1,0 +1,8 @@
+# Destino do envio de um anexo (attachments.uploadUrl): PUT na url com o
+# Content-Type indicado, até expiresAt.
+class: AttachmentUpload
+fields:
+  attachmentId: UuidValue
+  url: String
+  contentType: String
+  expiresAt: DateTime

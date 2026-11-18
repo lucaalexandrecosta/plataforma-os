@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plataforma_os_backoffice/src/ui/common/format.dart';
+import 'package:plataforma_os_backoffice/src/ui/common/open_url.dart';
 import 'package:plataforma_os_client/plataforma_os_client.dart';
 import 'package:serverpod_client/serverpod_client.dart' show UuidValue;
 
@@ -166,5 +167,42 @@ void main() {
     expect(find.text('-18 °C'), findsOneWidget);
     expect(find.text('Não OK · Rasgada'), findsOneWidget);
     expect(find.text('Observações'), findsOneWidget);
+  });
+
+  testWidgets('detalhe da OS lista fotos e assinatura e abre o arquivo enviado', (tester) async {
+    final wo = FakeGateway.sample();
+    final opened = <String>[];
+    Attachment attachment(int n, String kind, String? stage, String status) => Attachment(
+      id: UuidValue.fromString('00000000-0000-4000-8003-00000000000$n'),
+      workOrderId: wo.id,
+      kind: kind,
+      photoStage: stage,
+      contentType: kind == 'signature' ? 'image/png' : 'image/jpeg',
+      uploadStatus: status,
+      capturedAt: DateTime.utc(2026, 11, 17, 13, n),
+      capturedByName: 'Eduardo Técnico',
+      createdAt: DateTime.utc(2026, 11, 17, 13, n),
+    );
+    final gateway = FakeGateway()
+      ..workOrderList.add(wo)
+      ..attachmentList.addAll([
+        attachment(1, 'photo', 'before', 'uploaded'),
+        attachment(2, 'photo', 'after', 'pending'),
+        attachment(3, 'signature', null, 'uploaded'),
+      ]);
+    await pumpApp(tester, gateway, overrides: [openUrlProvider.overrideWithValue(opened.add)]);
+    await login(tester);
+    await tester.tap(find.text('2026-000001'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Fotos e assinatura'), findsOneWidget);
+    expect(find.text('Foto de antes'), findsOneWidget);
+    expect(find.textContaining('aguardando envio do aparelho'), findsOneWidget);
+    expect(find.text('Assinatura'), findsOneWidget);
+    final first = find.byKey(const Key('attachment-00000000-0000-4000-8003-000000000001'));
+    await tester.ensureVisible(first);
+    await tester.tap(find.descendant(of: first, matching: find.text('Abrir')));
+    await tester.pumpAndSettle();
+    expect(opened, ['https://s3.example/00000000-0000-4000-8003-000000000001?sig=1']);
   });
 }

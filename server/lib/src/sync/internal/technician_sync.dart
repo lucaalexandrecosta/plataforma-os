@@ -30,6 +30,9 @@ abstract final class TechnicianSync {
   };
   static const checklistSubmit = 'checklist_response.submit';
 
+  /// Mutações que não mudam o status da visita (entityId ainda é a visita).
+  static const _otherTypes = {checklistSubmit, Attachments.registerType, Attachments.signatureType};
+
   /// Erros que dizem que o servidor mudou (e não que a ação era inválida).
   static const _conflictCodes = {'VERSION_MISMATCH', 'VISIT_CANCELLED', 'VISIT_REASSIGNED'};
 
@@ -106,18 +109,24 @@ abstract final class TechnicianSync {
         refuse('rejected', 'DEPENDENCY_FAILED', 'Uma ação anterior desta visita não foi aceita.'),
       );
     }
-    final isChecklist = m.type == checklistSubmit;
-    if (!isChecklist && !_visitTypes.contains(m.type)) {
+    if (!_visitTypes.contains(m.type) && !_otherTypes.contains(m.type)) {
       return recorded(refuse('rejected', 'UNKNOWN_TYPE', 'Ação desconhecida: ${m.type}.'));
     }
     VisitMutationPayload? payload;
     ChecklistSubmitPayload? checklist;
+    AttachmentRegisterPayload? attachment;
+    SignatureCapturePayload? signature;
     try {
       final json = jsonDecode(m.payload) as Map<String, dynamic>;
-      if (isChecklist) {
-        checklist = ChecklistSubmitPayload.fromJson(json);
-      } else {
-        payload = VisitMutationPayload.fromJson(json);
+      switch (m.type) {
+        case checklistSubmit:
+          checklist = ChecklistSubmitPayload.fromJson(json);
+        case Attachments.registerType:
+          attachment = AttachmentRegisterPayload.fromJson(json);
+        case Attachments.signatureType:
+          signature = SignatureCapturePayload.fromJson(json);
+        default:
+          payload = VisitMutationPayload.fromJson(json);
       }
     } on Object {
       return recorded(refuse('rejected', 'INVALID_PAYLOAD', 'Dados da ação ilegíveis.'));
@@ -134,18 +143,27 @@ abstract final class TechnicianSync {
     }
 
     try {
-      if (checklist != null) {
-        return await session.db.transaction((tx) async {
-          final saved = await ChecklistResponses.submit(session, visit, me.id, checklist!, tx);
-          final result = SyncMutationResult(
-            mutationId: m.mutationId,
-            status: 'applied',
-            visit: visit,
-            checklist: saved,
-          );
-          await _record(session, deviceId, me, m, result, tx);
-          return result;
+      Future<SyncMutationResult> apply(Future<SyncMutationResult> Function(Transaction tx) body) =>
+          session.db.transaction((tx) async {
+            final result = await body(tx);
+            await _record(session, deviceId, me, m, result, tx);
+            return result;
+          });
+      SyncMutationResult applied({Visit? updated, VisitChecklist? saved}) =>
+          SyncMutationResult(mutationId: m.mutationId, status: 'applied', visit: updated ?? visit, checklist: saved);
+      if (checklist case final c?) {
+        return await apply((tx) async => applied(saved: await ChecklistResponses.submit(session, visit, me.id, c, tx)));
+      }
+      if (attachment case final a?) {
+        return await apply((tx) async {
+          await Attachments.register(session, visit, me.id, a, tx);
+          return applied();
         });
+      }
+      if (signature case final sig?) {
+        return await apply(
+          (tx) async => applied(updated: await Attachments.captureSignature(session, visit, sig, tx)),
+        );
       }
       final p = payload!;
       return await session.db.transaction((tx) async {

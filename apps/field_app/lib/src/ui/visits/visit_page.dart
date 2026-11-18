@@ -7,7 +7,9 @@ import 'package:serverpod_client/serverpod_client.dart' show UuidValue;
 import '../../api/gateway.dart';
 import '../../device/device.dart';
 import '../../labels.dart';
+import '../../local/attachment_rules.dart';
 import '../../local/checklist_rules.dart';
+import '../../local/database.dart';
 import '../../local/field_store.dart';
 import '../../local/providers.dart';
 import '../../local/visit_rules.dart';
@@ -140,6 +142,19 @@ class _VisitPageState extends ConsumerState<VisitPage> {
     await _run(visit, VisitMutation.checkIn, payload: input(justification), done: 'Check-in registrado.');
   }
 
+  Future<void> _photo(Visit visit, String stage) async {
+    final store = ref.read(storeProvider);
+    if (store == null || _busy) return;
+    try {
+      final bytes = await ref.read(deviceProvider).takePhoto();
+      if (bytes == null || !mounted) return;
+      await store.addPhoto(visit, stage, bytes);
+      if (mounted) _snack('Foto de ${label(photoStageLabels, stage).toLowerCase()} salva.');
+    } on GatewayException catch (e) {
+      if (mounted) reportError(context, ref, e);
+    }
+  }
+
   Future<void> _finish(Visit visit) async {
     final checkedIn = const {'on_site', 'paused'}.contains(visit.status);
     final input = await askFinish(context, checkedIn: checkedIn);
@@ -197,6 +212,14 @@ class _VisitPageState extends ConsumerState<VisitPage> {
                               ),
                               null => const SizedBox.shrink(),
                             },
+                          ),
+                          const SizedBox(height: 8),
+                          _EvidenceCard(
+                            visit: visit,
+                            attachments: store.watchAttachments(visit.id),
+                            busy: _busy,
+                            onPhoto: (stage) => _photo(visit, stage),
+                            onSign: () => context.push('/agenda/visita/${visit.id}/assinatura'),
                           ),
                           const SizedBox(height: 8),
                           _Details(visit: visit, wo: woSnap.data),
@@ -358,6 +381,149 @@ class _ChecklistCard extends StatelessWidget {
         trailing: const Icon(Icons.chevron_right),
         onTap: onOpen,
       ),
+    );
+  }
+}
+
+/// Fotos (antes, depois, evidência) e assinatura da visita, com o que o
+/// tipo de OS exige e a situação do envio de cada arquivo.
+class _EvidenceCard extends StatelessWidget {
+  const _EvidenceCard({
+    required this.visit,
+    required this.attachments,
+    required this.busy,
+    required this.onPhoto,
+    required this.onSign,
+  });
+
+  final Visit visit;
+  final Stream<List<LocalAttachment>> attachments;
+  final bool busy;
+  final ValueChanged<String> onPhoto;
+  final VoidCallback onSign;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final open = const {'on_site', 'paused'}.contains(visit.status);
+    final required = [
+      if (visit.requirePhotos) '1 foto de antes e 1 de depois',
+      if (visit.requireSignature) 'assinatura',
+    ];
+    return StreamBuilder<List<LocalAttachment>>(
+      stream: attachments,
+      builder: (context, snap) {
+        final all = snap.data ?? const <LocalAttachment>[];
+        final photos = [
+          for (final a in all)
+            if (a.kind == 'photo' && a.status != attachmentFailed) a,
+        ];
+        if (!open && photos.isEmpty && visit.signerName == null) return const SizedBox.shrink();
+        return Card(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              key: const Key('evidence-card'),
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text('Fotos e assinatura', style: theme.textTheme.titleMedium),
+                if (required.isNotEmpty)
+                  Text(
+                    'Obrigatório para concluir: ${required.join(' e ')}.',
+                    style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+                  ),
+                if (photos.isNotEmpty) ...[
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [for (final p in photos) _Thumb(attachment: p)],
+                  ),
+                ],
+                if (open) ...[
+                  const SizedBox(height: 12),
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children: [
+                      for (final MapEntry(:key, :value) in photoStageLabels.entries)
+                        OutlinedButton.icon(
+                          key: Key('photo-$key'),
+                          onPressed: busy ? null : () => onPhoto(key),
+                          icon: const Icon(Icons.photo_camera_outlined),
+                          label: Text(value),
+                        ),
+                    ],
+                  ),
+                ],
+                const SizedBox(height: 8),
+                if (visit.signerName case final name?)
+                  ListTile(
+                    key: const Key('signed'),
+                    contentPadding: EdgeInsets.zero,
+                    leading: const Icon(Icons.draw),
+                    title: Text('Assinado por $name'),
+                    subtitle: Text(
+                      [label(signerRoleLabels, visit.signerRole), formatDateTime(visit.signedAt)].join(' · '),
+                    ),
+                  )
+                else if (open)
+                  FilledButton.tonalIcon(
+                    key: const Key('act-sign'),
+                    onPressed: busy ? null : onSign,
+                    icon: const Icon(Icons.draw),
+                    label: const Text('Coletar assinatura'),
+                  ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _Thumb extends StatelessWidget {
+  const _Thumb({required this.attachment});
+
+  final LocalAttachment attachment;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final uploaded = attachment.status == attachmentUploaded;
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        ClipRRect(
+          borderRadius: BorderRadius.circular(6),
+          child: Image.memory(
+            attachment.bytes,
+            width: 84,
+            height: 84,
+            fit: BoxFit.cover,
+            errorBuilder: (_, _, _) => Container(
+              width: 84,
+              height: 84,
+              color: theme.colorScheme.surfaceContainerHighest,
+              child: const Icon(Icons.image_outlined),
+            ),
+          ),
+        ),
+        const SizedBox(height: 2),
+        Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              uploaded ? Icons.cloud_done_outlined : Icons.cloud_upload_outlined,
+              size: 14,
+              color: uploaded ? theme.colorScheme.primary : theme.colorScheme.tertiary,
+            ),
+            const SizedBox(width: 2),
+            Text(label(photoStageLabels, attachment.photoStage), style: theme.textTheme.labelSmall),
+          ],
+        ),
+      ],
     );
   }
 }

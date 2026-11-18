@@ -22,6 +22,7 @@ import 'package:plataforma_os_client/src/protocol/customers/models/customer_site
 import 'package:plataforma_os_client/src/protocol/identity_access/models/assignable_role.dart' as _i2g1699a;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/tenant_user.dart' as _i8ihd43z;
 import 'package:plataforma_os_client/src/protocol/patrimony/models/depreciation_closing.dart' as _iqiiy4eg;
+import 'package:plataforma_os_client/src/protocol/scheduling/models/attachment.dart' as _ixilyq04;
 import 'package:plataforma_os_client/src/protocol/scheduling/models/technician.dart' as _ikjr2b9x;
 import 'package:plataforma_os_client/src/protocol/scheduling/models/visit.dart' as _isvtjvq7;
 import 'package:plataforma_os_client/src/protocol/scheduling/models/visit_checklist.dart' as _is9a6d8i;
@@ -75,6 +76,8 @@ import 'patrimony/models/depreciation_profile_input.dart' as _icy94czf;
 import 'platform/errors/models/api_exception.dart' as _i147o0qx;
 import 'platform/errors/models/error_category.dart' as _i0p9y4c3;
 import 'platform/errors/models/field_error.dart' as _i3z3bgdl;
+import 'scheduling/models/attachment.dart' as _ixse5dbv;
+import 'scheduling/models/attachment_upload.dart' as _i0uwdt0o;
 import 'scheduling/models/checklist_answer.dart' as _ivf2vzay;
 import 'scheduling/models/checklist_response.dart' as _in3mx861;
 import 'scheduling/models/technician.dart' as _isgl9bus;
@@ -84,8 +87,10 @@ import 'scheduling/models/visit_check_in.dart' as _iz6dmpx4;
 import 'scheduling/models/visit_checklist.dart' as _itpro5gd;
 import 'scheduling/models/visit_finish.dart' as _iemqddjv;
 import 'scheduling/models/visit_input.dart' as _iqwjilz9;
+import 'sync/models/attachment_register_payload.dart' as _in92r7xb;
 import 'sync/models/checklist_submit_payload.dart' as _iwnyyer3;
 import 'sync/models/device_registration.dart' as _iqd8b9b2;
+import 'sync/models/signature_capture_payload.dart' as _i4ree4vr;
 import 'sync/models/sync_mutation.dart' as _i8kxdcd0;
 import 'sync/models/sync_mutation_result.dart' as _ihyj8e8a;
 import 'sync/models/sync_pull_result.dart' as _iweo9dks;
@@ -148,6 +153,8 @@ export 'patrimony/models/depreciation_profile_input.dart';
 export 'platform/errors/models/api_exception.dart';
 export 'platform/errors/models/error_category.dart';
 export 'platform/errors/models/field_error.dart';
+export 'scheduling/models/attachment.dart';
+export 'scheduling/models/attachment_upload.dart';
 export 'scheduling/models/checklist_answer.dart';
 export 'scheduling/models/checklist_response.dart';
 export 'scheduling/models/technician.dart';
@@ -157,8 +164,10 @@ export 'scheduling/models/visit_check_in.dart';
 export 'scheduling/models/visit_checklist.dart';
 export 'scheduling/models/visit_finish.dart';
 export 'scheduling/models/visit_input.dart';
+export 'sync/models/attachment_register_payload.dart';
 export 'sync/models/checklist_submit_payload.dart';
 export 'sync/models/device_registration.dart';
+export 'sync/models/signature_capture_payload.dart';
 export 'sync/models/sync_mutation.dart';
 export 'sync/models/sync_mutation_result.dart';
 export 'sync/models/sync_pull_result.dart';
@@ -234,6 +243,8 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<_i147o0qx.ApiException>,
       _isc.getType<_i0p9y4c3.ErrorCategory>,
       _isc.getType<_i3z3bgdl.FieldError>,
+      _isc.getType<_ixse5dbv.Attachment>,
+      _isc.getType<_i0uwdt0o.AttachmentUpload>,
       _isc.getType<_ivf2vzay.ChecklistAnswer>,
       _isc.getType<_in3mx861.ChecklistResponse>,
       _isc.getType<_isgl9bus.Technician>,
@@ -243,8 +254,10 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<_itpro5gd.VisitChecklist>,
       _isc.getType<_iemqddjv.VisitFinish>,
       _isc.getType<_iqwjilz9.VisitInput>,
+      _isc.getType<_in92r7xb.AttachmentRegisterPayload>,
       _isc.getType<_iwnyyer3.ChecklistSubmitPayload>,
       _isc.getType<_iqd8b9b2.DeviceRegistration>,
+      _isc.getType<_i4ree4vr.SignatureCapturePayload>,
       _isc.getType<_i8kxdcd0.SyncMutation>,
       _isc.getType<_ihyj8e8a.SyncMutationResult>,
       _isc.getType<_iweo9dks.SyncPullResult>,
@@ -307,6 +320,8 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<_i147o0qx.ApiException?>,
       _isc.getType<_i0p9y4c3.ErrorCategory?>,
       _isc.getType<_i3z3bgdl.FieldError?>,
+      _isc.getType<_ixse5dbv.Attachment?>,
+      _isc.getType<_i0uwdt0o.AttachmentUpload?>,
       _isc.getType<_ivf2vzay.ChecklistAnswer?>,
       _isc.getType<_in3mx861.ChecklistResponse?>,
       _isc.getType<_isgl9bus.Technician?>,
@@ -316,8 +331,10 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<_itpro5gd.VisitChecklist?>,
       _isc.getType<_iemqddjv.VisitFinish?>,
       _isc.getType<_iqwjilz9.VisitInput?>,
+      _isc.getType<_in92r7xb.AttachmentRegisterPayload?>,
       _isc.getType<_iwnyyer3.ChecklistSubmitPayload?>,
       _isc.getType<_iqd8b9b2.DeviceRegistration?>,
+      _isc.getType<_i4ree4vr.SignatureCapturePayload?>,
       _isc.getType<_i8kxdcd0.SyncMutation?>,
       _isc.getType<_ihyj8e8a.SyncMutationResult?>,
       _isc.getType<_iweo9dks.SyncPullResult?>,
@@ -370,6 +387,7 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<List<_i8ihd43z.TenantUser>>,
       _isc.getType<List<String>>,
       _isc.getType<List<_iqiiy4eg.DepreciationClosing>>,
+      _isc.getType<List<_ixilyq04.Attachment>>,
       _isc.getType<List<_ikjr2b9x.Technician>>,
       _isc.getType<List<_isvtjvq7.Visit>>,
       _isc.getType<List<_is9a6d8i.VisitChecklist>>,
@@ -426,6 +444,8 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       'ApiException',
       'ErrorCategory',
       'FieldError',
+      'Attachment',
+      'AttachmentUpload',
       'ChecklistAnswer',
       'ChecklistResponse',
       'Technician',
@@ -435,8 +455,10 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       'VisitChecklist',
       'VisitFinish',
       'VisitInput',
+      'AttachmentRegisterPayload',
       'ChecklistSubmitPayload',
       'DeviceRegistration',
+      'SignatureCapturePayload',
       'SyncMutation',
       'SyncMutationResult',
       'SyncPullResult',
@@ -609,6 +631,12 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     if (t == _i3z3bgdl.FieldError) {
       return _i3z3bgdl.FieldError.fromJson(data) as T;
     }
+    if (t == _ixse5dbv.Attachment) {
+      return _ixse5dbv.Attachment.fromJson(data) as T;
+    }
+    if (t == _i0uwdt0o.AttachmentUpload) {
+      return _i0uwdt0o.AttachmentUpload.fromJson(data) as T;
+    }
     if (t == _ivf2vzay.ChecklistAnswer) {
       return _ivf2vzay.ChecklistAnswer.fromJson(data) as T;
     }
@@ -636,11 +664,17 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     if (t == _iqwjilz9.VisitInput) {
       return _iqwjilz9.VisitInput.fromJson(data) as T;
     }
+    if (t == _in92r7xb.AttachmentRegisterPayload) {
+      return _in92r7xb.AttachmentRegisterPayload.fromJson(data) as T;
+    }
     if (t == _iwnyyer3.ChecklistSubmitPayload) {
       return _iwnyyer3.ChecklistSubmitPayload.fromJson(data) as T;
     }
     if (t == _iqd8b9b2.DeviceRegistration) {
       return _iqd8b9b2.DeviceRegistration.fromJson(data) as T;
+    }
+    if (t == _i4ree4vr.SignatureCapturePayload) {
+      return _i4ree4vr.SignatureCapturePayload.fromJson(data) as T;
     }
     if (t == _i8kxdcd0.SyncMutation) {
       return _i8kxdcd0.SyncMutation.fromJson(data) as T;
@@ -828,6 +862,12 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     if (t == _isc.getType<_i3z3bgdl.FieldError?>()) {
       return (data != null ? _i3z3bgdl.FieldError.fromJson(data) : null) as T;
     }
+    if (t == _isc.getType<_ixse5dbv.Attachment?>()) {
+      return (data != null ? _ixse5dbv.Attachment.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i0uwdt0o.AttachmentUpload?>()) {
+      return (data != null ? _i0uwdt0o.AttachmentUpload.fromJson(data) : null) as T;
+    }
     if (t == _isc.getType<_ivf2vzay.ChecklistAnswer?>()) {
       return (data != null ? _ivf2vzay.ChecklistAnswer.fromJson(data) : null) as T;
     }
@@ -855,11 +895,17 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     if (t == _isc.getType<_iqwjilz9.VisitInput?>()) {
       return (data != null ? _iqwjilz9.VisitInput.fromJson(data) : null) as T;
     }
+    if (t == _isc.getType<_in92r7xb.AttachmentRegisterPayload?>()) {
+      return (data != null ? _in92r7xb.AttachmentRegisterPayload.fromJson(data) : null) as T;
+    }
     if (t == _isc.getType<_iwnyyer3.ChecklistSubmitPayload?>()) {
       return (data != null ? _iwnyyer3.ChecklistSubmitPayload.fromJson(data) : null) as T;
     }
     if (t == _isc.getType<_iqd8b9b2.DeviceRegistration?>()) {
       return (data != null ? _iqd8b9b2.DeviceRegistration.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i4ree4vr.SignatureCapturePayload?>()) {
+      return (data != null ? _i4ree4vr.SignatureCapturePayload.fromJson(data) : null) as T;
     }
     if (t == _isc.getType<_i8kxdcd0.SyncMutation?>()) {
       return (data != null ? _i8kxdcd0.SyncMutation.fromJson(data) : null) as T;
@@ -1020,6 +1066,9 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     if (t == List<_iqiiy4eg.DepreciationClosing>) {
       return (data as List).map((e) => deserialize<_iqiiy4eg.DepreciationClosing>(e)).toList() as T;
     }
+    if (t == List<_ixilyq04.Attachment>) {
+      return (data as List).map((e) => deserialize<_ixilyq04.Attachment>(e)).toList() as T;
+    }
     if (t == List<_ikjr2b9x.Technician>) {
       return (data as List).map((e) => deserialize<_ikjr2b9x.Technician>(e)).toList() as T;
     }
@@ -1101,6 +1150,8 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _i147o0qx.ApiException => 'ApiException',
       _i0p9y4c3.ErrorCategory => 'ErrorCategory',
       _i3z3bgdl.FieldError => 'FieldError',
+      _ixse5dbv.Attachment => 'Attachment',
+      _i0uwdt0o.AttachmentUpload => 'AttachmentUpload',
       _ivf2vzay.ChecklistAnswer => 'ChecklistAnswer',
       _in3mx861.ChecklistResponse => 'ChecklistResponse',
       _isgl9bus.Technician => 'Technician',
@@ -1110,8 +1161,10 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _itpro5gd.VisitChecklist => 'VisitChecklist',
       _iemqddjv.VisitFinish => 'VisitFinish',
       _iqwjilz9.VisitInput => 'VisitInput',
+      _in92r7xb.AttachmentRegisterPayload => 'AttachmentRegisterPayload',
       _iwnyyer3.ChecklistSubmitPayload => 'ChecklistSubmitPayload',
       _iqd8b9b2.DeviceRegistration => 'DeviceRegistration',
+      _i4ree4vr.SignatureCapturePayload => 'SignatureCapturePayload',
       _i8kxdcd0.SyncMutation => 'SyncMutation',
       _ihyj8e8a.SyncMutationResult => 'SyncMutationResult',
       _iweo9dks.SyncPullResult => 'SyncPullResult',
@@ -1230,6 +1283,10 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
         return 'ErrorCategory';
       case _i3z3bgdl.FieldError():
         return 'FieldError';
+      case _ixse5dbv.Attachment():
+        return 'Attachment';
+      case _i0uwdt0o.AttachmentUpload():
+        return 'AttachmentUpload';
       case _ivf2vzay.ChecklistAnswer():
         return 'ChecklistAnswer';
       case _in3mx861.ChecklistResponse():
@@ -1248,10 +1305,14 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
         return 'VisitFinish';
       case _iqwjilz9.VisitInput():
         return 'VisitInput';
+      case _in92r7xb.AttachmentRegisterPayload():
+        return 'AttachmentRegisterPayload';
       case _iwnyyer3.ChecklistSubmitPayload():
         return 'ChecklistSubmitPayload';
       case _iqd8b9b2.DeviceRegistration():
         return 'DeviceRegistration';
+      case _i4ree4vr.SignatureCapturePayload():
+        return 'SignatureCapturePayload';
       case _i8kxdcd0.SyncMutation():
         return 'SyncMutation';
       case _ihyj8e8a.SyncMutationResult():
@@ -1436,6 +1497,12 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     if (dataClassName == 'FieldError') {
       return deserialize<_i3z3bgdl.FieldError>(data['data']);
     }
+    if (dataClassName == 'Attachment') {
+      return deserialize<_ixse5dbv.Attachment>(data['data']);
+    }
+    if (dataClassName == 'AttachmentUpload') {
+      return deserialize<_i0uwdt0o.AttachmentUpload>(data['data']);
+    }
     if (dataClassName == 'ChecklistAnswer') {
       return deserialize<_ivf2vzay.ChecklistAnswer>(data['data']);
     }
@@ -1463,11 +1530,17 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     if (dataClassName == 'VisitInput') {
       return deserialize<_iqwjilz9.VisitInput>(data['data']);
     }
+    if (dataClassName == 'AttachmentRegisterPayload') {
+      return deserialize<_in92r7xb.AttachmentRegisterPayload>(data['data']);
+    }
     if (dataClassName == 'ChecklistSubmitPayload') {
       return deserialize<_iwnyyer3.ChecklistSubmitPayload>(data['data']);
     }
     if (dataClassName == 'DeviceRegistration') {
       return deserialize<_iqd8b9b2.DeviceRegistration>(data['data']);
+    }
+    if (dataClassName == 'SignatureCapturePayload') {
+      return deserialize<_i4ree4vr.SignatureCapturePayload>(data['data']);
     }
     if (dataClassName == 'SyncMutation') {
       return deserialize<_i8kxdcd0.SyncMutation>(data['data']);

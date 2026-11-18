@@ -1,6 +1,9 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../api/gateway.dart';
 import 'qr_scanner_page.dart';
@@ -17,6 +20,10 @@ abstract interface class Device {
 
   /// Abre o leitor e devolve o conteúdo do QR, ou nulo se a pessoa voltar.
   Future<String?> scanQr(BuildContext context);
+
+  /// Tira uma foto pela câmera (não pela galeria, docs/06 §5.12), já
+  /// reduzida a 1920 px no lado maior e em JPEG ~75%. Nulo se a pessoa voltar.
+  Future<Uint8List?> takePhoto();
 }
 
 final deviceProvider = Provider<Device>((ref) => const PhoneDevice());
@@ -41,6 +48,21 @@ class PhoneDevice implements Device {
       return (latitude: p.latitude, longitude: p.longitude, accuracyM: p.accuracy);
     } on Exception {
       throw const GatewayException('Não consegui a posição do GPS. Tente de novo em local aberto.');
+    }
+  }
+
+  @override
+  Future<Uint8List?> takePhoto() async {
+    try {
+      final file = await ImagePicker().pickImage(
+        source: ImageSource.camera,
+        maxWidth: 1920,
+        maxHeight: 1920,
+        imageQuality: 75,
+      );
+      return await file?.readAsBytes();
+    } on Exception {
+      throw const GatewayException('Não consegui abrir a câmera. Confira a permissão do app.');
     }
   }
 

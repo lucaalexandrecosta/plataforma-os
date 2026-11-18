@@ -408,6 +408,14 @@ class ServerGateway implements Gateway {
   Future<List<Visit>> visitsOfWorkOrder(UuidValue workOrderId) => _guard(() => _tenant.visits.ofWorkOrder(workOrderId));
 
   @override
+  Future<List<Attachment>> attachmentsOfWorkOrder(UuidValue workOrderId) =>
+      _guard(() => _tenant.attachments.ofWorkOrder(workOrderId));
+
+  @override
+  Future<String> attachmentDownloadUrl(UuidValue attachmentId) =>
+      _guard(() => _tenant.attachments.downloadUrl(attachmentId));
+
+  @override
   Future<List<VisitChecklist>> checklistsOfWorkOrder(UuidValue workOrderId) =>
       _guard(() => _tenant.visits.checklistsOfWorkOrder(workOrderId));
 

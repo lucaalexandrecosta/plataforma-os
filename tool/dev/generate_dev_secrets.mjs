@@ -44,12 +44,21 @@ development:
   redis: ''
   serviceSecret: '${secret()}'
   tokenIssuer: 'http://localhost:8080'
+  # Object storage local (RustFS do infra/local/compose.yaml).
+  s3Endpoint: 'http://localhost:9000'
+  s3Bucket: 'plataforma-os-dev'
+  s3AccessKey: 's3-dev'
+  s3SecretKey: 's3-dev-password'
 
 test:
   database: 'dev'
   redis: ''
   serviceSecret: '${secret()}'
   tokenIssuer: 'http://localhost:9080'
+  s3Endpoint: 'http://localhost:9000'
+  s3Bucket: 'plataforma-os-test'
+  s3AccessKey: 's3-dev'
+  s3SecretKey: 's3-dev-password'
 `
 
 fs.writeFileSync(target, yaml)

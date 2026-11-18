@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:plataforma_os_client/plataforma_os_client.dart';
 import 'package:plataforma_os_field/src/api/gateway.dart';
+import 'package:plataforma_os_field/src/local/attachment_rules.dart';
 import 'package:plataforma_os_field/src/local/checklist_rules.dart';
 import 'package:plataforma_os_field/src/local/visit_rules.dart';
 import 'package:serverpod_client/serverpod_client.dart' show UuidValue;
@@ -40,6 +41,12 @@ class FakeGateway implements Gateway {
   /// Estado do servidor.
   final visits = <Visit>[];
   final workOrders = <UuidValue, WorkOrder>{};
+
+  /// Anexos registrados (por id) e arquivos recebidos pelo "armazenamento".
+  final attachments = <UuidValue, AttachmentRegisterPayload>{};
+  final attachmentVisits = <UuidValue, UuidValue>{};
+  final storedFiles = <UuidValue, List<int>>{};
+  final confirmed = <UuidValue>{};
 
   /// Checklist de cada visita (por id da visita).
   final checklists = <UuidValue, VisitChecklist>{};
@@ -103,6 +110,8 @@ class FakeGateway implements Gateway {
     String priority = 'normal',
     bool asset = true,
     bool requireQr = false,
+    bool requirePhotos = false,
+    bool requireSignature = false,
   }) {
     final woId = UuidValue.fromString('00000000-0000-4000-8000-${n.toString().padLeft(12, '0')}');
     final number = '2026-${n.toString().padLeft(6, '0')}';
@@ -147,6 +156,8 @@ class FakeGateway implements Gateway {
         scheduledEnd: start.add(const Duration(hours: 2)).toUtc(),
         checkInOffSite: false,
         requireQrCheckIn: requireQr,
+        requirePhotos: requirePhotos,
+        requireSignature: requireSignature,
         version: 1,
       ),
     );
@@ -276,6 +287,16 @@ class FakeGateway implements Gateway {
         );
       } else if (m.type == checklistSubmitType) {
         result = _submitChecklist(m, visit);
+      } else if (m.type == attachmentRegisterType) {
+        final p = AttachmentRegisterPayload.fromJson(jsonDecode(m.payload) as Map<String, dynamic>);
+        attachments[p.attachmentId] = p;
+        attachmentVisits[p.attachmentId] = visit.id;
+        result = SyncMutationResult(mutationId: m.mutationId, status: 'applied', visit: visit);
+      } else if (m.type == signatureCaptureType) {
+        final p = SignatureCapturePayload.fromJson(jsonDecode(m.payload) as Map<String, dynamic>);
+        final updated = applySignature(visit, p).copyWith(version: visit.version + 1);
+        visits[i] = updated;
+        result = SyncMutationResult(mutationId: m.mutationId, status: 'applied', visit: updated);
       } else {
         final payload = VisitMutationPayload.fromJson(jsonDecode(m.payload) as Map<String, dynamic>);
         try {
@@ -285,6 +306,15 @@ class FakeGateway implements Gateway {
               checklist != null &&
               checklist.response?.status != 'submitted') {
             throw const GatewayException('Envie o checklist antes de concluir a visita.', code: 'CHECKLIST_REQUIRED');
+          }
+          if (m.type == VisitMutation.finish && payload.finish?.outcome == 'resolved') {
+            final stages = [
+              for (final e in attachments.entries)
+                if (attachmentVisits[e.key] == visit.id && e.value.kind == 'photo') e.value.photoStage,
+            ];
+            if (missingEvidence(visit, stages) case final missing?) {
+              throw GatewayException(missing, code: 'EVIDENCE_REQUIRED');
+            }
           }
           final scanned = payload.checkIn?.scannedCode;
           if (m.type == VisitMutation.checkIn && payload.checkIn?.method == 'qr' && scanned != assetQr) {
@@ -355,5 +385,51 @@ class FakeGateway implements Gateway {
     );
     checklists[visit.id] = saved;
     return SyncMutationResult(mutationId: m.mutationId, status: 'applied', visit: visit, checklist: saved);
+  }
+
+  // ----------------------------------------------------------- anexos
+  @override
+  Future<AttachmentUpload> attachmentUploadUrl(UuidValue attachmentId) async {
+    _maybeFail('attachmentUploadUrl');
+    _network();
+    final a = attachments[attachmentId] ?? (throw const GatewayException('Não encontrado.', code: 'NOT_FOUND'));
+    if (confirmed.contains(attachmentId)) {
+      throw const GatewayException('Este arquivo já foi enviado.', code: 'ALREADY_UPLOADED');
+    }
+    return AttachmentUpload(
+      attachmentId: attachmentId,
+      url: 'https://s3.example/$attachmentId',
+      contentType: a.contentType,
+      expiresAt: DateTime.now().toUtc().add(const Duration(minutes: 15)),
+    );
+  }
+
+  @override
+  Future<void> uploadFile(AttachmentUpload target, List<int> bytes) async {
+    _maybeFail('uploadFile');
+    _network();
+    storedFiles[target.attachmentId] = bytes;
+  }
+
+  @override
+  Future<Attachment> confirmAttachmentUpload(UuidValue attachmentId) async {
+    _maybeFail('confirmAttachmentUpload');
+    _network();
+    final a = attachments[attachmentId]!;
+    final bytes = storedFiles[attachmentId];
+    if (bytes == null || bytes.length != a.sizeBytes) {
+      throw const GatewayException('O arquivo ainda não chegou ao servidor.', code: 'UPLOAD_MISSING');
+    }
+    confirmed.add(attachmentId);
+    return Attachment(
+      id: attachmentId,
+      visitId: attachmentVisits[attachmentId],
+      kind: a.kind,
+      photoStage: a.photoStage,
+      contentType: a.contentType,
+      sizeBytes: a.sizeBytes,
+      uploadStatus: 'uploaded',
+      createdAt: DateTime.now().toUtc(),
+    );
   }
 }

@@ -9,3 +9,6 @@ fields:
   isActive: bool
   # Checklist publicado (opcional).
   defaultChecklistTemplateId: UuidValue?
+  # Obrigatoriedades ao concluir como resolvida (padrão: não exige).
+  requirePhotos: bool?
+  requireSignature: bool?

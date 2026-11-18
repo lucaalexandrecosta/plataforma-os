@@ -43,6 +43,8 @@ import 'package:plataforma_os_server/src/generated/patrimony/models/depreciation
 import 'package:plataforma_os_server/src/generated/patrimony/models/depreciation_position.dart' as _ijwc67wv;
 import 'package:plataforma_os_server/src/generated/patrimony/models/depreciation_profile.dart' as _idh96kkc;
 import 'package:plataforma_os_server/src/generated/patrimony/models/depreciation_profile_input.dart' as _ims07aom;
+import 'package:plataforma_os_server/src/generated/scheduling/models/attachment.dart' as _i1mnl54w;
+import 'package:plataforma_os_server/src/generated/scheduling/models/attachment_upload.dart' as _ilvlsl3h;
 import 'package:plataforma_os_server/src/generated/scheduling/models/technician.dart' as _ixvhwnkq;
 import 'package:plataforma_os_server/src/generated/scheduling/models/technician_input.dart' as _i4g4d70s;
 import 'package:plataforma_os_server/src/generated/scheduling/models/visit.dart' as _iezjjcq0;
@@ -224,6 +226,8 @@ class TestEndpoints {
 
   late final _DepreciationEndpoint depreciation;
 
+  late final _AttachmentsEndpoint attachments;
+
   late final _TechniciansEndpoint technicians;
 
   late final _VisitsEndpoint visits;
@@ -284,6 +288,10 @@ class _InternalTestEndpoints extends TestEndpoints implements _ist.InternalTestE
       serializationManager,
     );
     depreciation = _DepreciationEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    attachments = _AttachmentsEndpoint(
       endpoints,
       serializationManager,
     );
@@ -2449,6 +2457,137 @@ class _DepreciationEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<_ip56mlnh.DepreciationClosing>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
+class _AttachmentsEndpoint {
+  _AttachmentsEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _is.EndpointDispatch _endpointDispatch;
+
+  final _is.SerializationManager _serializationManager;
+
+  _ida.Future<_ilvlsl3h.AttachmentUpload> uploadUrl(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue attachmentId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'attachments',
+        method: 'uploadUrl',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'attachments',
+          methodName: 'uploadUrl',
+          parameters: _ist.testObjectToJson({'attachmentId': attachmentId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_ilvlsl3h.AttachmentUpload>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_i1mnl54w.Attachment> confirmUpload(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue attachmentId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'attachments',
+        method: 'confirmUpload',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'attachments',
+          methodName: 'confirmUpload',
+          parameters: _ist.testObjectToJson({'attachmentId': attachmentId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_i1mnl54w.Attachment>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_i1mnl54w.Attachment>> ofWorkOrder(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue workOrderId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'attachments',
+        method: 'ofWorkOrder',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'attachments',
+          methodName: 'ofWorkOrder',
+          parameters: _ist.testObjectToJson({'workOrderId': workOrderId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_i1mnl54w.Attachment>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<String> downloadUrl(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue attachmentId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'attachments',
+        method: 'downloadUrl',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'attachments',
+          methodName: 'downloadUrl',
+          parameters: _ist.testObjectToJson({'attachmentId': attachmentId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<String>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

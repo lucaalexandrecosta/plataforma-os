@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_riverpod/misc.dart' show Override;
 import 'package:flutter_test/flutter_test.dart';
 import 'package:plataforma_os_backoffice/src/api/gateway.dart';
 import 'package:plataforma_os_backoffice/src/app.dart';
@@ -7,12 +8,15 @@ import 'package:plataforma_os_backoffice/src/session/session.dart';
 
 import 'fake_gateway.dart';
 
-Future<void> pumpApp(WidgetTester tester, FakeGateway gateway) async {
+Future<void> pumpApp(WidgetTester tester, FakeGateway gateway, {List<Override> overrides = const []}) async {
   tester.view.physicalSize = const Size(1400, 900);
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
   await tester.pumpWidget(
-    ProviderScope(overrides: [gatewayProvider.overrideWithValue(gateway)], child: const BackofficeApp()),
+    ProviderScope(
+      overrides: [gatewayProvider.overrideWithValue(gateway), ...overrides],
+      child: const BackofficeApp(),
+    ),
   );
   await tester.pumpAndSettle();
 }

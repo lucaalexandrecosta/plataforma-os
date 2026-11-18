@@ -72,6 +72,11 @@ depreciation:
   - closings:
   - close:
   - reopen:
+attachments:
+  - uploadUrl:
+  - confirmUpload:
+  - ofWorkOrder:
+  - downloadUrl:
 technicians:
   - list:
   - mine:

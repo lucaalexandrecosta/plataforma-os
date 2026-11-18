@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:drift/drift.dart' show driftRuntimeOptions;
 import 'package:drift/native.dart';
 import 'package:flutter/material.dart';
@@ -10,6 +12,7 @@ import 'package:plataforma_os_field/src/device/device.dart';
 import 'package:plataforma_os_field/src/local/database.dart';
 import 'package:plataforma_os_field/src/local/providers.dart';
 import 'package:plataforma_os_field/src/session/session.dart';
+import 'package:plataforma_os_field/src/ui/visits/signature_page.dart';
 
 import 'fake_gateway.dart';
 
@@ -30,6 +33,12 @@ class FakeDevice implements Device {
 
   @override
   Future<String?> scanQr(BuildContext context) async => qr;
+
+  /// Próxima foto da câmera (nulo = a pessoa voltou sem tirar).
+  Uint8List? photo = Uint8List.fromList(List.generate(64, (i) => i));
+
+  @override
+  Future<Uint8List?> takePhoto() async => photo;
 }
 
 /// `testWidgets` que desmonta o app no fim: fecha o banco local e deixa os
@@ -58,6 +67,7 @@ Future<void> pumpApp(WidgetTester tester, FakeGateway gateway, {FakeDevice? devi
         clockProvider.overrideWithValue(() => now),
         databaseOpenerProvider.overrideWithValue((_) => FieldDatabase(NativeDatabase.memory())),
         syncIntervalProvider.overrideWithValue(null),
+        signatureImageProvider.overrideWithValue((_) async => Uint8List.fromList([0x89, 0x50, 0x4E, 0x47, 1, 2, 3])),
       ],
       child: const FieldApp(),
     ),

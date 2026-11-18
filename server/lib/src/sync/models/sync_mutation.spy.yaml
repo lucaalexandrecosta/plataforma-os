@@ -1,7 +1,8 @@
 # Uma ação do técnico feita no aparelho (docs/06 §6.6). type: visit.start_travel,
-# visit.check_in, visit.pause, visit.resume, visit.finish ou
-# checklist_response.submit; entityId é a visita. payload: JSON de
-# VisitMutationPayload (ou ChecklistSubmitPayload no checklist).
+# visit.check_in, visit.pause, visit.resume, visit.finish,
+# checklist_response.submit, attachment.register ou signature.capture;
+# entityId é a visita. payload: JSON de VisitMutationPayload,
+# ChecklistSubmitPayload, AttachmentRegisterPayload ou SignatureCapturePayload.
 class: SyncMutation
 fields:
   mutationId: UuidValue

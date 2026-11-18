@@ -1067,6 +1067,24 @@ class FakeGateway implements Gateway {
       if (v.workOrderId == workOrderId) v,
   ];
 
+  /// Fotos e assinaturas (attachmentList), para o detalhe da OS.
+  final attachmentList = <Attachment>[];
+
+  @override
+  Future<List<Attachment>> attachmentsOfWorkOrder(UuidValue workOrderId) async {
+    _maybeFail('attachmentsOfWorkOrder');
+    return [
+      for (final a in attachmentList)
+        if (a.workOrderId == workOrderId) a,
+    ];
+  }
+
+  @override
+  Future<String> attachmentDownloadUrl(UuidValue attachmentId) async {
+    _maybeFail('attachmentDownloadUrl');
+    return 'https://s3.example/$attachmentId?sig=1';
+  }
+
   /// Checklists respondidos (visitChecklistList), para o detalhe da OS.
   final visitChecklistList = <VisitChecklist>[];
 

@@ -1271,6 +1271,8 @@ CREATE TABLE app.work_order_types (
   requires_asset                boolean NOT NULL DEFAULT true,
   available_to_customer         boolean NOT NULL DEFAULT false,
   require_qr_check_in           boolean,
+  require_photos                boolean NOT NULL DEFAULT false,
+  require_signature             boolean NOT NULL DEFAULT false,
   skip_triage                   boolean NOT NULL DEFAULT false,
   default_checklist_template_id uuid,
   default_service_id            uuid,
@@ -1294,6 +1296,8 @@ CREATE INDEX work_order_types_checklist_idx ON app.work_order_types (tenant_id, 
 CREATE INDEX work_order_types_service_idx ON app.work_order_types (tenant_id, default_service_id) WHERE default_service_id IS NOT NULL;
 CREATE INDEX work_order_types_row_version_idx ON app.work_order_types (tenant_id, row_version);
 COMMENT ON TABLE app.work_order_types IS 'Tipo de OS (corretiva, preventiva, instalação, retirada...). available_to_customer: aparece na abertura pelo app do cliente.';
+COMMENT ON COLUMN app.work_order_types.require_photos IS 'Concluir a visita como resolvida exige ao menos uma foto de antes e uma de depois (docs/06 §5.12).';
+COMMENT ON COLUMN app.work_order_types.require_signature IS 'Concluir a visita como resolvida exige a assinatura de quem recebeu o atendimento (docs/06 §5.13).';
 COMMENT ON COLUMN app.work_order_types.category IS 'v0.2 (F3): refurbishment (recondicionamento em oficina) e teardown (desmontagem para peças; ao concluir, baixa do ativo com retirement_reason = cannibalized). Essas OS usam resolution_mode = workshop.';
 COMMENT ON COLUMN app.work_order_types.require_qr_check_in IS 'v0.2 (MVP, antifraude). Nulo = herda tenant_settings.require_qr_check_in; true/false sobrescreve para o tipo.';
 COMMENT ON COLUMN app.work_order_types.skip_triage IS 'v0.2 (MVP). No modo de triagem direct, chamados deste tipo pulam a fila de triagem.';
@@ -2325,6 +2329,7 @@ CREATE TABLE app.work_order_visits (
   signature_attachment_id uuid,
   signer_name             text,
   signer_document         text,
+  signer_role             text CHECK (signer_role IN ('site_manager', 'employee', 'other')),
   signed_at               timestamptz,
   confirmed_symptom_id    uuid,
   failure_cause_id        uuid,
@@ -2616,6 +2621,7 @@ CREATE TABLE app.attachments (
   tenant_id                 uuid NOT NULL REFERENCES app.tenants (id),
   kind                      text NOT NULL CHECK (kind IN ('photo', 'signature', 'document', 'audio', 'video')),
   category                  text CHECK (category IN ('comodato_contract', 'invoice', 'manual', 'movement_term', 'photo', 'other')),
+  photo_stage               text CHECK (photo_stage IN ('before', 'after', 'evidence')),
   work_order_id             uuid,
   visit_id                  uuid,
   comment_id                uuid,
@@ -2673,6 +2679,7 @@ CREATE INDEX attachments_contact_idx ON app.attachments (tenant_id, captured_by_
 CREATE INDEX attachments_pending_idx ON app.attachments (tenant_id, upload_status, created_at) WHERE upload_status = 'pending';
 CREATE INDEX attachments_row_version_idx ON app.attachments (tenant_id, row_version);
 COMMENT ON TABLE app.attachments IS 'Anexo (foto, assinatura, documento): metadados; o binário fica no object storage sob t/<tenant_id>/ (CHECK). Registro criado antes do upload (upload_status pending).';
+COMMENT ON COLUMN app.attachments.photo_stage IS 'Momento da foto da visita (docs/06 §5.12): before (antes), after (depois) ou evidence (evidência). Nulo fora das fotos de OS/visita.';
 COMMENT ON COLUMN app.attachments.latitude IS 'Latitude da captura em graus decimais WGS 84 (double precision; double no Dart).';
 COMMENT ON COLUMN app.attachments.longitude IS 'Longitude da captura em graus decimais WGS 84 (double precision; double no Dart).';
 COMMENT ON COLUMN app.attachments.category IS 'v0.2 (MVP). Categoria de documento do ativo ou do modelo (exige asset_id ou product_id): comodato_contract (contrato de comodato emitido pelo ERP; upload no MVP, pelo ERP na F2), invoice (NF), manual (manual técnico; offline no app na F2), movement_term (termo de movimentação em PDF, só no ativo e kind = document), photo, other. Nulo nos anexos de OS/visita/comentário/checklist.';

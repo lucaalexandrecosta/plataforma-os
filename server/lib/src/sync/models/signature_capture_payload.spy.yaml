@@ -1,0 +1,10 @@
+# Payload de signature.capture (entityId é a visita): quem assinou e o anexo
+# da imagem (registrado antes na mesma fila). signerRole: site_manager,
+# employee ou other.
+class: SignatureCapturePayload
+fields:
+  attachmentId: UuidValue
+  signerName: String
+  signerDocument: String?
+  signerRole: String
+  signedAt: DateTime

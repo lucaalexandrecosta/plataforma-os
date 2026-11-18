@@ -15,3 +15,7 @@ fields:
   # Checklist padrão das visitas (vale a versão publicada mais nova do código).
   defaultChecklistTemplateId: UuidValue?
   defaultChecklistName: String?
+  # Concluir como resolvida exige foto de antes e de depois.
+  requirePhotos: bool, default=false
+  # Concluir como resolvida exige a assinatura do cliente.
+  requireSignature: bool, default=false

@@ -3,7 +3,7 @@
 <plist version="1.0">
 <dict>
 	<key>NSCameraUsageDescription</key>
-	<string>A câmera lê o QR da etiqueta do equipamento no check-in.</string>
+	<string>A câmera lê o QR da etiqueta do equipamento no check-in e tira as fotos do atendimento.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>A localização confirma que você chegou ao local do atendimento.</string>
 	<key>CADisableMinimumFrameDurationOnPhone</key>
