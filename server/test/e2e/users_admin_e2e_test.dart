@@ -57,6 +57,8 @@ void main() {
     expect(invited.roles, ['technician']);
     expect(invited.hasLogin, isFalse);
     await expectLater(ana.users.invite(nova, 'Outra', ['manager']), throwsApiError('ALREADY_MEMBER'));
+    // O e-mail de convite pode ser reenviado enquanto ela não entra.
+    expect((await ana.users.resendInvite(invited.membershipId)).status, MembershipStatus.invited);
 
     // A convidada cria a senha e entra pelo app do técnico.
     final novaClient = await tenantClient(nova, 'frio-sul', technicianApp: true);
@@ -64,6 +66,7 @@ void main() {
     final active = await member(ana, nova);
     expect(active.status, MembershipStatus.active);
     expect(active.hasLogin, isTrue);
+    await expectLater(ana.users.resendInvite(active.membershipId), throwsApiError('NOT_INVITED'));
   });
 
   test('a mesma pessoa é convidada por outra empresa sem duplicar o cadastro', () async {

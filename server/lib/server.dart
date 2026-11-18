@@ -7,6 +7,7 @@ import 'src/identity_access/internal/login/login_config.dart';
 import 'src/platform/auth/access_token_service.dart';
 import 'src/platform/auth/authentication_handler.dart';
 import 'src/platform/db/tenant_scoped_database.dart';
+import 'src/platform/email/email.dart';
 
 /// Inicia o servidor. O mesmo executável sobe em dois papéis (docs/02 §3.1):
 ///
@@ -22,6 +23,7 @@ Future<void> run(List<String> args) async {
     databaseInterceptor: tenantScopedDatabaseInterceptor,
   );
 
+  Email.configure(pod);
   configureAuth(pod);
 
   await pod.start();

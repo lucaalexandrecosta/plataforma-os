@@ -28,6 +28,10 @@ Cada módulo expõe só o arquivo `<módulo>.dart`; o resto fica em `internal/`.
 
 Login próprio (sem IdP externo): o módulo `serverpod_auth_idp` cuida de e-mail, senha, código de verificação e da sessão de login (JWT, renovada por `refreshJwtTokens`). A sessão de login só identifica a pessoa. Para acessar dados, o app chama `auth.selectTenant(slug)` e recebe o token ES256 do tenant (10 min), o único aceito pelos `StaffEndpoint`. Configuração em `lib/src/identity_access/internal/login/login_config.dart`; segredos `emailSecretHashPepper`, `jwtRefreshTokenHashPepper` e `jwtHmacSha512PrivateKey`.
 
+## E-mail
+
+Códigos de primeiro acesso e troca de senha e convites da equipe saem por SMTP (Amazon SES ou outro provedor), em `lib/src/platform/email/`. Segredos: `smtpHost`, `smtpPort` (587), `smtpUsername`, `smtpPassword`, `emailFrom` (remetente verificado) e `backofficeUrl` (link dos convites); `smtpAllowInsecure: 'true'` só para servidor SMTP local. Sem `smtpHost`, em desenvolvimento e teste o e-mail vai para o log do servidor; nos outros modos o pedido falha em vez de engolir o código.
+
 ## Regras que valem desde já
 
 - O `tenant_id` nunca vem do cliente: só do token validado (`RequestContext`).

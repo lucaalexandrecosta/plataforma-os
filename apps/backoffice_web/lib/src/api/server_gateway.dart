@@ -148,6 +148,9 @@ class ServerGateway implements Gateway {
       _guard(() => _tenant.users.setRoles(user.membershipId, roles));
 
   @override
+  Future<TenantUser> resendInvite(TenantUser user) => _guard(() => _tenant.users.resendInvite(user.membershipId));
+
+  @override
   Future<TenantUser> suspendUser(TenantUser user) => _guard(() => _tenant.users.suspend(user.membershipId));
 
   @override

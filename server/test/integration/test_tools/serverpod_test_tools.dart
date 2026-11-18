@@ -1816,6 +1816,36 @@ class _UsersEndpoint {
     });
   }
 
+  _ida.Future<_iqhozu6i.TenantUser> resendInvite(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue membershipId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'users',
+        method: 'resendInvite',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'users',
+          methodName: 'resendInvite',
+          parameters: _ist.testObjectToJson({'membershipId': membershipId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_iqhozu6i.TenantUser>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _ida.Future<_iqhozu6i.TenantUser> setRoles(
     _ist.TestSessionBuilder sessionBuilder,
     _is.UuidValue membershipId,
