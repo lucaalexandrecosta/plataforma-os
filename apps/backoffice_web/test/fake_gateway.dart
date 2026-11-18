@@ -364,6 +364,7 @@ class FakeGateway implements Gateway {
   // clientes
   final customerList = <Customer>[];
   final siteList = <CustomerSite>[];
+  final contactList = <CustomerContact>[];
 
   Customer _withSites(Customer c) =>
       c.copyWith(siteCount: siteList.where((s) => s.customerId == c.id && s.isActive).length);
@@ -454,6 +455,56 @@ class FakeGateway implements Gateway {
     });
     siteList[siteList.indexWhere((x) => x.id == s.id)] = s;
     return s;
+  }
+
+  CustomerContact _contactFrom(
+    CustomerContactInput input, {
+    required String id,
+    required UuidValue customerId,
+    required int version,
+  }) {
+    final digits = input.phone?.replaceAll(RegExp(r'\D'), '');
+    final siteId = input.customerSiteId;
+    return CustomerContact.fromJson({
+      ...input.toJson(),
+      'id': id,
+      'customerId': customerId.uuid,
+      'phone': digits == null || digits.isEmpty ? null : '+55$digits',
+      'customerSiteName': siteId == null ? null : siteList.singleWhere((s) => s.id == siteId).name,
+      'status': 'active',
+      'source': 'local',
+      'version': version,
+    });
+  }
+
+  @override
+  Future<List<CustomerContact>> customerContacts(UuidValue customerId) async {
+    _maybeFail('customerContacts');
+    return [
+      for (final c in contactList)
+        if (c.customerId == customerId) c,
+    ];
+  }
+
+  @override
+  Future<CustomerContact> createCustomerContact(UuidValue customerId, CustomerContactInput input) async {
+    _maybeFail('createCustomerContact');
+    final c = _contactFrom(
+      input,
+      id: '00000000-0000-4000-8000-0000000008${(contactList.length + 1).toString().padLeft(2, '0')}',
+      customerId: customerId,
+      version: 1,
+    );
+    contactList.add(c);
+    return c;
+  }
+
+  @override
+  Future<CustomerContact> updateCustomerContact(CustomerContact contact, CustomerContactInput input) async {
+    _maybeFail('updateCustomerContact');
+    final c = _contactFrom(input, id: contact.id.uuid, customerId: contact.customerId, version: contact.version + 1);
+    contactList[contactList.indexWhere((x) => x.id == c.id)] = c;
+    return c;
   }
 
   // cadastros

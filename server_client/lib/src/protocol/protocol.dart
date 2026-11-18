@@ -15,6 +15,7 @@ import 'package:plataforma_os_client/src/protocol/assets/models/asset_assignment
 import 'package:plataforma_os_client/src/protocol/assets/models/qr_tag.dart' as _ix23buzf;
 import 'package:plataforma_os_client/src/protocol/assets/models/qr_tag_batch.dart' as _ic9pb02v;
 import 'package:plataforma_os_client/src/protocol/catalog/models/product_summary.dart' as _ihgw7zuo;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_contact.dart' as _iicdz276;
 import 'package:plataforma_os_client/src/protocol/customers/models/customer_site.dart' as _iq0mn52n;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/assignable_role.dart' as _i2g1699a;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/tenant_user.dart' as _i8ihd43z;
@@ -40,6 +41,8 @@ import 'assets/models/qr_tag_batch.dart' as _ikikcay0;
 import 'catalog/models/product_input.dart' as _iuumnsch;
 import 'catalog/models/product_summary.dart' as _i4geouqi;
 import 'customers/models/customer.dart' as _in2ysqih;
+import 'customers/models/customer_contact.dart' as _iyonel9d;
+import 'customers/models/customer_contact_input.dart' as _i8ppoe04;
 import 'customers/models/customer_input.dart' as _i54pcl9h;
 import 'customers/models/customer_page.dart' as _iu4jficl;
 import 'customers/models/customer_site.dart' as _ihhtee09;
@@ -101,6 +104,8 @@ export 'assets/models/qr_tag_batch.dart';
 export 'catalog/models/product_input.dart';
 export 'catalog/models/product_summary.dart';
 export 'customers/models/customer.dart';
+export 'customers/models/customer_contact.dart';
+export 'customers/models/customer_contact_input.dart';
 export 'customers/models/customer_input.dart';
 export 'customers/models/customer_page.dart';
 export 'customers/models/customer_site.dart';
@@ -175,6 +180,8 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<_iuumnsch.ProductInput>,
       _isc.getType<_i4geouqi.ProductSummary>,
       _isc.getType<_in2ysqih.Customer>,
+      _isc.getType<_iyonel9d.CustomerContact>,
+      _isc.getType<_i8ppoe04.CustomerContactInput>,
       _isc.getType<_i54pcl9h.CustomerInput>,
       _isc.getType<_iu4jficl.CustomerPage>,
       _isc.getType<_ihhtee09.CustomerSite>,
@@ -236,6 +243,8 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<_iuumnsch.ProductInput?>,
       _isc.getType<_i4geouqi.ProductSummary?>,
       _isc.getType<_in2ysqih.Customer?>,
+      _isc.getType<_iyonel9d.CustomerContact?>,
+      _isc.getType<_i8ppoe04.CustomerContactInput?>,
       _isc.getType<_i54pcl9h.CustomerInput?>,
       _isc.getType<_iu4jficl.CustomerPage?>,
       _isc.getType<_ihhtee09.CustomerSite?>,
@@ -305,6 +314,7 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<List<_ix23buzf.QrTag>>,
       _isc.getType<List<_ihgw7zuo.ProductSummary>>,
       _isc.getType<List<_iq0mn52n.CustomerSite>>,
+      _isc.getType<List<_iicdz276.CustomerContact>>,
       _isc.getType<List<_i11upz4e.TenantSummary>>,
       _isc.getType<List<_i2g1699a.AssignableRole>>,
       _isc.getType<List<_i8ihd43z.TenantUser>>,
@@ -334,6 +344,8 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       'ProductInput',
       'ProductSummary',
       'Customer',
+      'CustomerContact',
+      'CustomerContactInput',
       'CustomerInput',
       'CustomerPage',
       'CustomerSite',
@@ -442,6 +454,12 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     }
     if (t == _in2ysqih.Customer) {
       return _in2ysqih.Customer.fromJson(data) as T;
+    }
+    if (t == _iyonel9d.CustomerContact) {
+      return _iyonel9d.CustomerContact.fromJson(data) as T;
+    }
+    if (t == _i8ppoe04.CustomerContactInput) {
+      return _i8ppoe04.CustomerContactInput.fromJson(data) as T;
     }
     if (t == _i54pcl9h.CustomerInput) {
       return _i54pcl9h.CustomerInput.fromJson(data) as T;
@@ -625,6 +643,12 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     }
     if (t == _isc.getType<_in2ysqih.Customer?>()) {
       return (data != null ? _in2ysqih.Customer.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iyonel9d.CustomerContact?>()) {
+      return (data != null ? _iyonel9d.CustomerContact.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i8ppoe04.CustomerContactInput?>()) {
+      return (data != null ? _i8ppoe04.CustomerContactInput.fromJson(data) : null) as T;
     }
     if (t == _isc.getType<_i54pcl9h.CustomerInput?>()) {
       return (data != null ? _i54pcl9h.CustomerInput.fromJson(data) : null) as T;
@@ -836,6 +860,9 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     if (t == List<_iq0mn52n.CustomerSite>) {
       return (data as List).map((e) => deserialize<_iq0mn52n.CustomerSite>(e)).toList() as T;
     }
+    if (t == List<_iicdz276.CustomerContact>) {
+      return (data as List).map((e) => deserialize<_iicdz276.CustomerContact>(e)).toList() as T;
+    }
     if (t == List<_i11upz4e.TenantSummary>) {
       return (data as List).map((e) => deserialize<_i11upz4e.TenantSummary>(e)).toList() as T;
     }
@@ -898,6 +925,8 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _iuumnsch.ProductInput => 'ProductInput',
       _i4geouqi.ProductSummary => 'ProductSummary',
       _in2ysqih.Customer => 'Customer',
+      _iyonel9d.CustomerContact => 'CustomerContact',
+      _i8ppoe04.CustomerContactInput => 'CustomerContactInput',
       _i54pcl9h.CustomerInput => 'CustomerInput',
       _iu4jficl.CustomerPage => 'CustomerPage',
       _ihhtee09.CustomerSite => 'CustomerSite',
@@ -984,6 +1013,10 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
         return 'ProductSummary';
       case _in2ysqih.Customer():
         return 'Customer';
+      case _iyonel9d.CustomerContact():
+        return 'CustomerContact';
+      case _i8ppoe04.CustomerContactInput():
+        return 'CustomerContactInput';
       case _i54pcl9h.CustomerInput():
         return 'CustomerInput';
       case _iu4jficl.CustomerPage():
@@ -1134,6 +1167,12 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     }
     if (dataClassName == 'Customer') {
       return deserialize<_in2ysqih.Customer>(data['data']);
+    }
+    if (dataClassName == 'CustomerContact') {
+      return deserialize<_iyonel9d.CustomerContact>(data['data']);
+    }
+    if (dataClassName == 'CustomerContactInput') {
+      return deserialize<_i8ppoe04.CustomerContactInput>(data['data']);
     }
     if (dataClassName == 'CustomerInput') {
       return deserialize<_i54pcl9h.CustomerInput>(data['data']);

@@ -149,3 +149,9 @@ const movementDocumentLabels = {
   'work_order': 'OS de instalação',
   'other': 'Outro',
 };
+
+const contactRoleLabels = {'customer_contact': 'Contato', 'customer_admin': 'Responsável do cliente'};
+
+const contactChannelLabels = {'whatsapp': 'WhatsApp', 'sms': 'SMS', 'email': 'E-mail'};
+
+const contactStatusLabels = {'active': 'Ativo', 'pending_approval': 'Aguardando aprovação', 'blocked': 'Bloqueado'};

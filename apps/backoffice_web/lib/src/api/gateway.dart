@@ -57,6 +57,9 @@ abstract interface class Gateway {
   Future<List<CustomerSite>> customerSites(UuidValue customerId);
   Future<CustomerSite> createCustomerSite(UuidValue customerId, CustomerSiteInput input);
   Future<CustomerSite> updateCustomerSite(CustomerSite site, CustomerSiteInput input);
+  Future<List<CustomerContact>> customerContacts(UuidValue customerId);
+  Future<CustomerContact> createCustomerContact(UuidValue customerId, CustomerContactInput input);
+  Future<CustomerContact> updateCustomerContact(CustomerContact contact, CustomerContactInput input);
 
   // ----------------------------------------------------------- cadastros
   Future<List<Branch>> branches({bool includeInactive});

@@ -1,0 +1,13 @@
+# Entrada de customers.createContact/updateContact. O telefone aceita
+# formato livre; números de 10 ou 11 dígitos ganham +55.
+class: CustomerContactInput
+fields:
+  customerSiteId: UuidValue?
+  name: String
+  email: String?
+  phone: String?
+  jobTitle: String?
+  contactRole: String
+  canOpenRequests: bool
+  preferredChannel: String?
+  isActive: bool

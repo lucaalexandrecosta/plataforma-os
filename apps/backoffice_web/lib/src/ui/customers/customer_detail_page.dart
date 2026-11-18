@@ -4,13 +4,14 @@ import 'package:go_router/go_router.dart';
 import 'package:plataforma_os_client/plataforma_os_client.dart';
 import 'package:serverpod_client/serverpod_client.dart' show UuidValue;
 
+import '../../labels.dart';
 import '../../session/session.dart';
 import '../common/errors.dart';
 import '../common/format.dart';
 import '../common/status_chip.dart';
 import 'customer_dialogs.dart';
 
-/// Ficha do cliente: dados e unidades (locais de atendimento).
+/// Ficha do cliente: dados, unidades (locais de atendimento), contatos e bens.
 class CustomerDetailPage extends ConsumerStatefulWidget {
   const CustomerDetailPage({super.key, required this.id});
 
@@ -21,7 +22,7 @@ class CustomerDetailPage extends ConsumerStatefulWidget {
 }
 
 class _CustomerDetailPageState extends ConsumerState<CustomerDetailPage> {
-  late Future<(Customer, List<CustomerSite>)> _data;
+  late Future<(Customer, List<CustomerSite>, List<CustomerContact>)> _data;
   late Future<AssetPage> _assets;
 
   @override
@@ -40,8 +41,9 @@ class _CustomerDetailPageState extends ConsumerState<CustomerDetailPage> {
     final g = ref.read(gatewayProvider);
     _data = () async {
       final sites = g.customerSites(widget.id);
+      final contacts = g.customerContacts(widget.id);
       final customer = await g.customer(widget.id);
-      return (customer, await sites);
+      return (customer, await sites, await contacts);
     }();
     _assets = g.assets(customerId: widget.id, limit: 100);
   }
@@ -62,6 +64,23 @@ class _CustomerDetailPageState extends ConsumerState<CustomerDetailPage> {
     if (saved != null && mounted) setState(_load);
   }
 
+  Future<void> _editContact(List<CustomerSite> sites, [CustomerContact? contact]) async {
+    final saved = await showDialog<CustomerContact>(
+      context: context,
+      builder: (_) => CustomerContactDialog(customerId: widget.id, sites: sites, contact: contact),
+    );
+    if (saved != null && mounted) setState(_load);
+  }
+
+  static String _contactLine(CustomerContact c) => [
+    if (c.jobTitle != null) c.jobTitle!,
+    if (c.phone != null) formatPhone(c.phone!),
+    if (c.email != null) c.email!,
+    c.customerSiteName ?? 'Todas as unidades',
+    if (c.preferredChannel != null) 'prefere ${contactChannelLabels[c.preferredChannel] ?? c.preferredChannel}',
+    if (!c.canOpenRequests) 'não abre chamados',
+  ].join(' · ');
+
   static String? _address(CustomerSite s) {
     final line1 = [s.street, s.streetNumber, s.complement].whereType<String>().join(', ');
     final line2 = [
@@ -80,12 +99,12 @@ class _CustomerDetailPageState extends ConsumerState<CustomerDetailPage> {
   Widget build(BuildContext context) {
     final session = ref.watch(sessionProvider);
     final canManage = session is SignedIn && session.can('customers.manage');
-    return FutureBuilder<(Customer, List<CustomerSite>)>(
+    return FutureBuilder<(Customer, List<CustomerSite>, List<CustomerContact>)>(
       future: _data,
       builder: (context, snap) {
         if (snap.hasError) return ErrorPanel(error: snap.error!, onRetry: () => setState(_load));
         if (!snap.hasData) return const Center(child: CircularProgressIndicator());
-        final (c, sites) = snap.data!;
+        final (c, sites, contacts) = snap.data!;
         final theme = Theme.of(context);
         return ListView(
           padding: const EdgeInsets.all(16),
@@ -162,6 +181,49 @@ class _CustomerDetailPageState extends ConsumerState<CustomerDetailPage> {
                         ),
                         isThreeLine: s.accessNotes != null && _address(s) != null,
                         onTap: canManage ? () => _editSite(s) : null,
+                      ),
+                  ],
+                ),
+              ),
+            const SizedBox(height: 16),
+            Row(
+              children: [
+                Expanded(child: Text('Contatos', style: theme.textTheme.titleMedium)),
+                if (canManage)
+                  FilledButton.tonalIcon(
+                    key: const Key('contact-new'),
+                    onPressed: () => _editContact(sites),
+                    icon: const Icon(Icons.person_add_alt_outlined),
+                    label: const Text('Novo contato'),
+                  ),
+              ],
+            ),
+            const SizedBox(height: 8),
+            if (contacts.isEmpty)
+              const Text('Nenhum contato. Cadastre quem abre chamados e recebe os avisos.')
+            else
+              Card(
+                margin: EdgeInsets.zero,
+                child: Column(
+                  children: [
+                    for (final ct in contacts)
+                      ListTile(
+                        key: ValueKey(ct.id),
+                        leading: Icon(
+                          ct.contactRole == 'customer_admin'
+                              ? Icons.admin_panel_settings_outlined
+                              : Icons.person_outline,
+                        ),
+                        title: Text(
+                          [
+                            ct.name,
+                            if (!ct.isActive) '(inativo)',
+                            if (ct.isActive && ct.status != 'active')
+                              '(${contactStatusLabels[ct.status] ?? ct.status})',
+                          ].join(' '),
+                        ),
+                        subtitle: Text(_contactLine(ct)),
+                        onTap: canManage ? () => _editContact(sites, ct) : null,
                       ),
                   ],
                 ),

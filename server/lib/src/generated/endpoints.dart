@@ -14,6 +14,7 @@ import 'package:plataforma_os_server/src/generated/assets/models/asset_input.dar
 import 'package:plataforma_os_server/src/generated/assets/models/asset_install_input.dart' as _iggraypf;
 import 'package:plataforma_os_server/src/generated/assets/models/asset_withdraw_input.dart' as _ilt8ymra;
 import 'package:plataforma_os_server/src/generated/catalog/models/product_input.dart' as _iku7g2we;
+import 'package:plataforma_os_server/src/generated/customers/models/customer_contact_input.dart' as _i0rc22zw;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_input.dart' as _iw3fixvn;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_site_input.dart' as _iv6e8owq;
 import 'package:plataforma_os_server/src/generated/patrimony/models/depreciation_profile_input.dart' as _ims07aom;
@@ -732,6 +733,78 @@ class Endpoints extends _is.EndpointDispatch {
                 _is.Session session,
                 Map<String, dynamic> params,
               ) async => (endpoints['customers'] as _i2n45wl3.CustomersEndpoint).updateSite(
+                session,
+                params['id'],
+                params['expectedVersion'],
+                params['input'],
+              ),
+        ),
+        'contacts': _is.MethodConnector(
+          name: 'contacts',
+          params: {
+            'customerId': _is.ParameterDescription(
+              name: 'customerId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['customers'] as _i2n45wl3.CustomersEndpoint).contacts(
+                session,
+                params['customerId'],
+              ),
+        ),
+        'createContact': _is.MethodConnector(
+          name: 'createContact',
+          params: {
+            'customerId': _is.ParameterDescription(
+              name: 'customerId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_i0rc22zw.CustomerContactInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['customers'] as _i2n45wl3.CustomersEndpoint).createContact(
+                session,
+                params['customerId'],
+                params['input'],
+              ),
+        ),
+        'updateContact': _is.MethodConnector(
+          name: 'updateContact',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_i0rc22zw.CustomerContactInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['customers'] as _i2n45wl3.CustomersEndpoint).updateContact(
                 session,
                 params['id'],
                 params['expectedVersion'],
