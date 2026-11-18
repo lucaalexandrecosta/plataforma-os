@@ -13,6 +13,7 @@
 import 'package:plataforma_os_server/src/generated/protocol.dart' as _isma42go;
 import 'package:serverpod/serverpod.dart' as _is;
 import '../../scheduling/models/visit.dart' as _in1xgb8o;
+import '../../scheduling/models/visit_checklist.dart' as _il8n53mf;
 import '../../work_orders/models/work_order.dart' as _iolupbz8;
 
 abstract class SyncPullResult implements _is.SerializableModel, _is.ProtocolSerialization {
@@ -22,6 +23,7 @@ abstract class SyncPullResult implements _is.SerializableModel, _is.ProtocolSeri
     required this.scopeTo,
     required this.visits,
     required this.workOrders,
+    required this.checklists,
   });
 
   factory SyncPullResult({
@@ -30,6 +32,7 @@ abstract class SyncPullResult implements _is.SerializableModel, _is.ProtocolSeri
     required DateTime scopeTo,
     required List<_in1xgb8o.Visit> visits,
     required List<_iolupbz8.WorkOrder> workOrders,
+    required List<_il8n53mf.VisitChecklist> checklists,
   }) = _SyncPullResultImpl;
 
   factory SyncPullResult.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -39,6 +42,7 @@ abstract class SyncPullResult implements _is.SerializableModel, _is.ProtocolSeri
       scopeTo: _is.DateTimeJsonExtension.fromJson(jsonSerialization['scopeTo']),
       visits: _isma42go.Protocol().deserialize<List<_in1xgb8o.Visit>>(jsonSerialization['visits']),
       workOrders: _isma42go.Protocol().deserialize<List<_iolupbz8.WorkOrder>>(jsonSerialization['workOrders']),
+      checklists: _isma42go.Protocol().deserialize<List<_il8n53mf.VisitChecklist>>(jsonSerialization['checklists']),
     );
   }
 
@@ -52,6 +56,8 @@ abstract class SyncPullResult implements _is.SerializableModel, _is.ProtocolSeri
 
   List<_iolupbz8.WorkOrder> workOrders;
 
+  List<_il8n53mf.VisitChecklist> checklists;
+
   /// Returns a shallow copy of this [SyncPullResult]
   /// with some or all fields replaced by the given arguments.
   @_is.useResult
@@ -61,6 +67,7 @@ abstract class SyncPullResult implements _is.SerializableModel, _is.ProtocolSeri
     DateTime? scopeTo,
     List<_in1xgb8o.Visit>? visits,
     List<_iolupbz8.WorkOrder>? workOrders,
+    List<_il8n53mf.VisitChecklist>? checklists,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -71,6 +78,7 @@ abstract class SyncPullResult implements _is.SerializableModel, _is.ProtocolSeri
       'scopeTo': scopeTo.toJson(),
       'visits': visits.toJson(valueToJson: (v) => v.toJson()),
       'workOrders': workOrders.toJson(valueToJson: (v) => v.toJson()),
+      'checklists': checklists.toJson(valueToJson: (v) => v.toJson()),
     };
   }
 
@@ -83,6 +91,7 @@ abstract class SyncPullResult implements _is.SerializableModel, _is.ProtocolSeri
       'scopeTo': scopeTo.toJson(),
       'visits': visits.toJson(valueToJson: (v) => v.toJsonForProtocol()),
       'workOrders': workOrders.toJson(valueToJson: (v) => v.toJsonForProtocol()),
+      'checklists': checklists.toJson(valueToJson: (v) => v.toJsonForProtocol()),
     };
   }
 
@@ -99,12 +108,14 @@ class _SyncPullResultImpl extends SyncPullResult {
     required DateTime scopeTo,
     required List<_in1xgb8o.Visit> visits,
     required List<_iolupbz8.WorkOrder> workOrders,
+    required List<_il8n53mf.VisitChecklist> checklists,
   }) : super._(
          serverTime: serverTime,
          scopeFrom: scopeFrom,
          scopeTo: scopeTo,
          visits: visits,
          workOrders: workOrders,
+         checklists: checklists,
        );
 
   /// Returns a shallow copy of this [SyncPullResult]
@@ -117,6 +128,7 @@ class _SyncPullResultImpl extends SyncPullResult {
     DateTime? scopeTo,
     List<_in1xgb8o.Visit>? visits,
     List<_iolupbz8.WorkOrder>? workOrders,
+    List<_il8n53mf.VisitChecklist>? checklists,
   }) {
     return SyncPullResult(
       serverTime: serverTime ?? this.serverTime,
@@ -124,6 +136,7 @@ class _SyncPullResultImpl extends SyncPullResult {
       scopeTo: scopeTo ?? this.scopeTo,
       visits: visits ?? this.visits.map((e0) => e0.copyWith()).toList(),
       workOrders: workOrders ?? this.workOrders.map((e0) => e0.copyWith()).toList(),
+      checklists: checklists ?? this.checklists.map((e0) => e0.copyWith()).toList(),
     );
   }
 }

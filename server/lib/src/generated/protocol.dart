@@ -24,6 +24,7 @@ import 'package:plataforma_os_server/src/generated/identity_access/models/tenant
 import 'package:plataforma_os_server/src/generated/patrimony/models/depreciation_closing.dart' as _ip56mlnh;
 import 'package:plataforma_os_server/src/generated/scheduling/models/technician.dart' as _ixvhwnkq;
 import 'package:plataforma_os_server/src/generated/scheduling/models/visit.dart' as _iezjjcq0;
+import 'package:plataforma_os_server/src/generated/scheduling/models/visit_checklist.dart' as _iblxfzeg;
 import 'package:plataforma_os_server/src/generated/sync/models/sync_mutation_result.dart' as _ilt9w9x8;
 import 'package:plataforma_os_server/src/generated/tenancy/models/branch.dart' as _i7vupwwc;
 import 'package:plataforma_os_server/src/generated/tenancy/models/cost_center.dart' as _islkyssd;
@@ -75,12 +76,16 @@ import 'patrimony/models/depreciation_profile_input.dart' as _icy94czf;
 import 'platform/errors/models/api_exception.dart' as _i147o0qx;
 import 'platform/errors/models/error_category.dart' as _i0p9y4c3;
 import 'platform/errors/models/field_error.dart' as _i3z3bgdl;
+import 'scheduling/models/checklist_answer.dart' as _ivf2vzay;
+import 'scheduling/models/checklist_response.dart' as _in3mx861;
 import 'scheduling/models/technician.dart' as _isgl9bus;
 import 'scheduling/models/technician_input.dart' as _inntwrv0;
 import 'scheduling/models/visit.dart' as _i3v1yqab;
 import 'scheduling/models/visit_check_in.dart' as _iz6dmpx4;
+import 'scheduling/models/visit_checklist.dart' as _itpro5gd;
 import 'scheduling/models/visit_finish.dart' as _iemqddjv;
 import 'scheduling/models/visit_input.dart' as _iqwjilz9;
+import 'sync/models/checklist_submit_payload.dart' as _iwnyyer3;
 import 'sync/models/device_registration.dart' as _iqd8b9b2;
 import 'sync/models/sync_mutation.dart' as _i8kxdcd0;
 import 'sync/models/sync_mutation_result.dart' as _ihyj8e8a;
@@ -144,12 +149,16 @@ export 'patrimony/models/depreciation_profile_input.dart';
 export 'platform/errors/models/api_exception.dart';
 export 'platform/errors/models/error_category.dart';
 export 'platform/errors/models/field_error.dart';
+export 'scheduling/models/checklist_answer.dart';
+export 'scheduling/models/checklist_response.dart';
 export 'scheduling/models/technician.dart';
 export 'scheduling/models/technician_input.dart';
 export 'scheduling/models/visit.dart';
 export 'scheduling/models/visit_check_in.dart';
+export 'scheduling/models/visit_checklist.dart';
 export 'scheduling/models/visit_finish.dart';
 export 'scheduling/models/visit_input.dart';
+export 'sync/models/checklist_submit_payload.dart';
 export 'sync/models/device_registration.dart';
 export 'sync/models/sync_mutation.dart';
 export 'sync/models/sync_mutation_result.dart';
@@ -225,12 +234,16 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<_i147o0qx.ApiException>,
       _is.getType<_i0p9y4c3.ErrorCategory>,
       _is.getType<_i3z3bgdl.FieldError>,
+      _is.getType<_ivf2vzay.ChecklistAnswer>,
+      _is.getType<_in3mx861.ChecklistResponse>,
       _is.getType<_isgl9bus.Technician>,
       _is.getType<_inntwrv0.TechnicianInput>,
       _is.getType<_i3v1yqab.Visit>,
       _is.getType<_iz6dmpx4.VisitCheckIn>,
+      _is.getType<_itpro5gd.VisitChecklist>,
       _is.getType<_iemqddjv.VisitFinish>,
       _is.getType<_iqwjilz9.VisitInput>,
+      _is.getType<_iwnyyer3.ChecklistSubmitPayload>,
       _is.getType<_iqd8b9b2.DeviceRegistration>,
       _is.getType<_i8kxdcd0.SyncMutation>,
       _is.getType<_ihyj8e8a.SyncMutationResult>,
@@ -294,12 +307,16 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<_i147o0qx.ApiException?>,
       _is.getType<_i0p9y4c3.ErrorCategory?>,
       _is.getType<_i3z3bgdl.FieldError?>,
+      _is.getType<_ivf2vzay.ChecklistAnswer?>,
+      _is.getType<_in3mx861.ChecklistResponse?>,
       _is.getType<_isgl9bus.Technician?>,
       _is.getType<_inntwrv0.TechnicianInput?>,
       _is.getType<_i3v1yqab.Visit?>,
       _is.getType<_iz6dmpx4.VisitCheckIn?>,
+      _is.getType<_itpro5gd.VisitChecklist?>,
       _is.getType<_iemqddjv.VisitFinish?>,
       _is.getType<_iqwjilz9.VisitInput?>,
+      _is.getType<_iwnyyer3.ChecklistSubmitPayload?>,
       _is.getType<_iqd8b9b2.DeviceRegistration?>,
       _is.getType<_i8kxdcd0.SyncMutation?>,
       _is.getType<_ihyj8e8a.SyncMutationResult?>,
@@ -334,8 +351,10 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<List<_i3z3bgdl.FieldError>?>,
       _is.getType<Map<String, String>>,
       _is.getType<Map<String, String>?>,
+      _is.getType<List<_ivf2vzay.ChecklistAnswer>>,
       _is.getType<List<_i3v1yqab.Visit>>,
       _is.getType<List<_i5zaa4b8.WorkOrder>>,
+      _is.getType<List<_itpro5gd.VisitChecklist>>,
       _is.getType<List<_i8kxdcd0.SyncMutation>>,
       _is.getType<List<_i00stvlt.WorkOrderStatusChange>>,
       _is.getType<List<_iqmm5djm.AssetAssignment>>,
@@ -353,6 +372,7 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<List<_ip56mlnh.DepreciationClosing>>,
       _is.getType<List<_ixvhwnkq.Technician>>,
       _is.getType<List<_iezjjcq0.Visit>>,
+      _is.getType<List<_iblxfzeg.VisitChecklist>>,
       _is.getType<List<_ilt9w9x8.SyncMutationResult>>,
       _is.getType<List<_i7vupwwc.Branch>>,
       _is.getType<List<_islkyssd.CostCenter>>,
@@ -407,12 +427,16 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       'ApiException',
       'ErrorCategory',
       'FieldError',
+      'ChecklistAnswer',
+      'ChecklistResponse',
       'Technician',
       'TechnicianInput',
       'Visit',
       'VisitCheckIn',
+      'VisitChecklist',
       'VisitFinish',
       'VisitInput',
+      'ChecklistSubmitPayload',
       'DeviceRegistration',
       'SyncMutation',
       'SyncMutationResult',
@@ -790,6 +814,12 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == _i3z3bgdl.FieldError) {
       return _i3z3bgdl.FieldError.fromJson(data) as T;
     }
+    if (t == _ivf2vzay.ChecklistAnswer) {
+      return _ivf2vzay.ChecklistAnswer.fromJson(data) as T;
+    }
+    if (t == _in3mx861.ChecklistResponse) {
+      return _in3mx861.ChecklistResponse.fromJson(data) as T;
+    }
     if (t == _isgl9bus.Technician) {
       return _isgl9bus.Technician.fromJson(data) as T;
     }
@@ -802,11 +832,17 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == _iz6dmpx4.VisitCheckIn) {
       return _iz6dmpx4.VisitCheckIn.fromJson(data) as T;
     }
+    if (t == _itpro5gd.VisitChecklist) {
+      return _itpro5gd.VisitChecklist.fromJson(data) as T;
+    }
     if (t == _iemqddjv.VisitFinish) {
       return _iemqddjv.VisitFinish.fromJson(data) as T;
     }
     if (t == _iqwjilz9.VisitInput) {
       return _iqwjilz9.VisitInput.fromJson(data) as T;
+    }
+    if (t == _iwnyyer3.ChecklistSubmitPayload) {
+      return _iwnyyer3.ChecklistSubmitPayload.fromJson(data) as T;
     }
     if (t == _iqd8b9b2.DeviceRegistration) {
       return _iqd8b9b2.DeviceRegistration.fromJson(data) as T;
@@ -997,6 +1033,12 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == _is.getType<_i3z3bgdl.FieldError?>()) {
       return (data != null ? _i3z3bgdl.FieldError.fromJson(data) : null) as T;
     }
+    if (t == _is.getType<_ivf2vzay.ChecklistAnswer?>()) {
+      return (data != null ? _ivf2vzay.ChecklistAnswer.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_in3mx861.ChecklistResponse?>()) {
+      return (data != null ? _in3mx861.ChecklistResponse.fromJson(data) : null) as T;
+    }
     if (t == _is.getType<_isgl9bus.Technician?>()) {
       return (data != null ? _isgl9bus.Technician.fromJson(data) : null) as T;
     }
@@ -1009,11 +1051,17 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == _is.getType<_iz6dmpx4.VisitCheckIn?>()) {
       return (data != null ? _iz6dmpx4.VisitCheckIn.fromJson(data) : null) as T;
     }
+    if (t == _is.getType<_itpro5gd.VisitChecklist?>()) {
+      return (data != null ? _itpro5gd.VisitChecklist.fromJson(data) : null) as T;
+    }
     if (t == _is.getType<_iemqddjv.VisitFinish?>()) {
       return (data != null ? _iemqddjv.VisitFinish.fromJson(data) : null) as T;
     }
     if (t == _is.getType<_iqwjilz9.VisitInput?>()) {
       return (data != null ? _iqwjilz9.VisitInput.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iwnyyer3.ChecklistSubmitPayload?>()) {
+      return (data != null ? _iwnyyer3.ChecklistSubmitPayload.fromJson(data) : null) as T;
     }
     if (t == _is.getType<_iqd8b9b2.DeviceRegistration?>()) {
       return (data != null ? _iqd8b9b2.DeviceRegistration.fromJson(data) : null) as T;
@@ -1120,11 +1168,17 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
               : null)
           as T;
     }
+    if (t == List<_ivf2vzay.ChecklistAnswer>) {
+      return (data as List).map((e) => deserialize<_ivf2vzay.ChecklistAnswer>(e)).toList() as T;
+    }
     if (t == List<_i3v1yqab.Visit>) {
       return (data as List).map((e) => deserialize<_i3v1yqab.Visit>(e)).toList() as T;
     }
     if (t == List<_i5zaa4b8.WorkOrder>) {
       return (data as List).map((e) => deserialize<_i5zaa4b8.WorkOrder>(e)).toList() as T;
+    }
+    if (t == List<_itpro5gd.VisitChecklist>) {
+      return (data as List).map((e) => deserialize<_itpro5gd.VisitChecklist>(e)).toList() as T;
     }
     if (t == List<_i8kxdcd0.SyncMutation>) {
       return (data as List).map((e) => deserialize<_i8kxdcd0.SyncMutation>(e)).toList() as T;
@@ -1176,6 +1230,9 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     }
     if (t == List<_iezjjcq0.Visit>) {
       return (data as List).map((e) => deserialize<_iezjjcq0.Visit>(e)).toList() as T;
+    }
+    if (t == List<_iblxfzeg.VisitChecklist>) {
+      return (data as List).map((e) => deserialize<_iblxfzeg.VisitChecklist>(e)).toList() as T;
     }
     if (t == List<_ilt9w9x8.SyncMutationResult>) {
       return (data as List).map((e) => deserialize<_ilt9w9x8.SyncMutationResult>(e)).toList() as T;
@@ -1249,12 +1306,16 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _i147o0qx.ApiException => 'ApiException',
       _i0p9y4c3.ErrorCategory => 'ErrorCategory',
       _i3z3bgdl.FieldError => 'FieldError',
+      _ivf2vzay.ChecklistAnswer => 'ChecklistAnswer',
+      _in3mx861.ChecklistResponse => 'ChecklistResponse',
       _isgl9bus.Technician => 'Technician',
       _inntwrv0.TechnicianInput => 'TechnicianInput',
       _i3v1yqab.Visit => 'Visit',
       _iz6dmpx4.VisitCheckIn => 'VisitCheckIn',
+      _itpro5gd.VisitChecklist => 'VisitChecklist',
       _iemqddjv.VisitFinish => 'VisitFinish',
       _iqwjilz9.VisitInput => 'VisitInput',
+      _iwnyyer3.ChecklistSubmitPayload => 'ChecklistSubmitPayload',
       _iqd8b9b2.DeviceRegistration => 'DeviceRegistration',
       _i8kxdcd0.SyncMutation => 'SyncMutation',
       _ihyj8e8a.SyncMutationResult => 'SyncMutationResult',
@@ -1374,6 +1435,10 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
         return 'ErrorCategory';
       case _i3z3bgdl.FieldError():
         return 'FieldError';
+      case _ivf2vzay.ChecklistAnswer():
+        return 'ChecklistAnswer';
+      case _in3mx861.ChecklistResponse():
+        return 'ChecklistResponse';
       case _isgl9bus.Technician():
         return 'Technician';
       case _inntwrv0.TechnicianInput():
@@ -1382,10 +1447,14 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
         return 'Visit';
       case _iz6dmpx4.VisitCheckIn():
         return 'VisitCheckIn';
+      case _itpro5gd.VisitChecklist():
+        return 'VisitChecklist';
       case _iemqddjv.VisitFinish():
         return 'VisitFinish';
       case _iqwjilz9.VisitInput():
         return 'VisitInput';
+      case _iwnyyer3.ChecklistSubmitPayload():
+        return 'ChecklistSubmitPayload';
       case _iqd8b9b2.DeviceRegistration():
         return 'DeviceRegistration';
       case _i8kxdcd0.SyncMutation():
@@ -1576,6 +1645,12 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (dataClassName == 'FieldError') {
       return deserialize<_i3z3bgdl.FieldError>(data['data']);
     }
+    if (dataClassName == 'ChecklistAnswer') {
+      return deserialize<_ivf2vzay.ChecklistAnswer>(data['data']);
+    }
+    if (dataClassName == 'ChecklistResponse') {
+      return deserialize<_in3mx861.ChecklistResponse>(data['data']);
+    }
     if (dataClassName == 'Technician') {
       return deserialize<_isgl9bus.Technician>(data['data']);
     }
@@ -1588,11 +1663,17 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (dataClassName == 'VisitCheckIn') {
       return deserialize<_iz6dmpx4.VisitCheckIn>(data['data']);
     }
+    if (dataClassName == 'VisitChecklist') {
+      return deserialize<_itpro5gd.VisitChecklist>(data['data']);
+    }
     if (dataClassName == 'VisitFinish') {
       return deserialize<_iemqddjv.VisitFinish>(data['data']);
     }
     if (dataClassName == 'VisitInput') {
       return deserialize<_iqwjilz9.VisitInput>(data['data']);
+    }
+    if (dataClassName == 'ChecklistSubmitPayload') {
+      return deserialize<_iwnyyer3.ChecklistSubmitPayload>(data['data']);
     }
     if (dataClassName == 'DeviceRegistration') {
       return deserialize<_iqd8b9b2.DeviceRegistration>(data['data']);

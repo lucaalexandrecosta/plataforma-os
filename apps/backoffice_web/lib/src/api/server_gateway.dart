@@ -408,6 +408,10 @@ class ServerGateway implements Gateway {
   Future<List<Visit>> visitsOfWorkOrder(UuidValue workOrderId) => _guard(() => _tenant.visits.ofWorkOrder(workOrderId));
 
   @override
+  Future<List<VisitChecklist>> checklistsOfWorkOrder(UuidValue workOrderId) =>
+      _guard(() => _tenant.visits.checklistsOfWorkOrder(workOrderId));
+
+  @override
   Future<Visit> scheduleVisit(UuidValue workOrderId, VisitInput input) =>
       _guard(() => _tenant.visits.schedule(workOrderId, input));
 

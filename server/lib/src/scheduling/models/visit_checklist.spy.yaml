@@ -1,0 +1,8 @@
+# Checklist de uma visita: o modelo a preencher (o da resposta já enviada ou a
+# versão publicada do checklist padrão do tipo de OS) e as respostas, se houver.
+class: VisitChecklist
+fields:
+  visitId: UuidValue
+  visitNumber: int
+  template: ChecklistTemplate
+  response: ChecklistResponse?

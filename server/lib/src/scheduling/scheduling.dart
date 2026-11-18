@@ -3,7 +3,18 @@
 /// do `field_execution`, camada 7, junto com o sync offline).
 library;
 
-export '../generated/protocol.dart' show Technician, TechnicianInput, Visit, VisitCheckIn, VisitFinish, VisitInput;
+export '../generated/protocol.dart'
+    show
+        ChecklistAnswer,
+        ChecklistResponse,
+        Technician,
+        TechnicianInput,
+        Visit,
+        VisitChecklist,
+        VisitCheckIn,
+        VisitFinish,
+        VisitInput;
+export 'internal/checklist_responses.dart' show ChecklistResponses;
 export 'internal/technicians.dart' show Technicians;
 export 'internal/visits.dart' show Visits;
 export 'tables.dart' show schedulingOwnership;

@@ -1,0 +1,8 @@
+# Resposta de um item do checklist na visita. value conforme o tipo do item:
+# yes_no: yes | no | na; ok_nok: ok | nok | na; number: decimal com ponto;
+# text: texto livre; choice: uma das opções do item.
+class: ChecklistAnswer
+fields:
+  itemKey: String
+  value: String
+  note: String?

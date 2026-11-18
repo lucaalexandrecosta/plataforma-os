@@ -1,0 +1,6 @@
+# Payload da mutação checklist_response.submit (entityId é a visita): todas as
+# respostas do checklist, na versão do modelo que o aparelho baixou.
+class: ChecklistSubmitPayload
+fields:
+  checklistTemplateId: UuidValue
+  answers: List<ChecklistAnswer>

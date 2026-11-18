@@ -46,6 +46,7 @@ import 'package:plataforma_os_client/src/protocol/scheduling/models/technician.d
 import 'package:plataforma_os_client/src/protocol/scheduling/models/technician_input.dart' as _ixaduq6k;
 import 'package:plataforma_os_client/src/protocol/scheduling/models/visit.dart' as _isvtjvq7;
 import 'package:plataforma_os_client/src/protocol/scheduling/models/visit_check_in.dart' as _ias7e1vu;
+import 'package:plataforma_os_client/src/protocol/scheduling/models/visit_checklist.dart' as _is9a6d8i;
 import 'package:plataforma_os_client/src/protocol/scheduling/models/visit_finish.dart' as _ikfe26w9;
 import 'package:plataforma_os_client/src/protocol/scheduling/models/visit_input.dart' as _ivjpdmyn;
 import 'package:plataforma_os_client/src/protocol/sync/models/device_registration.dart' as _iam7n156;
@@ -933,7 +934,7 @@ class EndpointTechnicians extends EndpointStaff {
 /// status atual da OS. Erros: `FORBIDDEN`, `VALIDATION_FAILED`, `NOT_FOUND`,
 /// `VERSION_MISMATCH`, `INVALID_TRANSITION`, `WORK_ORDER_NOT_SCHEDULABLE`,
 /// `VISIT_NOT_SCHEDULED`, `ANOTHER_VISIT_ACTIVE`, `QR_ASSET_MISMATCH`,
-/// `CHECK_IN_REQUIRED`.
+/// `CHECK_IN_REQUIRED`, `CHECKLIST_REQUIRED`.
 /// {@category Endpoint}
 class EndpointVisits extends EndpointStaff {
   EndpointVisits(_isc.EndpointCaller caller) : super(caller);
@@ -975,6 +976,14 @@ class EndpointVisits extends EndpointStaff {
       caller.callServerEndpoint<List<_isvtjvq7.Visit>>(
         'visits',
         'ofWorkOrder',
+        {'workOrderId': workOrderId},
+      );
+
+  /// Checklists respondidos nas visitas da OS.
+  _ida.Future<List<_is9a6d8i.VisitChecklist>> checklistsOfWorkOrder(_isc.UuidValue workOrderId) =>
+      caller.callServerEndpoint<List<_is9a6d8i.VisitChecklist>>(
+        'visits',
+        'checklistsOfWorkOrder',
         {'workOrderId': workOrderId},
       );
 

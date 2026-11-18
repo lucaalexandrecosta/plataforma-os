@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:plataforma_os_client/plataforma_os_client.dart';
 import 'package:serverpod_client/serverpod_client.dart' show UuidValue;
 
 import '../../api/gateway.dart';
 import '../../device/device.dart';
 import '../../labels.dart';
+import '../../local/checklist_rules.dart';
 import '../../local/field_store.dart';
 import '../../local/providers.dart';
 import '../../local/visit_rules.dart';
@@ -183,6 +185,19 @@ class _VisitPageState extends ConsumerState<VisitPage> {
                             wo: woSnap.data,
                             pending: sumSnap.data?.pendingVisitIds.contains(visit.id.uuid) ?? false,
                           ),
+                          StreamBuilder<VisitChecklistState?>(
+                            stream: store.watchChecklist(visit.id),
+                            builder: (context, c) => switch (c.data) {
+                              final checklist? => Padding(
+                                padding: const EdgeInsets.only(top: 8),
+                                child: _ChecklistCard(
+                                  checklist: checklist,
+                                  onOpen: () => context.push('/agenda/visita/${visit.id}/checklist'),
+                                ),
+                              ),
+                              null => const SizedBox.shrink(),
+                            },
+                          ),
                           const SizedBox(height: 8),
                           _Details(visit: visit, wo: woSnap.data),
                         ],
@@ -315,6 +330,33 @@ class _Header extends StatelessWidget {
             ),
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _ChecklistCard extends StatelessWidget {
+  const _ChecklistCard({required this.checklist, required this.onOpen});
+
+  final VisitChecklistState checklist;
+  final VoidCallback onOpen;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final status = checklist.submitted
+        ? (checklist.pending ? 'Enviado, aguardando sinal' : 'Enviado')
+        : checklist.answered == 0
+        ? 'Não iniciado'
+        : 'Em preenchimento';
+    return Card(
+      child: ListTile(
+        key: const Key('visit-checklist'),
+        leading: Icon(checklist.submitted ? Icons.fact_check : Icons.checklist, color: theme.colorScheme.primary),
+        title: Text(checklist.template.name),
+        subtitle: Text('${checklist.answered} de ${checklist.total} respondidos · $status'),
+        trailing: const Icon(Icons.chevron_right),
+        onTap: onOpen,
       ),
     );
   }

@@ -8,3 +8,5 @@ fields:
   errorCode: String?
   errorMessage: String?
   visit: Visit?
+  # Checklist da visita depois de checklist_response.submit aplicada.
+  checklist: VisitChecklist?

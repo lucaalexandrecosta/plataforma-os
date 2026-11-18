@@ -50,6 +50,30 @@ class Notices extends Table {
   BoolColumn get read => boolean().withDefault(const Constant(false))();
 }
 
+/// Checklist de cada visita do recorte, como o servidor mandou: o modelo a
+/// preencher e as respostas já gravadas lá (docs/06 §5.9).
+class LocalChecklists extends Table {
+  TextColumn get visitId => text()();
+  TextColumn get json => text()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {visitId};
+}
+
+/// Respostas em preenchimento no aparelho, salvas a cada toque. [submitted]
+/// diz que o técnico tocou "Enviar" (a mutação está ou esteve na fila);
+/// qualquer mudança depois volta a rascunho.
+class ChecklistDrafts extends Table {
+  TextColumn get visitId => text()();
+  TextColumn get templateId => text()();
+  TextColumn get answers => text()();
+  BoolColumn get submitted => boolean().withDefault(const Constant(false))();
+  DateTimeColumn get updatedAt => dateTime()();
+
+  @override
+  Set<Column<Object>> get primaryKey => {visitId};
+}
+
 /// Chave e valor: id do aparelho, último sync, desvio do relógio.
 class SyncState extends Table {
   TextColumn get key => text()();
@@ -63,7 +87,9 @@ class SyncState extends Table {
 ///
 /// Nesta etapa o SQLite não é cifrado; o SQLCipher com a chave no
 /// armazenamento seguro (docs/06 §6.12) entra com o login persistente.
-@DriftDatabase(tables: [LocalVisits, LocalWorkOrders, PendingMutations, Notices, SyncState])
+@DriftDatabase(
+  tables: [LocalVisits, LocalWorkOrders, PendingMutations, Notices, SyncState, LocalChecklists, ChecklistDrafts],
+)
 class FieldDatabase extends _$FieldDatabase {
   FieldDatabase(super.executor);
 
@@ -72,5 +98,15 @@ class FieldDatabase extends _$FieldDatabase {
       FieldDatabase(driftDatabase(name: 'tenant_${tenantSlug.replaceAll(RegExp('[^a-z0-9_-]'), '_')}'));
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
+
+  @override
+  MigrationStrategy get migration => MigrationStrategy(
+    onUpgrade: (m, from, to) async {
+      if (from < 2) {
+        await m.createTable(localChecklists);
+        await m.createTable(checklistDrafts);
+      }
+    },
+  );
 }

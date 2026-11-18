@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:plataforma_os_client/plataforma_os_client.dart';
 import 'package:plataforma_os_field/src/api/gateway.dart';
+import 'package:plataforma_os_field/src/local/checklist_rules.dart';
 import 'package:plataforma_os_field/src/local/visit_rules.dart';
 import 'package:serverpod_client/serverpod_client.dart' show UuidValue;
 
@@ -39,6 +40,31 @@ class FakeGateway implements Gateway {
   /// Estado do servidor.
   final visits = <Visit>[];
   final workOrders = <UuidValue, WorkOrder>{};
+
+  /// Checklist de cada visita (por id da visita).
+  final checklists = <UuidValue, VisitChecklist>{};
+
+  static final checklistTemplate = ChecklistTemplate(
+    id: UuidValue.fromString('00000000-0000-4000-8000-0000000000c1'),
+    code: 'PREV-FZ',
+    name: 'Preventiva freezer',
+    templateVersion: 1,
+    status: 'published',
+    items: [
+      ChecklistItem(key: 'temperatura', label: 'Temperatura', type: 'number', required: true, unit: '°C'),
+      ChecklistItem(key: 'porta', label: 'Borracha da porta', type: 'ok_nok', required: true),
+      ChecklistItem(key: 'estado', label: 'Estado geral', type: 'choice', required: false, options: ['Bom', 'Ruim']),
+      ChecklistItem(key: 'obs', label: 'Observações', type: 'text', required: false),
+    ],
+    isActive: true,
+    version: 2,
+  );
+
+  /// Dá à visita [n] o checklist de exemplo.
+  void addChecklist(int n) {
+    final v = visitNumber(n);
+    checklists[v.id] = VisitChecklist(visitId: v.id, visitNumber: v.visitNumber, template: checklistTemplate);
+  }
 
   /// Sem rede: sync falha, ações ficam na fila.
   var offline = false;
@@ -207,6 +233,7 @@ class FakeGateway implements Gateway {
       scopeTo: DateTime.utc(2026, 12, 2),
       visits: mine,
       workOrders: [for (final v in mine) workOrders[v.workOrderId]!],
+      checklists: [for (final v in mine) ?checklists[v.id]],
     );
   }
 
@@ -247,9 +274,18 @@ class FakeGateway implements Gateway {
           errorMessage: 'Esta visita foi cancelada pelo despacho.',
           visit: visit,
         );
+      } else if (m.type == checklistSubmitType) {
+        result = _submitChecklist(m, visit);
       } else {
         final payload = VisitMutationPayload.fromJson(jsonDecode(m.payload) as Map<String, dynamic>);
         try {
+          final checklist = checklists[visit.id];
+          if (m.type == VisitMutation.finish &&
+              payload.finish?.outcome == 'resolved' &&
+              checklist != null &&
+              checklist.response?.status != 'submitted') {
+            throw const GatewayException('Envie o checklist antes de concluir a visita.', code: 'CHECKLIST_REQUIRED');
+          }
           final scanned = payload.checkIn?.scannedCode;
           if (m.type == VisitMutation.checkIn && payload.checkIn?.method == 'qr' && scanned != assetQr) {
             throw const GatewayException('A etiqueta lida não é do bem desta OS.', code: 'QR_ASSET_MISMATCH');
@@ -283,5 +319,41 @@ class FakeGateway implements Gateway {
       throw offlineError;
     }
     return results;
+  }
+
+  SyncMutationResult _submitChecklist(SyncMutation m, Visit visit) {
+    final payload = ChecklistSubmitPayload.fromJson(jsonDecode(m.payload) as Map<String, dynamic>);
+    final current = checklists[visit.id];
+    SyncMutationResult refuse(String code, String message) => SyncMutationResult(
+      mutationId: m.mutationId,
+      status: 'rejected',
+      errorCode: code,
+      errorMessage: message,
+      visit: visit,
+    );
+    if (current == null || current.template.id != payload.checklistTemplateId) {
+      return refuse('CHECKLIST_MISMATCH', 'Este checklist não é o desta visita.');
+    }
+    if (!const {'on_site', 'paused'}.contains(visit.status)) {
+      return refuse('CHECK_IN_REQUIRED', 'O checklist é enviado durante a visita, após o check-in.');
+    }
+    final (errors, answers) = checkChecklist(current.template, {for (final a in payload.answers) a.itemKey: a});
+    if (errors.isNotEmpty) return refuse('VALIDATION_FAILED', 'Confira os campos informados.');
+    final saved = current.copyWith(
+      response: ChecklistResponse(
+        id: UuidValue.fromString('00000000-0000-4000-8002-000000000001'),
+        workOrderId: visit.workOrderId,
+        visitId: visit.id,
+        checklistTemplateId: current.template.id,
+        templateVersion: current.template.templateVersion,
+        status: 'submitted',
+        answers: answers,
+        submittedAt: DateTime.now().toUtc(),
+        submittedByName: 'Eduardo Técnico',
+        version: (current.response?.version ?? 0) + 1,
+      ),
+    );
+    checklists[visit.id] = saved;
+    return SyncMutationResult(mutationId: m.mutationId, status: 'applied', visit: visit, checklist: saved);
   }
 }

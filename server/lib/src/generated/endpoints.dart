@@ -1744,6 +1744,24 @@ class Endpoints extends _is.EndpointDispatch {
                 params['workOrderId'],
               ),
         ),
+        'checklistsOfWorkOrder': _is.MethodConnector(
+          name: 'checklistsOfWorkOrder',
+          params: {
+            'workOrderId': _is.ParameterDescription(
+              name: 'workOrderId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['visits'] as _i34c7in8.VisitsEndpoint).checklistsOfWorkOrder(
+                session,
+                params['workOrderId'],
+              ),
+        ),
         'get': _is.MethodConnector(
           name: 'get',
           params: {

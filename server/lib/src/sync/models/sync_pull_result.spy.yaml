@@ -8,3 +8,5 @@ fields:
   scopeTo: DateTime
   visits: List<Visit>
   workOrders: List<WorkOrder>
+  # Checklist de cada visita do recorte que tem checklist.
+  checklists: List<VisitChecklist>

@@ -1067,6 +1067,18 @@ class FakeGateway implements Gateway {
       if (v.workOrderId == workOrderId) v,
   ];
 
+  /// Checklists respondidos (visitChecklistList), para o detalhe da OS.
+  final visitChecklistList = <VisitChecklist>[];
+
+  @override
+  Future<List<VisitChecklist>> checklistsOfWorkOrder(UuidValue workOrderId) async {
+    _maybeFail('checklistsOfWorkOrder');
+    return [
+      for (final c in visitChecklistList)
+        if (c.response?.workOrderId == workOrderId) c,
+    ];
+  }
+
   @override
   Future<Visit> scheduleVisit(UuidValue workOrderId, VisitInput input) async {
     _maybeFail('scheduleVisit');
