@@ -1,0 +1,6 @@
+# Erro de uma linha da importação: linha, coluna da planilha e mensagem.
+class: CustomerImportError
+fields:
+  line: int
+  column: String
+  message: String

@@ -16,6 +16,7 @@ import 'package:plataforma_os_client/src/protocol/assets/models/qr_tag.dart' as 
 import 'package:plataforma_os_client/src/protocol/assets/models/qr_tag_batch.dart' as _ic9pb02v;
 import 'package:plataforma_os_client/src/protocol/catalog/models/product_summary.dart' as _ihgw7zuo;
 import 'package:plataforma_os_client/src/protocol/customers/models/customer_contact.dart' as _iicdz276;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_import_row.dart' as _i2vmk5z7;
 import 'package:plataforma_os_client/src/protocol/customers/models/customer_site.dart' as _iq0mn52n;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/assignable_role.dart' as _i2g1699a;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/tenant_user.dart' as _i8ihd43z;
@@ -43,6 +44,9 @@ import 'catalog/models/product_summary.dart' as _i4geouqi;
 import 'customers/models/customer.dart' as _in2ysqih;
 import 'customers/models/customer_contact.dart' as _iyonel9d;
 import 'customers/models/customer_contact_input.dart' as _i8ppoe04;
+import 'customers/models/customer_import_error.dart' as _iyqwgync;
+import 'customers/models/customer_import_report.dart' as _idmyhu6b;
+import 'customers/models/customer_import_row.dart' as _i7qzxfir;
 import 'customers/models/customer_input.dart' as _i54pcl9h;
 import 'customers/models/customer_page.dart' as _iu4jficl;
 import 'customers/models/customer_site.dart' as _ihhtee09;
@@ -106,6 +110,9 @@ export 'catalog/models/product_summary.dart';
 export 'customers/models/customer.dart';
 export 'customers/models/customer_contact.dart';
 export 'customers/models/customer_contact_input.dart';
+export 'customers/models/customer_import_error.dart';
+export 'customers/models/customer_import_report.dart';
+export 'customers/models/customer_import_row.dart';
 export 'customers/models/customer_input.dart';
 export 'customers/models/customer_page.dart';
 export 'customers/models/customer_site.dart';
@@ -182,6 +189,9 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<_in2ysqih.Customer>,
       _isc.getType<_iyonel9d.CustomerContact>,
       _isc.getType<_i8ppoe04.CustomerContactInput>,
+      _isc.getType<_iyqwgync.CustomerImportError>,
+      _isc.getType<_idmyhu6b.CustomerImportReport>,
+      _isc.getType<_i7qzxfir.CustomerImportRow>,
       _isc.getType<_i54pcl9h.CustomerInput>,
       _isc.getType<_iu4jficl.CustomerPage>,
       _isc.getType<_ihhtee09.CustomerSite>,
@@ -245,6 +255,9 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<_in2ysqih.Customer?>,
       _isc.getType<_iyonel9d.CustomerContact?>,
       _isc.getType<_i8ppoe04.CustomerContactInput?>,
+      _isc.getType<_iyqwgync.CustomerImportError?>,
+      _isc.getType<_idmyhu6b.CustomerImportReport?>,
+      _isc.getType<_i7qzxfir.CustomerImportRow?>,
       _isc.getType<_i54pcl9h.CustomerInput?>,
       _isc.getType<_iu4jficl.CustomerPage?>,
       _isc.getType<_ihhtee09.CustomerSite?>,
@@ -296,6 +309,7 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<_iduxn53h.WorkOrderType?>,
       _isc.getType<_iolj0kda.WorkOrderTypeInput?>,
       _isc.getType<List<_ib3mptol.Asset>>,
+      _isc.getType<List<_iyqwgync.CustomerImportError>>,
       _isc.getType<List<_in2ysqih.Customer>>,
       _isc.getType<List<String>>,
       _isc.getType<List<_irfplgys.DepreciationLine>>,
@@ -315,6 +329,7 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<List<_ihgw7zuo.ProductSummary>>,
       _isc.getType<List<_iq0mn52n.CustomerSite>>,
       _isc.getType<List<_iicdz276.CustomerContact>>,
+      _isc.getType<List<_i2vmk5z7.CustomerImportRow>>,
       _isc.getType<List<_i11upz4e.TenantSummary>>,
       _isc.getType<List<_i2g1699a.AssignableRole>>,
       _isc.getType<List<_i8ihd43z.TenantUser>>,
@@ -346,6 +361,9 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       'Customer',
       'CustomerContact',
       'CustomerContactInput',
+      'CustomerImportError',
+      'CustomerImportReport',
+      'CustomerImportRow',
       'CustomerInput',
       'CustomerPage',
       'CustomerSite',
@@ -460,6 +478,15 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     }
     if (t == _i8ppoe04.CustomerContactInput) {
       return _i8ppoe04.CustomerContactInput.fromJson(data) as T;
+    }
+    if (t == _iyqwgync.CustomerImportError) {
+      return _iyqwgync.CustomerImportError.fromJson(data) as T;
+    }
+    if (t == _idmyhu6b.CustomerImportReport) {
+      return _idmyhu6b.CustomerImportReport.fromJson(data) as T;
+    }
+    if (t == _i7qzxfir.CustomerImportRow) {
+      return _i7qzxfir.CustomerImportRow.fromJson(data) as T;
     }
     if (t == _i54pcl9h.CustomerInput) {
       return _i54pcl9h.CustomerInput.fromJson(data) as T;
@@ -650,6 +677,15 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     if (t == _isc.getType<_i8ppoe04.CustomerContactInput?>()) {
       return (data != null ? _i8ppoe04.CustomerContactInput.fromJson(data) : null) as T;
     }
+    if (t == _isc.getType<_iyqwgync.CustomerImportError?>()) {
+      return (data != null ? _iyqwgync.CustomerImportError.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_idmyhu6b.CustomerImportReport?>()) {
+      return (data != null ? _idmyhu6b.CustomerImportReport.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i7qzxfir.CustomerImportRow?>()) {
+      return (data != null ? _i7qzxfir.CustomerImportRow.fromJson(data) : null) as T;
+    }
     if (t == _isc.getType<_i54pcl9h.CustomerInput?>()) {
       return (data != null ? _i54pcl9h.CustomerInput.fromJson(data) : null) as T;
     }
@@ -803,6 +839,9 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     if (t == List<_ib3mptol.Asset>) {
       return (data as List).map((e) => deserialize<_ib3mptol.Asset>(e)).toList() as T;
     }
+    if (t == List<_iyqwgync.CustomerImportError>) {
+      return (data as List).map((e) => deserialize<_iyqwgync.CustomerImportError>(e)).toList() as T;
+    }
     if (t == List<_in2ysqih.Customer>) {
       return (data as List).map((e) => deserialize<_in2ysqih.Customer>(e)).toList() as T;
     }
@@ -862,6 +901,9 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     }
     if (t == List<_iicdz276.CustomerContact>) {
       return (data as List).map((e) => deserialize<_iicdz276.CustomerContact>(e)).toList() as T;
+    }
+    if (t == List<_i2vmk5z7.CustomerImportRow>) {
+      return (data as List).map((e) => deserialize<_i2vmk5z7.CustomerImportRow>(e)).toList() as T;
     }
     if (t == List<_i11upz4e.TenantSummary>) {
       return (data as List).map((e) => deserialize<_i11upz4e.TenantSummary>(e)).toList() as T;
@@ -927,6 +969,9 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _in2ysqih.Customer => 'Customer',
       _iyonel9d.CustomerContact => 'CustomerContact',
       _i8ppoe04.CustomerContactInput => 'CustomerContactInput',
+      _iyqwgync.CustomerImportError => 'CustomerImportError',
+      _idmyhu6b.CustomerImportReport => 'CustomerImportReport',
+      _i7qzxfir.CustomerImportRow => 'CustomerImportRow',
       _i54pcl9h.CustomerInput => 'CustomerInput',
       _iu4jficl.CustomerPage => 'CustomerPage',
       _ihhtee09.CustomerSite => 'CustomerSite',
@@ -1017,6 +1062,12 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
         return 'CustomerContact';
       case _i8ppoe04.CustomerContactInput():
         return 'CustomerContactInput';
+      case _iyqwgync.CustomerImportError():
+        return 'CustomerImportError';
+      case _idmyhu6b.CustomerImportReport():
+        return 'CustomerImportReport';
+      case _i7qzxfir.CustomerImportRow():
+        return 'CustomerImportRow';
       case _i54pcl9h.CustomerInput():
         return 'CustomerInput';
       case _iu4jficl.CustomerPage():
@@ -1173,6 +1224,15 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     }
     if (dataClassName == 'CustomerContactInput') {
       return deserialize<_i8ppoe04.CustomerContactInput>(data['data']);
+    }
+    if (dataClassName == 'CustomerImportError') {
+      return deserialize<_iyqwgync.CustomerImportError>(data['data']);
+    }
+    if (dataClassName == 'CustomerImportReport') {
+      return deserialize<_idmyhu6b.CustomerImportReport>(data['data']);
+    }
+    if (dataClassName == 'CustomerImportRow') {
+      return deserialize<_i7qzxfir.CustomerImportRow>(data['data']);
     }
     if (dataClassName == 'CustomerInput') {
       return deserialize<_i54pcl9h.CustomerInput>(data['data']);

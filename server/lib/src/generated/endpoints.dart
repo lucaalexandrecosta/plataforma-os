@@ -15,6 +15,7 @@ import 'package:plataforma_os_server/src/generated/assets/models/asset_install_i
 import 'package:plataforma_os_server/src/generated/assets/models/asset_withdraw_input.dart' as _ilt8ymra;
 import 'package:plataforma_os_server/src/generated/catalog/models/product_input.dart' as _iku7g2we;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_contact_input.dart' as _i0rc22zw;
+import 'package:plataforma_os_server/src/generated/customers/models/customer_import_row.dart' as _is65d1g1;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_input.dart' as _iw3fixvn;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_site_input.dart' as _iv6e8owq;
 import 'package:plataforma_os_server/src/generated/patrimony/models/depreciation_profile_input.dart' as _ims07aom;
@@ -809,6 +810,30 @@ class Endpoints extends _is.EndpointDispatch {
                 params['id'],
                 params['expectedVersion'],
                 params['input'],
+              ),
+        ),
+        'importRows': _is.MethodConnector(
+          name: 'importRows',
+          params: {
+            'rows': _is.ParameterDescription(
+              name: 'rows',
+              type: _is.getType<List<_is65d1g1.CustomerImportRow>>(),
+              nullable: false,
+            ),
+            'dryRun': _is.ParameterDescription(
+              name: 'dryRun',
+              type: _is.getType<bool>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['customers'] as _i2n45wl3.CustomersEndpoint).importRows(
+                session,
+                params['rows'],
+                params['dryRun'],
               ),
         ),
       },

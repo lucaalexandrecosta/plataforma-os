@@ -1,0 +1,14 @@
+# Resultado de customers.importRows. Com erros, nada é gravado.
+class: CustomerImportReport
+fields:
+  dryRun: bool
+  # Gravou (sem erros e sem dryRun).
+  applied: bool
+  rows: int
+  customersCreated: int
+  customersExisting: int
+  sitesCreated: int
+  sitesExisting: int
+  contactsCreated: int
+  contactsExisting: int
+  errors: List<CustomerImportError>

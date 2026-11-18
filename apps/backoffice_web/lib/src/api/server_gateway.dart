@@ -230,6 +230,10 @@ class ServerGateway implements Gateway {
       _guard(() => _tenant.customers.updateContact(contact.id, contact.version, input));
 
   @override
+  Future<CustomerImportReport> importCustomers(List<CustomerImportRow> rows, {required bool dryRun}) =>
+      _guard(() => _tenant.customers.importRows(rows, dryRun));
+
+  @override
   Future<List<Branch>> branches({bool includeInactive = false}) =>
       _guard(() => _tenant.branches.list(includeInactive: includeInactive ? true : null));
 

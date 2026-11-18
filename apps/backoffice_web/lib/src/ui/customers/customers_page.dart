@@ -8,6 +8,7 @@ import '../common/errors.dart';
 import '../common/format.dart';
 import '../common/paged_table.dart';
 import 'customer_dialogs.dart';
+import 'import_customers_dialog.dart';
 
 /// Lista de clientes com busca por nome, código ou documento.
 class CustomersPage extends ConsumerStatefulWidget {
@@ -51,6 +52,11 @@ class _CustomersPageState extends ConsumerState<CustomersPage> {
     if (saved != null && mounted) context.go('/clientes/${saved.id}');
   }
 
+  Future<void> _import() async {
+    final done = await showDialog<bool>(context: context, builder: (_) => const ImportCustomersDialog());
+    if (done == true && mounted) _reload();
+  }
+
   @override
   Widget build(BuildContext context) {
     final session = ref.watch(sessionProvider);
@@ -86,6 +92,13 @@ class _CustomersPageState extends ConsumerState<CustomersPage> {
             ),
           ],
           actions: [
+            if (canManage)
+              OutlinedButton.icon(
+                key: const Key('customer-import'),
+                onPressed: _import,
+                icon: const Icon(Icons.upload_file_outlined),
+                label: const Text('Importar planilha'),
+              ),
             if (canManage)
               FilledButton.icon(
                 key: const Key('customer-new'),

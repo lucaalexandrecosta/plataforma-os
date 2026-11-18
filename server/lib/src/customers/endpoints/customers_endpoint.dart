@@ -3,6 +3,7 @@ import 'package:serverpod/serverpod.dart';
 import '../../generated/protocol.dart';
 import '../../platform/endpoints/endpoint_bases.dart';
 import '../internal/customer_contacts.dart';
+import '../internal/customer_import.dart';
 import '../internal/customers.dart';
 
 /// `customers.*` — clientes, unidades e contatos. Leitura para quem mexe com OS ou
@@ -53,4 +54,9 @@ class CustomersEndpoint extends StaffEndpoint {
     int expectedVersion,
     CustomerContactInput input,
   ) => CustomerContacts.update(session, id, expectedVersion, input);
+
+  /// Importa clientes, unidades e contatos de uma planilha. Com [dryRun] só
+  /// valida; com algum erro, nada é gravado (veja `CustomerImportReport`).
+  Future<CustomerImportReport> importRows(Session session, List<CustomerImportRow> rows, bool dryRun) =>
+      CustomerImport.importRows(session, rows, dryRun: dryRun);
 }
