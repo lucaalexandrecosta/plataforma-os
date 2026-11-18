@@ -60,6 +60,7 @@ abstract interface class Gateway {
   Future<List<CustomerContact>> customerContacts(UuidValue customerId);
   Future<CustomerContact> createCustomerContact(UuidValue customerId, CustomerContactInput input);
   Future<CustomerContact> updateCustomerContact(CustomerContact contact, CustomerContactInput input);
+  Future<CustomerImportReport> importCustomers(List<CustomerImportRow> rows, {required bool dryRun});
 
   // ----------------------------------------------------------- cadastros
   Future<List<Branch>> branches({bool includeInactive});

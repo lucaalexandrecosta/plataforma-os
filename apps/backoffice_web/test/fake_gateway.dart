@@ -507,6 +507,45 @@ class FakeGateway implements Gateway {
     return c;
   }
 
+  /// Importação simplificada: só exige nome e cria clientes novos.
+  final importCalls = <(int, bool)>[];
+
+  @override
+  Future<CustomerImportReport> importCustomers(List<CustomerImportRow> rows, {required bool dryRun}) async {
+    _maybeFail('importCustomers');
+    importCalls.add((rows.length, dryRun));
+    final errors = [
+      for (final r in rows)
+        if (r.name == null) CustomerImportError(line: r.line, column: 'nome', message: 'Informe o nome.'),
+    ];
+    final apply = errors.isEmpty && !dryRun;
+    if (apply) {
+      for (final r in rows) {
+        await createCustomer(
+          CustomerInput(
+            code: r.code,
+            name: r.name!,
+            personType: 'company',
+            documentNumber: r.documentNumber,
+            isActive: true,
+          ),
+        );
+      }
+    }
+    return CustomerImportReport(
+      dryRun: dryRun,
+      applied: apply,
+      rows: rows.length,
+      customersCreated: rows.length,
+      customersExisting: 0,
+      sitesCreated: rows.where((r) => r.siteName != null).length,
+      sitesExisting: 0,
+      contactsCreated: rows.where((r) => r.contactName != null).length,
+      contactsExisting: 0,
+      errors: errors,
+    );
+  }
+
   // cadastros
   @override
   Future<List<Branch>> branches({bool includeInactive = false}) async {

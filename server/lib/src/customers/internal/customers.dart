@@ -68,18 +68,7 @@ abstract final class Customers {
     await Authorization.require(session, managePermission);
     final params = _validate(session, input);
     final id = const Uuid().v7obj();
-    await _write(
-      session,
-      () => session.db.unsafeExecute(
-        'INSERT INTO app.customers (id, tenant_id, code, name, trade_name, person_type, document_type, '
-        '                           document_number, state_registration, email, phone, notes, is_active, '
-        '                           deactivated_at) '
-        'VALUES (@id::uuid, app.current_tenant_id(), @code, @name, @tradeName, @personType, @documentType, '
-        '        @documentNumber, @stateRegistration, @email, @phone, @notes, @isActive, '
-        '        CASE WHEN @isActive THEN NULL ELSE now() END)',
-        parameters: QueryParameters.named({'id': id.uuid, ...params}),
-      ),
-    );
+    await _write(session, () => insertCustomer(session, id, params));
     return (await _find(session, id))!;
   }
 
@@ -136,18 +125,7 @@ abstract final class Customers {
     if (await _find(session, customerId) == null) throw ApiErrors.notFound(session);
     final params = _validateSite(session, input);
     final id = const Uuid().v7obj();
-    await _write(
-      session,
-      () => session.db.unsafeExecute(
-        'INSERT INTO app.customer_sites (id, tenant_id, customer_id, code, name, street, street_number, complement, '
-        '                                district, city, state, postal_code, latitude, longitude, phone, '
-        '                                access_notes, is_active) '
-        'VALUES (@id::uuid, app.current_tenant_id(), @customerId::uuid, @code, @name, @street, @streetNumber, '
-        '        @complement, @district, @city, @state, @postalCode, @latitude, @longitude, @phone, @accessNotes, '
-        '        @isActive)',
-        parameters: QueryParameters.named({'id': id.uuid, 'customerId': customerId.uuid, ...params}),
-      ),
-    );
+    await _write(session, () => insertSite(session, id, customerId, params));
     return (await findSite(session, id))!;
   }
 
@@ -176,6 +154,43 @@ abstract final class Customers {
     if (changed == 0) throw ApiErrors.versionMismatch(session, (await findSite(session, id))!.version);
     return (await findSite(session, id))!;
   }
+
+  // ------------------------------------------- validação e gravação (módulo)
+
+  /// Insere um cliente já validado por [checkCustomer].
+  static Future<int> insertCustomer(
+    Session session,
+    UuidValue id,
+    Map<String, Object?> params, {
+    Transaction? transaction,
+  }) => session.db.unsafeExecute(
+    'INSERT INTO app.customers (id, tenant_id, code, name, trade_name, person_type, document_type, '
+    '                           document_number, state_registration, email, phone, notes, is_active, '
+    '                           deactivated_at) '
+    'VALUES (@id::uuid, app.current_tenant_id(), @code, @name, @tradeName, @personType, @documentType, '
+    '        @documentNumber, @stateRegistration, @email, @phone, @notes, @isActive, '
+    '        CASE WHEN @isActive THEN NULL ELSE now() END)',
+    parameters: QueryParameters.named({'id': id.uuid, ...params}),
+    transaction: transaction,
+  );
+
+  /// Insere uma unidade já validada por [checkSite].
+  static Future<int> insertSite(
+    Session session,
+    UuidValue id,
+    UuidValue customerId,
+    Map<String, Object?> params, {
+    Transaction? transaction,
+  }) => session.db.unsafeExecute(
+    'INSERT INTO app.customer_sites (id, tenant_id, customer_id, code, name, street, street_number, complement, '
+    '                                district, city, state, postal_code, latitude, longitude, phone, '
+    '                                access_notes, is_active) '
+    'VALUES (@id::uuid, app.current_tenant_id(), @customerId::uuid, @code, @name, @street, @streetNumber, '
+    '        @complement, @district, @city, @state, @postalCode, @latitude, @longitude, @phone, @accessNotes, '
+    '        @isActive)',
+    parameters: QueryParameters.named({'id': id.uuid, 'customerId': customerId.uuid, ...params}),
+    transaction: transaction,
+  );
 
   // ------------------------------------------------------------------ internos
 
@@ -206,6 +221,19 @@ abstract final class Customers {
   }
 
   static Map<String, Object?> _validate(Session session, CustomerInput input) {
+    final (params, errors) = checkCustomer(input);
+    if (errors.isNotEmpty) throw ApiErrors.validation(session, errors);
+    return params;
+  }
+
+  static Map<String, Object?> _validateSite(Session session, CustomerSiteInput input) {
+    final (params, errors) = checkSite(input);
+    if (errors.isNotEmpty) throw ApiErrors.validation(session, errors);
+    return params;
+  }
+
+  /// Valida e normaliza um cliente: parâmetros do INSERT/UPDATE e erros por campo.
+  static (Map<String, Object?>, List<FieldError>) checkCustomer(CustomerInput input) {
     final name = cleanText(input.name);
     final code = cleanText(input.code);
     final email = cleanText(input.email)?.toLowerCase();
@@ -228,23 +256,26 @@ abstract final class Customers {
       if (email != null && !RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email))
         FieldError(path: 'email', code: 'INVALID', message: 'E-mail inválido.'),
     ];
-    if (errors.isNotEmpty) throw ApiErrors.validation(session, errors);
-    return {
-      'code': code,
-      'name': name,
-      'tradeName': cleanText(input.tradeName),
-      'personType': personType,
-      'documentType': !hasDocument ? 'none' : (personType == 'individual' ? 'cpf' : 'cnpj'),
-      'documentNumber': hasDocument ? document : null,
-      'stateRegistration': cleanText(input.stateRegistration),
-      'email': email,
-      'phone': cleanText(input.phone),
-      'notes': cleanText(input.notes),
-      'isActive': input.isActive,
-    };
+    return (
+      {
+        'code': code,
+        'name': name,
+        'tradeName': cleanText(input.tradeName),
+        'personType': personType,
+        'documentType': !hasDocument ? 'none' : (personType == 'individual' ? 'cpf' : 'cnpj'),
+        'documentNumber': hasDocument ? document : null,
+        'stateRegistration': cleanText(input.stateRegistration),
+        'email': email,
+        'phone': cleanText(input.phone),
+        'notes': cleanText(input.notes),
+        'isActive': input.isActive,
+      },
+      errors,
+    );
   }
 
-  static Map<String, Object?> _validateSite(Session session, CustomerSiteInput input) {
+  /// Valida e normaliza uma unidade: parâmetros do INSERT/UPDATE e erros por campo.
+  static (Map<String, Object?>, List<FieldError>) checkSite(CustomerSiteInput input) {
     final name = cleanText(input.name);
     final state = cleanText(input.state)?.toUpperCase();
     final postal = input.postalCode?.replaceAll(RegExp(r'\D'), '');
@@ -263,23 +294,25 @@ abstract final class Customers {
       if (lng != null && (lng < -180 || lng > 180))
         FieldError(path: 'longitude', code: 'INVALID', message: 'Longitude entre -180 e 180.'),
     ];
-    if (errors.isNotEmpty) throw ApiErrors.validation(session, errors);
-    return {
-      'code': cleanText(input.code),
-      'name': name,
-      'street': cleanText(input.street),
-      'streetNumber': cleanText(input.streetNumber),
-      'complement': cleanText(input.complement),
-      'district': cleanText(input.district),
-      'city': cleanText(input.city),
-      'state': state,
-      'postalCode': (postal == null || postal.isEmpty) ? null : postal,
-      'latitude': lat,
-      'longitude': lng,
-      'phone': cleanText(input.phone),
-      'accessNotes': cleanText(input.accessNotes),
-      'isActive': input.isActive,
-    };
+    return (
+      {
+        'code': cleanText(input.code),
+        'name': name,
+        'street': cleanText(input.street),
+        'streetNumber': cleanText(input.streetNumber),
+        'complement': cleanText(input.complement),
+        'district': cleanText(input.district),
+        'city': cleanText(input.city),
+        'state': state,
+        'postalCode': (postal == null || postal.isEmpty) ? null : postal,
+        'latitude': lat,
+        'longitude': lng,
+        'phone': cleanText(input.phone),
+        'accessNotes': cleanText(input.accessNotes),
+        'isActive': input.isActive,
+      },
+      errors,
+    );
   }
 
   static Customer _map(List<Object?> r) => Customer(

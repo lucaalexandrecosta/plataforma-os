@@ -36,13 +36,7 @@ abstract final class CustomerContacts {
     if (await Customers.find(session, customerId) == null) throw ApiErrors.notFound(session);
     final params = await _validate(session, customerId, input);
     final id = const Uuid().v7obj();
-    await session.db.unsafeExecute(
-      'INSERT INTO app.customer_contacts (id, tenant_id, customer_id, customer_site_id, name, email, phone_e164, '
-      '                                   job_title, contact_role, can_open_requests, preferred_channel, is_active) '
-      'VALUES (@id::uuid, app.current_tenant_id(), @customerId::uuid, @siteId::uuid, @name, @email, @phone, '
-      '        @jobTitle, @role, @canOpen, @channel, @isActive)',
-      parameters: QueryParameters.named({'id': id.uuid, 'customerId': customerId.uuid, ...params}),
-    );
+    await insert(session, id, customerId, params);
     return (await _find(session, id))!;
   }
 
@@ -95,21 +89,25 @@ abstract final class CustomerContacts {
     return e164;
   }
 
-  // ------------------------------------------------------------------ internos
-
-  static Future<CustomerContact?> _find(Session session, UuidValue id) async {
-    final rows = await session.db.unsafeQuery(
-      'SELECT $_columns FROM $_from WHERE cc.id = @id::uuid',
-      parameters: QueryParameters.named({'id': id.uuid}),
-    );
-    return rows.isEmpty ? null : _map(rows.first);
-  }
-
-  static Future<Map<String, Object?>> _validate(
+  /// Insere um contato já validado por [check] (`siteId` nos parâmetros).
+  static Future<int> insert(
     Session session,
+    UuidValue id,
     UuidValue customerId,
-    CustomerContactInput input,
-  ) async {
+    Map<String, Object?> params, {
+    Transaction? transaction,
+  }) => session.db.unsafeExecute(
+    'INSERT INTO app.customer_contacts (id, tenant_id, customer_id, customer_site_id, name, email, phone_e164, '
+    '                                   job_title, contact_role, can_open_requests, preferred_channel, is_active) '
+    'VALUES (@id::uuid, app.current_tenant_id(), @customerId::uuid, @siteId::uuid, @name, @email, @phone, '
+    '        @jobTitle, @role, @canOpen, @channel, @isActive)',
+    parameters: QueryParameters.named({'id': id.uuid, 'customerId': customerId.uuid, ...params}),
+    transaction: transaction,
+  );
+
+  /// Valida e normaliza um contato, sem conferir a unidade (que precisa do
+  /// banco): parâmetros do INSERT/UPDATE e erros por campo.
+  static (Map<String, Object?>, List<FieldError>) check(CustomerContactInput input) {
     final name = cleanText(input.name);
     final email = cleanText(input.email)?.toLowerCase();
     final channel = cleanText(input.preferredChannel);
@@ -120,8 +118,6 @@ abstract final class CustomerContacts {
     } on FormatException {
       phoneInvalid = true;
     }
-    final siteId = input.customerSiteId;
-    final site = siteId == null ? null : await Customers.findSite(session, siteId);
     final errors = [
       if (name == null || name.length > 200) FieldError(path: 'name', code: 'REQUIRED', message: 'Informe o nome.'),
       if (email != null && !RegExp(r'^[^@\s]+@[^@\s]+\.[^@\s]+$').hasMatch(email))
@@ -138,21 +134,48 @@ abstract final class CustomerContacts {
         FieldError(path: 'preferredChannel', code: 'NEEDS_PHONE', message: 'Esse canal precisa de telefone.'),
       if (channel == 'email' && email == null)
         FieldError(path: 'preferredChannel', code: 'NEEDS_EMAIL', message: 'Esse canal precisa de e-mail.'),
-      if (siteId != null && (site == null || site.customerId != customerId))
-        FieldError(path: 'customerSiteId', code: 'NOT_FOUND', message: 'Unidade não encontrada neste cliente.'),
     ];
+    return (
+      {
+        'siteId': input.customerSiteId?.uuid,
+        'name': name,
+        'email': email,
+        'phone': phone,
+        'jobTitle': cleanText(input.jobTitle),
+        'role': input.contactRole,
+        'canOpen': input.canOpenRequests,
+        'channel': channel,
+        'isActive': input.isActive,
+      },
+      errors,
+    );
+  }
+
+  // ------------------------------------------------------------------ internos
+
+  static Future<CustomerContact?> _find(Session session, UuidValue id) async {
+    final rows = await session.db.unsafeQuery(
+      'SELECT $_columns FROM $_from WHERE cc.id = @id::uuid',
+      parameters: QueryParameters.named({'id': id.uuid}),
+    );
+    return rows.isEmpty ? null : _map(rows.first);
+  }
+
+  static Future<Map<String, Object?>> _validate(
+    Session session,
+    UuidValue customerId,
+    CustomerContactInput input,
+  ) async {
+    final (params, errors) = check(input);
+    final siteId = input.customerSiteId;
+    final site = siteId == null ? null : await Customers.findSite(session, siteId);
+    if (siteId != null && (site == null || site.customerId != customerId)) {
+      errors.add(
+        FieldError(path: 'customerSiteId', code: 'NOT_FOUND', message: 'Unidade não encontrada neste cliente.'),
+      );
+    }
     if (errors.isNotEmpty) throw ApiErrors.validation(session, errors);
-    return {
-      'siteId': siteId?.uuid,
-      'name': name,
-      'email': email,
-      'phone': phone,
-      'jobTitle': cleanText(input.jobTitle),
-      'role': input.contactRole,
-      'canOpen': input.canOpenRequests,
-      'channel': channel,
-      'isActive': input.isActive,
-    };
+    return params;
   }
 
   static CustomerContact _map(List<Object?> r) => CustomerContact(

@@ -16,6 +16,7 @@ import 'package:plataforma_os_server/src/generated/assets/models/qr_tag.dart' as
 import 'package:plataforma_os_server/src/generated/assets/models/qr_tag_batch.dart' as _i07n19u6;
 import 'package:plataforma_os_server/src/generated/catalog/models/product_summary.dart' as _ico54ik3;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_contact.dart' as _in02tur2;
+import 'package:plataforma_os_server/src/generated/customers/models/customer_import_row.dart' as _is65d1g1;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_site.dart' as _ing115qe;
 import 'package:plataforma_os_server/src/generated/identity_access/models/assignable_role.dart' as _iur1xixc;
 import 'package:plataforma_os_server/src/generated/identity_access/models/tenant_user.dart' as _iqhozu6i;
@@ -44,6 +45,9 @@ import 'catalog/models/product_summary.dart' as _i4geouqi;
 import 'customers/models/customer.dart' as _in2ysqih;
 import 'customers/models/customer_contact.dart' as _iyonel9d;
 import 'customers/models/customer_contact_input.dart' as _i8ppoe04;
+import 'customers/models/customer_import_error.dart' as _iyqwgync;
+import 'customers/models/customer_import_report.dart' as _idmyhu6b;
+import 'customers/models/customer_import_row.dart' as _i7qzxfir;
 import 'customers/models/customer_input.dart' as _i54pcl9h;
 import 'customers/models/customer_page.dart' as _iu4jficl;
 import 'customers/models/customer_site.dart' as _ihhtee09;
@@ -107,6 +111,9 @@ export 'catalog/models/product_summary.dart';
 export 'customers/models/customer.dart';
 export 'customers/models/customer_contact.dart';
 export 'customers/models/customer_contact_input.dart';
+export 'customers/models/customer_import_error.dart';
+export 'customers/models/customer_import_report.dart';
+export 'customers/models/customer_import_row.dart';
 export 'customers/models/customer_input.dart';
 export 'customers/models/customer_page.dart';
 export 'customers/models/customer_site.dart';
@@ -182,6 +189,9 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<_in2ysqih.Customer>,
       _is.getType<_iyonel9d.CustomerContact>,
       _is.getType<_i8ppoe04.CustomerContactInput>,
+      _is.getType<_iyqwgync.CustomerImportError>,
+      _is.getType<_idmyhu6b.CustomerImportReport>,
+      _is.getType<_i7qzxfir.CustomerImportRow>,
       _is.getType<_i54pcl9h.CustomerInput>,
       _is.getType<_iu4jficl.CustomerPage>,
       _is.getType<_ihhtee09.CustomerSite>,
@@ -245,6 +255,9 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<_in2ysqih.Customer?>,
       _is.getType<_iyonel9d.CustomerContact?>,
       _is.getType<_i8ppoe04.CustomerContactInput?>,
+      _is.getType<_iyqwgync.CustomerImportError?>,
+      _is.getType<_idmyhu6b.CustomerImportReport?>,
+      _is.getType<_i7qzxfir.CustomerImportRow?>,
       _is.getType<_i54pcl9h.CustomerInput?>,
       _is.getType<_iu4jficl.CustomerPage?>,
       _is.getType<_ihhtee09.CustomerSite?>,
@@ -296,6 +309,7 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<_iduxn53h.WorkOrderType?>,
       _is.getType<_iolj0kda.WorkOrderTypeInput?>,
       _is.getType<List<_ib3mptol.Asset>>,
+      _is.getType<List<_iyqwgync.CustomerImportError>>,
       _is.getType<List<_in2ysqih.Customer>>,
       _is.getType<List<String>>,
       _is.getType<List<_irfplgys.DepreciationLine>>,
@@ -315,6 +329,7 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<List<_ico54ik3.ProductSummary>>,
       _is.getType<List<_ing115qe.CustomerSite>>,
       _is.getType<List<_in02tur2.CustomerContact>>,
+      _is.getType<List<_is65d1g1.CustomerImportRow>>,
       _is.getType<List<_inphvrgt.TenantSummary>>,
       _is.getType<List<_iur1xixc.AssignableRole>>,
       _is.getType<List<_iqhozu6i.TenantUser>>,
@@ -347,6 +362,9 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       'Customer',
       'CustomerContact',
       'CustomerContactInput',
+      'CustomerImportError',
+      'CustomerImportReport',
+      'CustomerImportRow',
       'CustomerInput',
       'CustomerPage',
       'CustomerSite',
@@ -666,6 +684,15 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == _i8ppoe04.CustomerContactInput) {
       return _i8ppoe04.CustomerContactInput.fromJson(data) as T;
     }
+    if (t == _iyqwgync.CustomerImportError) {
+      return _iyqwgync.CustomerImportError.fromJson(data) as T;
+    }
+    if (t == _idmyhu6b.CustomerImportReport) {
+      return _idmyhu6b.CustomerImportReport.fromJson(data) as T;
+    }
+    if (t == _i7qzxfir.CustomerImportRow) {
+      return _i7qzxfir.CustomerImportRow.fromJson(data) as T;
+    }
     if (t == _i54pcl9h.CustomerInput) {
       return _i54pcl9h.CustomerInput.fromJson(data) as T;
     }
@@ -855,6 +882,15 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == _is.getType<_i8ppoe04.CustomerContactInput?>()) {
       return (data != null ? _i8ppoe04.CustomerContactInput.fromJson(data) : null) as T;
     }
+    if (t == _is.getType<_iyqwgync.CustomerImportError?>()) {
+      return (data != null ? _iyqwgync.CustomerImportError.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_idmyhu6b.CustomerImportReport?>()) {
+      return (data != null ? _idmyhu6b.CustomerImportReport.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i7qzxfir.CustomerImportRow?>()) {
+      return (data != null ? _i7qzxfir.CustomerImportRow.fromJson(data) : null) as T;
+    }
     if (t == _is.getType<_i54pcl9h.CustomerInput?>()) {
       return (data != null ? _i54pcl9h.CustomerInput.fromJson(data) : null) as T;
     }
@@ -1008,6 +1044,9 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == List<_ib3mptol.Asset>) {
       return (data as List).map((e) => deserialize<_ib3mptol.Asset>(e)).toList() as T;
     }
+    if (t == List<_iyqwgync.CustomerImportError>) {
+      return (data as List).map((e) => deserialize<_iyqwgync.CustomerImportError>(e)).toList() as T;
+    }
     if (t == List<_in2ysqih.Customer>) {
       return (data as List).map((e) => deserialize<_in2ysqih.Customer>(e)).toList() as T;
     }
@@ -1067,6 +1106,9 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     }
     if (t == List<_in02tur2.CustomerContact>) {
       return (data as List).map((e) => deserialize<_in02tur2.CustomerContact>(e)).toList() as T;
+    }
+    if (t == List<_is65d1g1.CustomerImportRow>) {
+      return (data as List).map((e) => deserialize<_is65d1g1.CustomerImportRow>(e)).toList() as T;
     }
     if (t == List<_inphvrgt.TenantSummary>) {
       return (data as List).map((e) => deserialize<_inphvrgt.TenantSummary>(e)).toList() as T;
@@ -1132,6 +1174,9 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _in2ysqih.Customer => 'Customer',
       _iyonel9d.CustomerContact => 'CustomerContact',
       _i8ppoe04.CustomerContactInput => 'CustomerContactInput',
+      _iyqwgync.CustomerImportError => 'CustomerImportError',
+      _idmyhu6b.CustomerImportReport => 'CustomerImportReport',
+      _i7qzxfir.CustomerImportRow => 'CustomerImportRow',
       _i54pcl9h.CustomerInput => 'CustomerInput',
       _iu4jficl.CustomerPage => 'CustomerPage',
       _ihhtee09.CustomerSite => 'CustomerSite',
@@ -1222,6 +1267,12 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
         return 'CustomerContact';
       case _i8ppoe04.CustomerContactInput():
         return 'CustomerContactInput';
+      case _iyqwgync.CustomerImportError():
+        return 'CustomerImportError';
+      case _idmyhu6b.CustomerImportReport():
+        return 'CustomerImportReport';
+      case _i7qzxfir.CustomerImportRow():
+        return 'CustomerImportRow';
       case _i54pcl9h.CustomerInput():
         return 'CustomerInput';
       case _iu4jficl.CustomerPage():
@@ -1382,6 +1433,15 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     }
     if (dataClassName == 'CustomerContactInput') {
       return deserialize<_i8ppoe04.CustomerContactInput>(data['data']);
+    }
+    if (dataClassName == 'CustomerImportError') {
+      return deserialize<_iyqwgync.CustomerImportError>(data['data']);
+    }
+    if (dataClassName == 'CustomerImportReport') {
+      return deserialize<_idmyhu6b.CustomerImportReport>(data['data']);
+    }
+    if (dataClassName == 'CustomerImportRow') {
+      return deserialize<_i7qzxfir.CustomerImportRow>(data['data']);
     }
     if (dataClassName == 'CustomerInput') {
       return deserialize<_i54pcl9h.CustomerInput>(data['data']);

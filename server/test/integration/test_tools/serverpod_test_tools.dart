@@ -26,6 +26,8 @@ import 'package:plataforma_os_server/src/generated/catalog/models/product_summar
 import 'package:plataforma_os_server/src/generated/customers/models/customer.dart' as _iejihgcl;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_contact.dart' as _in02tur2;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_contact_input.dart' as _i0rc22zw;
+import 'package:plataforma_os_server/src/generated/customers/models/customer_import_report.dart' as _icd2pnum;
+import 'package:plataforma_os_server/src/generated/customers/models/customer_import_row.dart' as _is65d1g1;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_input.dart' as _iw3fixvn;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_page.dart' as _ivfmmfkq;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_site.dart' as _ing115qe;
@@ -1226,6 +1228,40 @@ class _CustomersEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<_in02tur2.CustomerContact>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_icd2pnum.CustomerImportReport> importRows(
+    _ist.TestSessionBuilder sessionBuilder,
+    List<_is65d1g1.CustomerImportRow> rows,
+    bool dryRun,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'customers',
+        method: 'importRows',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'customers',
+          methodName: 'importRows',
+          parameters: _ist.testObjectToJson({
+            'rows': rows,
+            'dryRun': dryRun,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_icd2pnum.CustomerImportReport>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

@@ -25,6 +25,8 @@ import 'package:plataforma_os_client/src/protocol/catalog/models/product_summary
 import 'package:plataforma_os_client/src/protocol/customers/models/customer.dart' as _isrde2pn;
 import 'package:plataforma_os_client/src/protocol/customers/models/customer_contact.dart' as _iicdz276;
 import 'package:plataforma_os_client/src/protocol/customers/models/customer_contact_input.dart' as _ixru6art;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_import_report.dart' as _ilgud4gt;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_import_row.dart' as _i2vmk5z7;
 import 'package:plataforma_os_client/src/protocol/customers/models/customer_input.dart' as _il30a9yx;
 import 'package:plataforma_os_client/src/protocol/customers/models/customer_page.dart' as _igrzlp6q;
 import 'package:plataforma_os_client/src/protocol/customers/models/customer_site.dart' as _iq0mn52n;
@@ -394,6 +396,20 @@ class EndpointCustomers extends EndpointStaff {
       'id': id,
       'expectedVersion': expectedVersion,
       'input': input,
+    },
+  );
+
+  /// Importa clientes, unidades e contatos de uma planilha. Com [dryRun] só
+  /// valida; com algum erro, nada é gravado (veja `CustomerImportReport`).
+  _ida.Future<_ilgud4gt.CustomerImportReport> importRows(
+    List<_i2vmk5z7.CustomerImportRow> rows,
+    bool dryRun,
+  ) => caller.callServerEndpoint<_ilgud4gt.CustomerImportReport>(
+    'customers',
+    'importRows',
+    {
+      'rows': rows,
+      'dryRun': dryRun,
     },
   );
 }

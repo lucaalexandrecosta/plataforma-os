@@ -1,0 +1,32 @@
+# Linha da planilha de importação de clientes (customers.importRows). Cada
+# linha traz um cliente e, opcionalmente, uma unidade e um contato dele;
+# linhas do mesmo cliente repetem o código (ou o documento, ou o nome).
+class: CustomerImportRow
+fields:
+  # Linha na planilha (para o relatório de erros).
+  line: int
+  code: String?
+  name: String?
+  tradeName: String?
+  # PJ/PF (ou empresa/pessoa física); vazio = pelo tamanho do documento.
+  personType: String?
+  documentNumber: String?
+  stateRegistration: String?
+  email: String?
+  phone: String?
+  notes: String?
+  siteName: String?
+  siteCode: String?
+  postalCode: String?
+  street: String?
+  streetNumber: String?
+  complement: String?
+  district: String?
+  city: String?
+  state: String?
+  sitePhone: String?
+  accessNotes: String?
+  contactName: String?
+  contactPhone: String?
+  contactEmail: String?
+  contactJobTitle: String?

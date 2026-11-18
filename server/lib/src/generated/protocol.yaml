@@ -29,6 +29,7 @@ customers:
   - contacts:
   - createContact:
   - updateContact:
+  - importRows:
 auth:
   - selectTenant:
   - myTenants:
