@@ -38,7 +38,7 @@ abstract final class Storage {
       accessKey: required('s3AccessKey'),
       secretKey: required('s3SecretKey'),
       region: pod.getPassword('s3Region') ?? 'us-east-1',
-      createBucket: pod.runMode == ServerpodRunMode.development || pod.runMode == ServerpodRunMode.test,
+      createBucket: pod.runMode != ServerpodRunMode.production,
     );
   }
 
@@ -79,7 +79,7 @@ class S3ObjectStorage implements ObjectStorage {
   final String secretKey;
   final String region;
 
-  /// Cria o bucket no primeiro uso (dev e teste; em produção ele vem da infra).
+  /// Cria o bucket no primeiro uso (fora de produção; lá ele vem da infra).
   final bool createBucket;
   final http.Client _client;
   final DateTime Function() _clock;

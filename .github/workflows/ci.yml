@@ -127,3 +127,42 @@ jobs:
           dart run bin/main.dart --mode test --role monolith > server.log 2>&1 &
           for i in $(seq 1 60); do curl -fs http://localhost:9080/ >/dev/null 2>&1 && break; sleep 1; done
           dart test test/e2e || (cat server.log && exit 1)
+
+  staging:
+    name: ambiente de testes (imagens Docker e subida do zero)
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Imagens (servidor e proxy com o backoffice)
+        run: |
+          for target in server proxy; do
+            docker buildx build --load -f infra/staging/Dockerfile --target "$target" \
+              --cache-from type=gha,scope=staging --cache-to type=gha,mode=max,scope=staging \
+              -t "plataforma-os/$target:staging" .
+          done
+      - name: Subida do zero, migrações e rotas
+        run: |
+          cat > /tmp/stg.env <<'ENV'
+          PUBLIC_HOST=staging.test
+          POSTGRES_PASSWORD=ciPostgres123
+          APP_DB_PASSWORD=ciApp123
+          S3_SECRET_KEY=ciArquivos123
+          MAILPIT_PASSWORD=ciMail123
+          EMPRESA_SLUG=empresa-ci
+          EMPRESA_NOME=Empresa CI
+          ADMIN_EMAIL=admin@ci.test
+          CARREGAR_DEMO=sim
+          ENV
+          C="docker compose -f infra/staging/compose.yaml --env-file /tmp/stg.env"
+          $C up -d --no-build
+          ok=""
+          for i in $(seq 1 90); do
+            [ "$(curl -s -o /dev/null -w '%{http_code}' http://localhost:8088/api/)" = 200 ] && ok=1 && break
+            sleep 2
+          done
+          $C ps -a
+          [ -n "$ok" ] || { $C logs migrar server; exit 1; }
+          [ "$($C ps -a --format '{{.Service}} {{.ExitCode}}' | awk '$1=="migrar"{print $2}')" = 0 ]
+          curl -fs http://localhost:8088/ | grep -q '<title>'
+          curl -fs -u teste:ciMail123 http://localhost:8088/mail/api/v1/messages >/dev/null

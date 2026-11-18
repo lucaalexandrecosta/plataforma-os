@@ -1,0 +1,155 @@
+# Ambiente de testes completo em Docker: banco, object storage, e-mail de
+# teste, servidor e backoffice atrás de um endereço só. Passo a passo em
+# infra/staging/README.md. Uso (na raiz do repositório):
+#   cp infra/staging/.env.example infra/staging/.env   # e preencha
+#   docker compose -f infra/staging/compose.yaml up -d --build
+#   docker compose -f infra/staging/compose.yaml --profile ngrok up -d   # com túnel
+name: plataforma-os-staging
+
+x-build: &build
+  context: ../..
+  dockerfile: infra/staging/Dockerfile
+
+x-server-env: &server-env
+  SERVERPOD_DATABASE_HOST: postgres
+  SERVERPOD_DATABASE_NAME: plataforma_os
+  SERVERPOD_DATABASE_PASSWORD: ${APP_DB_PASSWORD:?defina APP_DB_PASSWORD no .env}
+  SERVERPOD_API_SERVER_PUBLIC_HOST: ${PUBLIC_HOST:?defina PUBLIC_HOST no .env}
+  SERVERPOD_API_SERVER_PUBLIC_PORT: "443"
+  SERVERPOD_API_SERVER_PUBLIC_SCHEME: https
+  SERVERPOD_PASSWORD_tokenIssuer: https://${PUBLIC_HOST}/api
+  SERVERPOD_PASSWORD_backofficeUrl: https://${PUBLIC_HOST}
+  # Fotos e assinaturas: o servidor fala com o storage pela rede interna e
+  # entrega aos aparelhos URLs no endereço público (rota /arquivos do Caddy).
+  SERVERPOD_PASSWORD_s3Endpoint: http://s3:9000
+  SERVERPOD_PASSWORD_s3PublicEndpoint: https://${PUBLIC_HOST}
+  SERVERPOD_PASSWORD_s3Bucket: arquivos
+  SERVERPOD_PASSWORD_s3AccessKey: plataforma-os
+  SERVERPOD_PASSWORD_s3SecretKey: ${S3_SECRET_KEY:?defina S3_SECRET_KEY no .env}
+  # E-mail: por padrão vai para o Mailpit (https://PUBLIC_HOST/mail). Para
+  # mandar de verdade, troque pelos dados de um SMTP (ver README).
+  SERVERPOD_PASSWORD_smtpHost: ${SMTP_HOST:-mailpit}
+  SERVERPOD_PASSWORD_smtpPort: ${SMTP_PORT:-1025}
+  SERVERPOD_PASSWORD_smtpUsername: ${SMTP_USERNAME:-}
+  SERVERPOD_PASSWORD_smtpPassword: ${SMTP_PASSWORD:-}
+  SERVERPOD_PASSWORD_smtpAllowInsecure: ${SMTP_ALLOW_INSECURE:-true}
+  SERVERPOD_PASSWORD_emailFrom: ${EMAIL_FROM:-nao-responda@plataforma-os.local}
+
+services:
+  postgres:
+    image: postgres:18.1
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?defina POSTGRES_PASSWORD no .env}
+      POSTGRES_DB: plataforma_os
+      TZ: UTC
+    volumes:
+      - banco:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d plataforma_os"]
+      interval: 5s
+      timeout: 3s
+      retries: 30
+
+  s3:
+    image: rustfs/rustfs:1.0.3
+    restart: unless-stopped
+    environment:
+      RUSTFS_ACCESS_KEY: plataforma-os
+      RUSTFS_SECRET_KEY: ${S3_SECRET_KEY}
+      RUSTFS_ADDRESS: ":9000"
+      RUSTFS_CONSOLE_ENABLE: "false"
+    volumes:
+      - arquivos:/data
+
+  mailpit:
+    image: axllent/mailpit:v1.27
+    restart: unless-stopped
+    environment:
+      MP_WEBROOT: mail
+      MP_UI_AUTH: "${MAILPIT_USER:-teste}:${MAILPIT_PASSWORD:?defina MAILPIT_PASSWORD no .env}"
+      MP_MAX_MESSAGES: "2000"
+
+  # Roda e termina: usuários do banco, migrações, empresa inicial.
+  migrar:
+    image: plataforma-os/server:staging
+    build:
+      <<: *build
+      target: server
+    entrypoint: ["/app/scripts/migrar.sh"]
+    environment:
+      <<: *server-env
+      PGHOST: postgres
+      PGUSER: postgres
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+      PGDATABASE: plataforma_os
+      CARREGAR_DEMO: ${CARREGAR_DEMO:-nao}
+      EMPRESA_SLUG: ${EMPRESA_SLUG:-}
+      EMPRESA_NOME: ${EMPRESA_NOME:-}
+      EMPRESA_CNPJ: ${EMPRESA_CNPJ:-}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-}
+      ADMIN_NOME: ${ADMIN_NOME:-}
+    volumes:
+      - segredos:/segredos
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  server:
+    image: plataforma-os/server:staging
+    restart: unless-stopped
+    environment: *server-env
+    volumes:
+      - segredos:/segredos
+    depends_on:
+      migrar:
+        condition: service_completed_successfully
+      s3:
+        condition: service_started
+      mailpit:
+        condition: service_started
+
+  proxy:
+    image: plataforma-os/proxy:staging
+    build:
+      <<: *build
+      target: proxy
+    restart: unless-stopped
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:-:80}
+    ports:
+      - "${HTTP_PORT:-8088}:80"
+      - "${HTTPS_PORT:-8443}:443"
+    volumes:
+      - caddy:/data
+    depends_on:
+      - server
+
+  # Túnel ngrok (domínio fixo grátis): --profile ngrok.
+  ngrok:
+    image: ngrok/ngrok:3
+    profiles: [ngrok]
+    restart: unless-stopped
+    command: ["http", "proxy:80", "--url=https://${PUBLIC_HOST}", "--log=stdout"]
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:-}
+    depends_on:
+      - proxy
+
+  # Túnel Cloudflare com domínio próprio na Cloudflare: --profile cloudflare.
+  cloudflared:
+    image: cloudflare/cloudflared:2026.10.0
+    profiles: [cloudflare]
+    restart: unless-stopped
+    command: ["tunnel", "--no-autoupdate", "run"]
+    environment:
+      TUNNEL_TOKEN: ${CLOUDFLARE_TUNNEL_TOKEN:-}
+    depends_on:
+      - proxy
+
+volumes:
+  banco:
+  arquivos:
+  segredos:
+  caddy:
