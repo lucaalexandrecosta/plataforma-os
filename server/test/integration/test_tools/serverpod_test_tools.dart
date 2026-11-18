@@ -47,6 +47,7 @@ import 'package:plataforma_os_server/src/generated/scheduling/models/technician.
 import 'package:plataforma_os_server/src/generated/scheduling/models/technician_input.dart' as _i4g4d70s;
 import 'package:plataforma_os_server/src/generated/scheduling/models/visit.dart' as _iezjjcq0;
 import 'package:plataforma_os_server/src/generated/scheduling/models/visit_check_in.dart' as _in4grqdw;
+import 'package:plataforma_os_server/src/generated/scheduling/models/visit_checklist.dart' as _iblxfzeg;
 import 'package:plataforma_os_server/src/generated/scheduling/models/visit_finish.dart' as _izl7q3ap;
 import 'package:plataforma_os_server/src/generated/scheduling/models/visit_input.dart' as _isygpo5n;
 import 'package:plataforma_os_server/src/generated/sync/models/device_registration.dart' as _ifayztnr;
@@ -2695,6 +2696,36 @@ class _VisitsEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<List<_iezjjcq0.Visit>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_iblxfzeg.VisitChecklist>> checklistsOfWorkOrder(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue workOrderId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'visits',
+        method: 'checklistsOfWorkOrder',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'visits',
+          methodName: 'checklistsOfWorkOrder',
+          parameters: _ist.testObjectToJson({'workOrderId': workOrderId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_iblxfzeg.VisitChecklist>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

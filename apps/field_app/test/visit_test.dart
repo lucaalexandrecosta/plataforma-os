@@ -224,4 +224,44 @@ void main() {
     expect(find.text('Agendada'), findsOneWidget);
     expect(gateway.pushed, isEmpty);
   });
+
+  testApp('checklist: preenche no aparelho, exige obrigatórios e libera a conclusão', (tester) async {
+    final gateway = FakeGateway()
+      ..addVisit(1, DateTime(2026, 11, 17, 9), status: 'on_site')
+      ..addChecklist(1);
+    await openVisit(tester, gateway);
+    expect(find.text('0 de 4 respondidos · Não iniciado'), findsOneWidget);
+
+    // Concluir sem o checklist é barrado no aparelho.
+    await tapKey(tester, 'act-finish');
+    await tester.enterText(find.byKey(const Key('finish-notes')), 'Troca da borracha');
+    await tapKey(tester, 'dialog-ok');
+    expect(find.text('Envie o checklist antes de concluir a visita.'), findsOneWidget);
+
+    await tapKey(tester, 'visit-checklist');
+    await tester.enterText(find.byKey(const Key('input-temperatura')), '-18');
+    await tester.pumpAndSettle();
+    await tapKey(tester, 'checklist-submit');
+    expect(find.text('Obrigatório.'), findsOneWidget);
+    expect(gateway.pushed, isEmpty);
+
+    await tapKey(tester, 'opt-porta-nok');
+    await tapKey(tester, 'opt-estado-Bom');
+    expect(find.text('3 de 4 respondidos'), findsOneWidget);
+    await tapKey(tester, 'checklist-submit');
+    expect(find.text('Checklist enviado.'), findsWidgets);
+    expect(gateway.pushed.single.type, 'checklist_response.submit');
+    expect(
+      {for (final a in gateway.checklists.values.single.response!.answers) a.itemKey: a.value},
+      {'temperatura': '-18', 'porta': 'nok', 'estado': 'Bom'},
+    );
+
+    await back(tester);
+    expect(find.text('3 de 4 respondidos · Enviado'), findsOneWidget);
+    await tapKey(tester, 'act-finish');
+    await tester.enterText(find.byKey(const Key('finish-notes')), 'Troca da borracha');
+    await tapKey(tester, 'dialog-ok');
+    expect(find.text('Situação da OS: Concluída'), findsOneWidget);
+    expect(gateway.visitNumber(1).outcome, 'resolved');
+  });
 }

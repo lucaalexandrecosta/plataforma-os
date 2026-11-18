@@ -176,3 +176,5 @@ const workOrderCategoryLabels = {
   'teardown': 'Desmontagem',
   'other': 'Outra',
 };
+
+const checklistResponseStatusLabels = {'draft': 'Rascunho', 'submitted': 'Enviado'};

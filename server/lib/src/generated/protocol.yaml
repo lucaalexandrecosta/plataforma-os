@@ -81,6 +81,7 @@ visits:
   - agenda:
   - mine:
   - ofWorkOrder:
+  - checklistsOfWorkOrder:
   - get:
   - schedule:
   - reschedule:

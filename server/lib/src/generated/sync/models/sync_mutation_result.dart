@@ -13,6 +13,7 @@
 import 'package:plataforma_os_server/src/generated/protocol.dart' as _isma42go;
 import 'package:serverpod/serverpod.dart' as _is;
 import '../../scheduling/models/visit.dart' as _in1xgb8o;
+import '../../scheduling/models/visit_checklist.dart' as _il8n53mf;
 
 abstract class SyncMutationResult implements _is.SerializableModel, _is.ProtocolSerialization {
   SyncMutationResult._({
@@ -21,6 +22,7 @@ abstract class SyncMutationResult implements _is.SerializableModel, _is.Protocol
     this.errorCode,
     this.errorMessage,
     this.visit,
+    this.checklist,
   });
 
   factory SyncMutationResult({
@@ -29,6 +31,7 @@ abstract class SyncMutationResult implements _is.SerializableModel, _is.Protocol
     String? errorCode,
     String? errorMessage,
     _in1xgb8o.Visit? visit,
+    _il8n53mf.VisitChecklist? checklist,
   }) = _SyncMutationResultImpl;
 
   factory SyncMutationResult.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -40,6 +43,9 @@ abstract class SyncMutationResult implements _is.SerializableModel, _is.Protocol
       visit: jsonSerialization['visit'] == null
           ? null
           : _isma42go.Protocol().deserialize<_in1xgb8o.Visit>(jsonSerialization['visit']),
+      checklist: jsonSerialization['checklist'] == null
+          ? null
+          : _isma42go.Protocol().deserialize<_il8n53mf.VisitChecklist>(jsonSerialization['checklist']),
     );
   }
 
@@ -53,6 +59,8 @@ abstract class SyncMutationResult implements _is.SerializableModel, _is.Protocol
 
   _in1xgb8o.Visit? visit;
 
+  _il8n53mf.VisitChecklist? checklist;
+
   /// Returns a shallow copy of this [SyncMutationResult]
   /// with some or all fields replaced by the given arguments.
   @_is.useResult
@@ -62,6 +70,7 @@ abstract class SyncMutationResult implements _is.SerializableModel, _is.Protocol
     String? errorCode,
     String? errorMessage,
     _in1xgb8o.Visit? visit = const _UndefinedSyncMutationResult$visit(),
+    _il8n53mf.VisitChecklist? checklist = const _UndefinedSyncMutationResult$checklist(),
   });
   @override
   Map<String, dynamic> toJson() {
@@ -72,6 +81,7 @@ abstract class SyncMutationResult implements _is.SerializableModel, _is.Protocol
       if (errorCode != null) 'errorCode': errorCode,
       if (errorMessage != null) 'errorMessage': errorMessage,
       if (visit != null) 'visit': visit?.toJson(),
+      if (checklist != null) 'checklist': checklist?.toJson(),
     };
   }
 
@@ -84,6 +94,7 @@ abstract class SyncMutationResult implements _is.SerializableModel, _is.Protocol
       if (errorCode != null) 'errorCode': errorCode,
       if (errorMessage != null) 'errorMessage': errorMessage,
       if (visit != null) 'visit': visit?.toJsonForProtocol(),
+      if (checklist != null) 'checklist': checklist?.toJsonForProtocol(),
     };
   }
 
@@ -99,6 +110,10 @@ class _UndefinedSyncMutationResult$visit extends _is.UndefinedSentinel implement
   const _UndefinedSyncMutationResult$visit();
 }
 
+class _UndefinedSyncMutationResult$checklist extends _is.UndefinedSentinel implements _il8n53mf.VisitChecklist {
+  const _UndefinedSyncMutationResult$checklist();
+}
+
 class _SyncMutationResultImpl extends SyncMutationResult {
   _SyncMutationResultImpl({
     required _is.UuidValue mutationId,
@@ -106,12 +121,14 @@ class _SyncMutationResultImpl extends SyncMutationResult {
     String? errorCode,
     String? errorMessage,
     _in1xgb8o.Visit? visit,
+    _il8n53mf.VisitChecklist? checklist,
   }) : super._(
          mutationId: mutationId,
          status: status,
          errorCode: errorCode,
          errorMessage: errorMessage,
          visit: visit,
+         checklist: checklist,
        );
 
   /// Returns a shallow copy of this [SyncMutationResult]
@@ -124,6 +141,7 @@ class _SyncMutationResultImpl extends SyncMutationResult {
     Object? errorCode = _Undefined,
     Object? errorMessage = _Undefined,
     _in1xgb8o.Visit? visit = const _UndefinedSyncMutationResult$visit(),
+    _il8n53mf.VisitChecklist? checklist = const _UndefinedSyncMutationResult$checklist(),
   }) {
     return SyncMutationResult(
       mutationId: mutationId ?? this.mutationId,
@@ -131,6 +149,7 @@ class _SyncMutationResultImpl extends SyncMutationResult {
       errorCode: errorCode is String? ? errorCode : this.errorCode,
       errorMessage: errorMessage is String? ? errorMessage : this.errorMessage,
       visit: visit is _is.UndefinedSentinel ? this.visit?.copyWith() : visit,
+      checklist: checklist is _is.UndefinedSentinel ? this.checklist?.copyWith() : checklist,
     );
   }
 }

@@ -7,6 +7,7 @@ import 'package:plataforma_os_client/plataforma_os_client.dart';
 import 'package:uuid/uuid.dart';
 
 import '../api/gateway.dart';
+import 'checklist_rules.dart';
 import 'database.dart';
 import 'visit_rules.dart';
 
@@ -76,6 +77,40 @@ class FieldStore {
         (r) => r == null ? null : WorkOrder.fromJson(jsonDecode(r.json) as Map<String, dynamic>),
       );
 
+  /// Checklist da visita (nulo se ela não tem), atualizado a cada resposta,
+  /// envio ou sync.
+  Stream<VisitChecklistState?> watchChecklist(UuidValue visitId) async* {
+    yield await checklist(visitId);
+    yield* db
+        .tableUpdates(TableUpdateQuery.onAllTables([db.localChecklists, db.checklistDrafts, db.pendingMutations]))
+        .asyncMap((_) => checklist(visitId));
+  }
+
+  Future<VisitChecklistState?> checklist(UuidValue visitId) async {
+    final row = await (db.select(db.localChecklists)..where((c) => c.visitId.equals(visitId.uuid))).getSingleOrNull();
+    if (row == null) return null;
+    final server = VisitChecklist.fromJson(jsonDecode(row.json) as Map<String, dynamic>);
+    final draft = await _draft(visitId.uuid);
+    final pending = await (db.select(
+      db.pendingMutations,
+    )..where((m) => m.entityId.equals(visitId.uuid) & m.type.equals(checklistSubmitType))).get();
+    final Map<String, ChecklistAnswer> answers;
+    final bool submitted;
+    if (draft != null) {
+      answers = _decodeAnswers(draft.answers);
+      submitted = draft.submitted;
+    } else {
+      answers = {for (final a in server.response?.answers ?? const <ChecklistAnswer>[]) a.itemKey: a};
+      submitted = server.response?.status == 'submitted';
+    }
+    return VisitChecklistState(
+      template: server.template,
+      answers: answers,
+      submitted: submitted,
+      pending: pending.isNotEmpty,
+    );
+  }
+
   /// Situação do sync; emite a atual logo ao ouvir.
   Stream<SyncSummary> watchSummary() async* {
     await _refreshSummary();
@@ -92,6 +127,12 @@ class FieldStore {
   Future<Visit> act(Visit visit, String type, VisitMutationPayload payload) async {
     final now = await _serverNow();
     final stamped = payload.copyWith(occurredAt: payload.occurredAt ?? now);
+    if (type == VisitMutation.finish && stamped.finish?.outcome == 'resolved') {
+      final checklist = await this.checklist(visit.id);
+      if (checklist != null && !checklist.submitted) {
+        throw const GatewayException('Envie o checklist antes de concluir a visita.', code: 'CHECKLIST_REQUIRED');
+      }
+    }
     final updated = await db.transaction(() async {
       final row = await (db.select(db.localVisits)..where((v) => v.id.equals(visit.id.uuid))).getSingleOrNull();
       if (row == null) throw const GatewayException('Esta visita não está mais na sua agenda.', code: 'NOT_FOUND');
@@ -127,6 +168,67 @@ class FieldStore {
     await _refreshSummary();
     unawaited(sync().catchError((_) {}));
     return updated;
+  }
+
+  /// Guarda uma resposta do checklist no aparelho (valor vazio apaga). Mexer
+  /// depois do envio volta o checklist a rascunho: é preciso enviar de novo.
+  Future<void> saveChecklistAnswer(UuidValue visitId, ChecklistAnswer answer) async {
+    await db.transaction(() async {
+      final current = await checklist(visitId);
+      if (current == null) return;
+      final answers = Map.of(current.answers);
+      if (answer.value.trim().isEmpty && (answer.note?.trim().isEmpty ?? true)) {
+        answers.remove(answer.itemKey);
+      } else {
+        answers[answer.itemKey] = answer;
+      }
+      await _writeDraft(visitId.uuid, current.template.id.uuid, answers, submitted: false);
+    });
+  }
+
+  /// Confere o checklist e põe o envio na fila. Com erro, lança
+  /// [GatewayException] com a mensagem de cada item em `fieldErrors`.
+  Future<void> submitChecklist(Visit visit) async {
+    await db.transaction(() async {
+      final current = await checklist(visit.id);
+      if (current == null) {
+        throw const GatewayException('Esta visita não tem checklist.', code: 'NOT_FOUND');
+      }
+      final shown = await (db.select(db.localVisits)..where((v) => v.id.equals(visit.id.uuid))).getSingleOrNull();
+      if (shown == null || !const {'on_site', 'paused'}.contains(_visit(shown.json).status)) {
+        throw const GatewayException(
+          'O checklist é enviado durante a visita, após o check-in.',
+          code: 'CHECK_IN_REQUIRED',
+        );
+      }
+      final (errors, answers) = checkChecklist(current.template, current.answers);
+      if (errors.isNotEmpty) {
+        final missing = current.missing.length;
+        throw GatewayException(
+          missing > 0 ? 'Responda os $missing itens obrigatórios que faltam.' : 'Confira as respostas marcadas.',
+          code: 'VALIDATION_FAILED',
+          fieldErrors: errors,
+        );
+      }
+      await _writeDraft(visit.id.uuid, current.template.id.uuid, {
+        for (final a in answers) a.itemKey: a,
+      }, submitted: true);
+      await db
+          .into(db.pendingMutations)
+          .insert(
+            PendingMutationsCompanion.insert(
+              mutationId: _uuid.v7(),
+              type: checklistSubmitType,
+              entityId: visit.id.uuid,
+              payload: jsonEncode(
+                ChecklistSubmitPayload(checklistTemplateId: current.template.id, answers: answers).toJson(),
+              ),
+              clientTimestamp: _clock().toUtc(),
+            ),
+          );
+    });
+    await _refreshSummary();
+    unawaited(sync().catchError((_) {}));
   }
 
   Future<void> markNoticesRead() async {
@@ -211,9 +313,10 @@ class FieldStore {
           touched.add(sent.entityId);
           await (db.delete(db.pendingMutations)..where((m) => m.mutationId.equals(sent.mutationId))).go();
           if (r.visit case final visit?) await _saveServer(visit);
-          if (r.status == 'rejected' || r.status == 'conflict') {
-            await _notice(sent.entityId, r);
-          }
+          if (r.checklist case final checklist?) await _saveChecklist(checklist);
+          final refused = r.status == 'rejected' || r.status == 'conflict';
+          if (refused) await _notice(sent.entityId, r);
+          if (sent.type == checklistSubmitType) await _settleDraft(sent.entityId, refused: refused);
         }
         for (final id in touched) {
           await _rebuild(id);
@@ -243,6 +346,18 @@ class FieldStore {
       for (final v in page.visits) {
         await _saveServer(v);
         await _rebuild(v.id.uuid);
+      }
+      await db.delete(db.localChecklists).go();
+      for (final c in page.checklists) {
+        await _saveChecklist(c);
+      }
+      final visitIds = {for (final v in await db.select(db.localVisits).get()) v.id};
+      for (final d in await db.select(db.checklistDrafts).get()) {
+        if (!visitIds.contains(d.visitId)) {
+          await (db.delete(db.checklistDrafts)..where((x) => x.visitId.equals(d.visitId))).go();
+        } else {
+          await _settleDraft(d.visitId, refused: false);
+        }
       }
       await db.delete(db.localWorkOrders).go();
       await db.batch((b) {
@@ -292,6 +407,7 @@ class FieldStore {
             .get();
     final now = _clock();
     for (final m in pending) {
+      if (!m.type.startsWith('visit.')) continue;
       try {
         visit = applyVisitMutation(
           visit,
@@ -305,6 +421,56 @@ class FieldStore {
     }
     await _saveDisplayed(id, visit);
   }
+
+  Future<void> _saveChecklist(VisitChecklist c) => db
+      .into(db.localChecklists)
+      .insertOnConflictUpdate(LocalChecklistsCompanion.insert(visitId: c.visitId.uuid, json: jsonEncode(c.toJson())));
+
+  Future<ChecklistDraft?> _draft(String visitId) =>
+      (db.select(db.checklistDrafts)..where((d) => d.visitId.equals(visitId))).getSingleOrNull();
+
+  Future<void> _writeDraft(
+    String visitId,
+    String templateId,
+    Map<String, ChecklistAnswer> answers, {
+    required bool submitted,
+  }) => db
+      .into(db.checklistDrafts)
+      .insertOnConflictUpdate(
+        ChecklistDraftsCompanion.insert(
+          visitId: visitId,
+          templateId: templateId,
+          answers: jsonEncode([for (final a in answers.values) a.toJson()]),
+          submitted: Value(submitted),
+          updatedAt: _clock().toUtc(),
+        ),
+      );
+
+  /// Depois da resposta do servidor a um envio: recusado, o rascunho volta a
+  /// ser editável; aceito (e sem outro envio na fila), o rascunho sai e vale
+  /// o que o servidor guardou.
+  Future<void> _settleDraft(String visitId, {required bool refused}) async {
+    final draft = await _draft(visitId);
+    if (draft == null) return;
+    final queued = await (db.select(
+      db.pendingMutations,
+    )..where((m) => m.entityId.equals(visitId) & m.type.equals(checklistSubmitType))).get();
+    if (queued.isNotEmpty) return;
+    if (refused) {
+      await (db.update(db.checklistDrafts)..where((d) => d.visitId.equals(visitId))).write(
+        const ChecklistDraftsCompanion(submitted: Value(false)),
+      );
+    } else if (draft.submitted) {
+      await (db.delete(db.checklistDrafts)..where((d) => d.visitId.equals(visitId))).go();
+    }
+  }
+
+  static Map<String, ChecklistAnswer> _decodeAnswers(String json) => {
+    for (final a in [
+      for (final e in jsonDecode(json) as List<dynamic>) ChecklistAnswer.fromJson(e as Map<String, dynamic>),
+    ])
+      a.itemKey: a,
+  };
 
   Future<void> _notice(String visitId, SyncMutationResult r) async {
     final number = r.visit?.workOrderNumber;

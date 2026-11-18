@@ -28,6 +28,7 @@ abstract final class TechnicianSync {
     'visit.resume',
     'visit.finish',
   };
+  static const checklistSubmit = 'checklist_response.submit';
 
   /// Erros que dizem que o servidor mudou (e não que a ação era inválida).
   static const _conflictCodes = {'VERSION_MISMATCH', 'VISIT_CANCELLED', 'VISIT_REASSIGNED'};
@@ -54,7 +55,15 @@ abstract final class TechnicianSync {
     final to = today.add(const Duration(days: scopeDaysAhead + 1));
     final visits = await Visits.mine(session, from: from, to: to);
     final workOrders = await WorkOrders.byIds(session, {for (final v in visits) v.workOrderId}.toList());
-    return SyncPullResult(serverTime: now, scopeFrom: from, scopeTo: to, visits: visits, workOrders: workOrders);
+    final checklists = await ChecklistResponses.forVisits(session, [for (final v in visits) v.id]);
+    return SyncPullResult(
+      serverTime: now,
+      scopeFrom: from,
+      scopeTo: to,
+      visits: visits,
+      workOrders: workOrders,
+      checklists: checklists,
+    );
   }
 
   static Future<List<SyncMutationResult>> push(Session session, SyncPushRequest request) async {
@@ -97,12 +106,19 @@ abstract final class TechnicianSync {
         refuse('rejected', 'DEPENDENCY_FAILED', 'Uma ação anterior desta visita não foi aceita.'),
       );
     }
-    if (!_visitTypes.contains(m.type)) {
+    final isChecklist = m.type == checklistSubmit;
+    if (!isChecklist && !_visitTypes.contains(m.type)) {
       return recorded(refuse('rejected', 'UNKNOWN_TYPE', 'Ação desconhecida: ${m.type}.'));
     }
-    final VisitMutationPayload payload;
+    VisitMutationPayload? payload;
+    ChecklistSubmitPayload? checklist;
     try {
-      payload = VisitMutationPayload.fromJson(jsonDecode(m.payload) as Map<String, dynamic>);
+      final json = jsonDecode(m.payload) as Map<String, dynamic>;
+      if (isChecklist) {
+        checklist = ChecklistSubmitPayload.fromJson(json);
+      } else {
+        payload = VisitMutationPayload.fromJson(json);
+      }
     } on Object {
       return recorded(refuse('rejected', 'INVALID_PAYLOAD', 'Dados da ação ilegíveis.'));
     }
@@ -118,8 +134,22 @@ abstract final class TechnicianSync {
     }
 
     try {
+      if (checklist != null) {
+        return await session.db.transaction((tx) async {
+          final saved = await ChecklistResponses.submit(session, visit, me.id, checklist!, tx);
+          final result = SyncMutationResult(
+            mutationId: m.mutationId,
+            status: 'applied',
+            visit: visit,
+            checklist: saved,
+          );
+          await _record(session, deviceId, me, m, result, tx);
+          return result;
+        });
+      }
+      final p = payload!;
       return await session.db.transaction((tx) async {
-        final at = payload.occurredAt;
+        final at = p.occurredAt;
         final v = visit.version;
         final updated = switch (m.type) {
           'visit.start_travel' => await Visits.startTravel(session, visit.id, v, occurredAt: at, transaction: tx),
@@ -127,7 +157,7 @@ abstract final class TechnicianSync {
             session,
             visit.id,
             v,
-            payload.checkIn ?? VisitCheckIn(method: ''),
+            p.checkIn ?? VisitCheckIn(method: ''),
             occurredAt: at,
             transaction: tx,
           ),
@@ -137,7 +167,7 @@ abstract final class TechnicianSync {
             session,
             visit.id,
             v,
-            payload.finish ?? VisitFinish(outcome: ''),
+            p.finish ?? VisitFinish(outcome: ''),
             occurredAt: at,
             transaction: tx,
           ),

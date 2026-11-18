@@ -1663,6 +1663,579 @@ class SyncStateCompanion extends UpdateCompanion<SyncStateData> {
   }
 }
 
+class $LocalChecklistsTable extends LocalChecklists with TableInfo<$LocalChecklistsTable, LocalChecklist> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $LocalChecklistsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _visitIdMeta = const VerificationMeta(
+    'visitId',
+  );
+  @override
+  late final GeneratedColumn<String> visitId = GeneratedColumn<String>(
+    'visit_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _jsonMeta = const VerificationMeta('json');
+  @override
+  late final GeneratedColumn<String> json = GeneratedColumn<String>(
+    'json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [visitId, json];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'local_checklists';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<LocalChecklist> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('visit_id')) {
+      context.handle(
+        _visitIdMeta,
+        visitId.isAcceptableOrUnknown(data['visit_id']!, _visitIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_visitIdMeta);
+    }
+    if (data.containsKey('json')) {
+      context.handle(
+        _jsonMeta,
+        json.isAcceptableOrUnknown(data['json']!, _jsonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_jsonMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {visitId};
+  @override
+  LocalChecklist map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return LocalChecklist(
+      visitId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}visit_id'],
+      )!,
+      json: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}json'],
+      )!,
+    );
+  }
+
+  @override
+  $LocalChecklistsTable createAlias(String alias) {
+    return $LocalChecklistsTable(attachedDatabase, alias);
+  }
+}
+
+class LocalChecklist extends DataClass implements Insertable<LocalChecklist> {
+  final String visitId;
+  final String json;
+  const LocalChecklist({required this.visitId, required this.json});
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['visit_id'] = Variable<String>(visitId);
+    map['json'] = Variable<String>(json);
+    return map;
+  }
+
+  LocalChecklistsCompanion toCompanion(bool nullToAbsent) {
+    return LocalChecklistsCompanion(visitId: Value(visitId), json: Value(json));
+  }
+
+  factory LocalChecklist.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return LocalChecklist(
+      visitId: serializer.fromJson<String>(json['visitId']),
+      json: serializer.fromJson<String>(json['json']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'visitId': serializer.toJson<String>(visitId),
+      'json': serializer.toJson<String>(json),
+    };
+  }
+
+  LocalChecklist copyWith({String? visitId, String? json}) =>
+      LocalChecklist(visitId: visitId ?? this.visitId, json: json ?? this.json);
+  LocalChecklist copyWithCompanion(LocalChecklistsCompanion data) {
+    return LocalChecklist(
+      visitId: data.visitId.present ? data.visitId.value : this.visitId,
+      json: data.json.present ? data.json.value : this.json,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalChecklist(')
+          ..write('visitId: $visitId, ')
+          ..write('json: $json')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(visitId, json);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) || (other is LocalChecklist && other.visitId == this.visitId && other.json == this.json);
+}
+
+class LocalChecklistsCompanion extends UpdateCompanion<LocalChecklist> {
+  final Value<String> visitId;
+  final Value<String> json;
+  final Value<int> rowid;
+  const LocalChecklistsCompanion({
+    this.visitId = const Value.absent(),
+    this.json = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  LocalChecklistsCompanion.insert({
+    required String visitId,
+    required String json,
+    this.rowid = const Value.absent(),
+  }) : visitId = Value(visitId),
+       json = Value(json);
+  static Insertable<LocalChecklist> custom({
+    Expression<String>? visitId,
+    Expression<String>? json,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (visitId != null) 'visit_id': visitId,
+      if (json != null) 'json': json,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  LocalChecklistsCompanion copyWith({
+    Value<String>? visitId,
+    Value<String>? json,
+    Value<int>? rowid,
+  }) {
+    return LocalChecklistsCompanion(
+      visitId: visitId ?? this.visitId,
+      json: json ?? this.json,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (visitId.present) {
+      map['visit_id'] = Variable<String>(visitId.value);
+    }
+    if (json.present) {
+      map['json'] = Variable<String>(json.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('LocalChecklistsCompanion(')
+          ..write('visitId: $visitId, ')
+          ..write('json: $json, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ChecklistDraftsTable extends ChecklistDrafts with TableInfo<$ChecklistDraftsTable, ChecklistDraft> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ChecklistDraftsTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _visitIdMeta = const VerificationMeta(
+    'visitId',
+  );
+  @override
+  late final GeneratedColumn<String> visitId = GeneratedColumn<String>(
+    'visit_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _templateIdMeta = const VerificationMeta(
+    'templateId',
+  );
+  @override
+  late final GeneratedColumn<String> templateId = GeneratedColumn<String>(
+    'template_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _answersMeta = const VerificationMeta(
+    'answers',
+  );
+  @override
+  late final GeneratedColumn<String> answers = GeneratedColumn<String>(
+    'answers',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _submittedMeta = const VerificationMeta(
+    'submitted',
+  );
+  @override
+  late final GeneratedColumn<bool> submitted = GeneratedColumn<bool>(
+    'submitted',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("submitted" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    visitId,
+    templateId,
+    answers,
+    submitted,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'checklist_drafts';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ChecklistDraft> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('visit_id')) {
+      context.handle(
+        _visitIdMeta,
+        visitId.isAcceptableOrUnknown(data['visit_id']!, _visitIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_visitIdMeta);
+    }
+    if (data.containsKey('template_id')) {
+      context.handle(
+        _templateIdMeta,
+        templateId.isAcceptableOrUnknown(data['template_id']!, _templateIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_templateIdMeta);
+    }
+    if (data.containsKey('answers')) {
+      context.handle(
+        _answersMeta,
+        answers.isAcceptableOrUnknown(data['answers']!, _answersMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_answersMeta);
+    }
+    if (data.containsKey('submitted')) {
+      context.handle(
+        _submittedMeta,
+        submitted.isAcceptableOrUnknown(data['submitted']!, _submittedMeta),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {visitId};
+  @override
+  ChecklistDraft map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ChecklistDraft(
+      visitId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}visit_id'],
+      )!,
+      templateId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}template_id'],
+      )!,
+      answers: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}answers'],
+      )!,
+      submitted: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}submitted'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ChecklistDraftsTable createAlias(String alias) {
+    return $ChecklistDraftsTable(attachedDatabase, alias);
+  }
+}
+
+class ChecklistDraft extends DataClass implements Insertable<ChecklistDraft> {
+  final String visitId;
+  final String templateId;
+  final String answers;
+  final bool submitted;
+  final DateTime updatedAt;
+  const ChecklistDraft({
+    required this.visitId,
+    required this.templateId,
+    required this.answers,
+    required this.submitted,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['visit_id'] = Variable<String>(visitId);
+    map['template_id'] = Variable<String>(templateId);
+    map['answers'] = Variable<String>(answers);
+    map['submitted'] = Variable<bool>(submitted);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  ChecklistDraftsCompanion toCompanion(bool nullToAbsent) {
+    return ChecklistDraftsCompanion(
+      visitId: Value(visitId),
+      templateId: Value(templateId),
+      answers: Value(answers),
+      submitted: Value(submitted),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory ChecklistDraft.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ChecklistDraft(
+      visitId: serializer.fromJson<String>(json['visitId']),
+      templateId: serializer.fromJson<String>(json['templateId']),
+      answers: serializer.fromJson<String>(json['answers']),
+      submitted: serializer.fromJson<bool>(json['submitted']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'visitId': serializer.toJson<String>(visitId),
+      'templateId': serializer.toJson<String>(templateId),
+      'answers': serializer.toJson<String>(answers),
+      'submitted': serializer.toJson<bool>(submitted),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  ChecklistDraft copyWith({
+    String? visitId,
+    String? templateId,
+    String? answers,
+    bool? submitted,
+    DateTime? updatedAt,
+  }) => ChecklistDraft(
+    visitId: visitId ?? this.visitId,
+    templateId: templateId ?? this.templateId,
+    answers: answers ?? this.answers,
+    submitted: submitted ?? this.submitted,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  ChecklistDraft copyWithCompanion(ChecklistDraftsCompanion data) {
+    return ChecklistDraft(
+      visitId: data.visitId.present ? data.visitId.value : this.visitId,
+      templateId: data.templateId.present ? data.templateId.value : this.templateId,
+      answers: data.answers.present ? data.answers.value : this.answers,
+      submitted: data.submitted.present ? data.submitted.value : this.submitted,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistDraft(')
+          ..write('visitId: $visitId, ')
+          ..write('templateId: $templateId, ')
+          ..write('answers: $answers, ')
+          ..write('submitted: $submitted, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(visitId, templateId, answers, submitted, updatedAt);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ChecklistDraft &&
+          other.visitId == this.visitId &&
+          other.templateId == this.templateId &&
+          other.answers == this.answers &&
+          other.submitted == this.submitted &&
+          other.updatedAt == this.updatedAt);
+}
+
+class ChecklistDraftsCompanion extends UpdateCompanion<ChecklistDraft> {
+  final Value<String> visitId;
+  final Value<String> templateId;
+  final Value<String> answers;
+  final Value<bool> submitted;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const ChecklistDraftsCompanion({
+    this.visitId = const Value.absent(),
+    this.templateId = const Value.absent(),
+    this.answers = const Value.absent(),
+    this.submitted = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ChecklistDraftsCompanion.insert({
+    required String visitId,
+    required String templateId,
+    required String answers,
+    this.submitted = const Value.absent(),
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : visitId = Value(visitId),
+       templateId = Value(templateId),
+       answers = Value(answers),
+       updatedAt = Value(updatedAt);
+  static Insertable<ChecklistDraft> custom({
+    Expression<String>? visitId,
+    Expression<String>? templateId,
+    Expression<String>? answers,
+    Expression<bool>? submitted,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (visitId != null) 'visit_id': visitId,
+      if (templateId != null) 'template_id': templateId,
+      if (answers != null) 'answers': answers,
+      if (submitted != null) 'submitted': submitted,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ChecklistDraftsCompanion copyWith({
+    Value<String>? visitId,
+    Value<String>? templateId,
+    Value<String>? answers,
+    Value<bool>? submitted,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return ChecklistDraftsCompanion(
+      visitId: visitId ?? this.visitId,
+      templateId: templateId ?? this.templateId,
+      answers: answers ?? this.answers,
+      submitted: submitted ?? this.submitted,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (visitId.present) {
+      map['visit_id'] = Variable<String>(visitId.value);
+    }
+    if (templateId.present) {
+      map['template_id'] = Variable<String>(templateId.value);
+    }
+    if (answers.present) {
+      map['answers'] = Variable<String>(answers.value);
+    }
+    if (submitted.present) {
+      map['submitted'] = Variable<bool>(submitted.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ChecklistDraftsCompanion(')
+          ..write('visitId: $visitId, ')
+          ..write('templateId: $templateId, ')
+          ..write('answers: $answers, ')
+          ..write('submitted: $submitted, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$FieldDatabase extends GeneratedDatabase {
   _$FieldDatabase(QueryExecutor e) : super(e);
   $FieldDatabaseManager get managers => $FieldDatabaseManager(this);
@@ -1675,6 +2248,12 @@ abstract class _$FieldDatabase extends GeneratedDatabase {
   );
   late final $NoticesTable notices = $NoticesTable(this);
   late final $SyncStateTable syncState = $SyncStateTable(this);
+  late final $LocalChecklistsTable localChecklists = $LocalChecklistsTable(
+    this,
+  );
+  late final $ChecklistDraftsTable checklistDrafts = $ChecklistDraftsTable(
+    this,
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables => allSchemaEntities.whereType<TableInfo<Table, Object?>>();
   @override
@@ -1684,6 +2263,8 @@ abstract class _$FieldDatabase extends GeneratedDatabase {
     pendingMutations,
     notices,
     syncState,
+    localChecklists,
+    checklistDrafts,
   ];
 }
 
@@ -2618,6 +3199,347 @@ typedef $$SyncStateTableProcessedTableManager =
       SyncStateData,
       PrefetchHooks Function()
     >;
+typedef $$LocalChecklistsTableCreateCompanionBuilder =
+    LocalChecklistsCompanion Function({
+      required String visitId,
+      required String json,
+      Value<int> rowid,
+    });
+typedef $$LocalChecklistsTableUpdateCompanionBuilder =
+    LocalChecklistsCompanion Function({
+      Value<String> visitId,
+      Value<String> json,
+      Value<int> rowid,
+    });
+
+class $$LocalChecklistsTableFilterComposer extends Composer<_$FieldDatabase, $LocalChecklistsTable> {
+  $$LocalChecklistsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get visitId => $composableBuilder(
+    column: $table.visitId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get json => $composableBuilder(
+    column: $table.json,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$LocalChecklistsTableOrderingComposer extends Composer<_$FieldDatabase, $LocalChecklistsTable> {
+  $$LocalChecklistsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get visitId => $composableBuilder(
+    column: $table.visitId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get json => $composableBuilder(
+    column: $table.json,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$LocalChecklistsTableAnnotationComposer extends Composer<_$FieldDatabase, $LocalChecklistsTable> {
+  $$LocalChecklistsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get visitId => $composableBuilder(column: $table.visitId, builder: (column) => column);
+
+  GeneratedColumn<String> get json => $composableBuilder(column: $table.json, builder: (column) => column);
+}
+
+class $$LocalChecklistsTableTableManager
+    extends
+        RootTableManager<
+          _$FieldDatabase,
+          $LocalChecklistsTable,
+          LocalChecklist,
+          $$LocalChecklistsTableFilterComposer,
+          $$LocalChecklistsTableOrderingComposer,
+          $$LocalChecklistsTableAnnotationComposer,
+          $$LocalChecklistsTableCreateCompanionBuilder,
+          $$LocalChecklistsTableUpdateCompanionBuilder,
+          (
+            LocalChecklist,
+            BaseReferences<_$FieldDatabase, $LocalChecklistsTable, LocalChecklist>,
+          ),
+          LocalChecklist,
+          PrefetchHooks Function()
+        > {
+  $$LocalChecklistsTableTableManager(
+    _$FieldDatabase db,
+    $LocalChecklistsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () => $$LocalChecklistsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$LocalChecklistsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$LocalChecklistsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> visitId = const Value.absent(),
+                Value<String> json = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => LocalChecklistsCompanion(
+                visitId: visitId,
+                json: json,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String visitId,
+                required String json,
+                Value<int> rowid = const Value.absent(),
+              }) => LocalChecklistsCompanion.insert(
+                visitId: visitId,
+                json: json,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$LocalChecklistsTable, LocalChecklist>(table),
+                  BaseReferences<_$FieldDatabase, $LocalChecklistsTable, LocalChecklist>(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$LocalChecklistsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$FieldDatabase,
+      $LocalChecklistsTable,
+      LocalChecklist,
+      $$LocalChecklistsTableFilterComposer,
+      $$LocalChecklistsTableOrderingComposer,
+      $$LocalChecklistsTableAnnotationComposer,
+      $$LocalChecklistsTableCreateCompanionBuilder,
+      $$LocalChecklistsTableUpdateCompanionBuilder,
+      (
+        LocalChecklist,
+        BaseReferences<_$FieldDatabase, $LocalChecklistsTable, LocalChecklist>,
+      ),
+      LocalChecklist,
+      PrefetchHooks Function()
+    >;
+typedef $$ChecklistDraftsTableCreateCompanionBuilder =
+    ChecklistDraftsCompanion Function({
+      required String visitId,
+      required String templateId,
+      required String answers,
+      Value<bool> submitted,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$ChecklistDraftsTableUpdateCompanionBuilder =
+    ChecklistDraftsCompanion Function({
+      Value<String> visitId,
+      Value<String> templateId,
+      Value<String> answers,
+      Value<bool> submitted,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$ChecklistDraftsTableFilterComposer extends Composer<_$FieldDatabase, $ChecklistDraftsTable> {
+  $$ChecklistDraftsTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get visitId => $composableBuilder(
+    column: $table.visitId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get templateId => $composableBuilder(
+    column: $table.templateId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get answers => $composableBuilder(
+    column: $table.answers,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get submitted => $composableBuilder(
+    column: $table.submitted,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ChecklistDraftsTableOrderingComposer extends Composer<_$FieldDatabase, $ChecklistDraftsTable> {
+  $$ChecklistDraftsTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get visitId => $composableBuilder(
+    column: $table.visitId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get templateId => $composableBuilder(
+    column: $table.templateId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get answers => $composableBuilder(
+    column: $table.answers,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get submitted => $composableBuilder(
+    column: $table.submitted,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ChecklistDraftsTableAnnotationComposer extends Composer<_$FieldDatabase, $ChecklistDraftsTable> {
+  $$ChecklistDraftsTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get visitId => $composableBuilder(column: $table.visitId, builder: (column) => column);
+
+  GeneratedColumn<String> get templateId => $composableBuilder(
+    column: $table.templateId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get answers => $composableBuilder(column: $table.answers, builder: (column) => column);
+
+  GeneratedColumn<bool> get submitted => $composableBuilder(column: $table.submitted, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt => $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$ChecklistDraftsTableTableManager
+    extends
+        RootTableManager<
+          _$FieldDatabase,
+          $ChecklistDraftsTable,
+          ChecklistDraft,
+          $$ChecklistDraftsTableFilterComposer,
+          $$ChecklistDraftsTableOrderingComposer,
+          $$ChecklistDraftsTableAnnotationComposer,
+          $$ChecklistDraftsTableCreateCompanionBuilder,
+          $$ChecklistDraftsTableUpdateCompanionBuilder,
+          (
+            ChecklistDraft,
+            BaseReferences<_$FieldDatabase, $ChecklistDraftsTable, ChecklistDraft>,
+          ),
+          ChecklistDraft,
+          PrefetchHooks Function()
+        > {
+  $$ChecklistDraftsTableTableManager(
+    _$FieldDatabase db,
+    $ChecklistDraftsTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () => $$ChecklistDraftsTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () => $$ChecklistDraftsTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () => $$ChecklistDraftsTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> visitId = const Value.absent(),
+                Value<String> templateId = const Value.absent(),
+                Value<String> answers = const Value.absent(),
+                Value<bool> submitted = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ChecklistDraftsCompanion(
+                visitId: visitId,
+                templateId: templateId,
+                answers: answers,
+                submitted: submitted,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String visitId,
+                required String templateId,
+                required String answers,
+                Value<bool> submitted = const Value.absent(),
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ChecklistDraftsCompanion.insert(
+                visitId: visitId,
+                templateId: templateId,
+                answers: answers,
+                submitted: submitted,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable<$ChecklistDraftsTable, ChecklistDraft>(table),
+                  BaseReferences<_$FieldDatabase, $ChecklistDraftsTable, ChecklistDraft>(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ChecklistDraftsTableProcessedTableManager =
+    ProcessedTableManager<
+      _$FieldDatabase,
+      $ChecklistDraftsTable,
+      ChecklistDraft,
+      $$ChecklistDraftsTableFilterComposer,
+      $$ChecklistDraftsTableOrderingComposer,
+      $$ChecklistDraftsTableAnnotationComposer,
+      $$ChecklistDraftsTableCreateCompanionBuilder,
+      $$ChecklistDraftsTableUpdateCompanionBuilder,
+      (
+        ChecklistDraft,
+        BaseReferences<_$FieldDatabase, $ChecklistDraftsTable, ChecklistDraft>,
+      ),
+      ChecklistDraft,
+      PrefetchHooks Function()
+    >;
 
 class $FieldDatabaseManager {
   final _$FieldDatabase _db;
@@ -2629,4 +3551,8 @@ class $FieldDatabaseManager {
       $$PendingMutationsTableTableManager(_db, _db.pendingMutations);
   $$NoticesTableTableManager get notices => $$NoticesTableTableManager(_db, _db.notices);
   $$SyncStateTableTableManager get syncState => $$SyncStateTableTableManager(_db, _db.syncState);
+  $$LocalChecklistsTableTableManager get localChecklists =>
+      $$LocalChecklistsTableTableManager(_db, _db.localChecklists);
+  $$ChecklistDraftsTableTableManager get checklistDrafts =>
+      $$ChecklistDraftsTableTableManager(_db, _db.checklistDrafts);
 }

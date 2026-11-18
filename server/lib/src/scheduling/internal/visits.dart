@@ -8,6 +8,7 @@ import '../../identity_access/identity_access.dart';
 import '../../platform/db/sql_values.dart';
 import '../../platform/errors/api_errors.dart';
 import '../../work_orders/work_orders.dart';
+import 'checklist_responses.dart';
 import 'technicians.dart';
 
 /// Visitas: agenda do despacho (`visits.schedule`) e execução pelo técnico da
@@ -363,6 +364,9 @@ abstract final class Visits {
     }
     if (input.outcome == 'resolved' && notes == null) {
       throw ApiErrors.fieldError(session, 'notes', 'REQUIRED', 'Descreva o que foi feito.');
+    }
+    if (input.outcome == 'resolved' && !await ChecklistResponses.isSatisfied(session, id)) {
+      throw ApiErrors.businessRule(session, 'CHECKLIST_REQUIRED', 'Envie o checklist antes de concluir a visita.');
     }
     if (input.outcome == 'needs_return' && holdReason != null && !_returnHoldReasons.contains(holdReason)) {
       throw ApiErrors.fieldError(session, 'holdReason', 'INVALID', 'Use "aguardando peça" ou "precisa de retorno".');

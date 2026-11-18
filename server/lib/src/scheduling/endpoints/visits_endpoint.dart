@@ -2,6 +2,7 @@ import 'package:serverpod/serverpod.dart';
 
 import '../../generated/protocol.dart';
 import '../../platform/endpoints/endpoint_bases.dart';
+import '../internal/checklist_responses.dart';
 import '../internal/visits.dart';
 
 /// `visits.*` — agenda (despacho) e execução da visita pelo técnico. Toda
@@ -9,7 +10,7 @@ import '../internal/visits.dart';
 /// status atual da OS. Erros: `FORBIDDEN`, `VALIDATION_FAILED`, `NOT_FOUND`,
 /// `VERSION_MISMATCH`, `INVALID_TRANSITION`, `WORK_ORDER_NOT_SCHEDULABLE`,
 /// `VISIT_NOT_SCHEDULED`, `ANOTHER_VISIT_ACTIVE`, `QR_ASSET_MISMATCH`,
-/// `CHECK_IN_REQUIRED`.
+/// `CHECK_IN_REQUIRED`, `CHECKLIST_REQUIRED`.
 class VisitsEndpoint extends StaffEndpoint {
   /// Visitas que começam no período [from, to) (até 62 dias).
   Future<List<Visit>> agenda(
@@ -30,6 +31,10 @@ class VisitsEndpoint extends StaffEndpoint {
   Future<List<Visit>> mine(Session session, DateTime from, DateTime to) => Visits.mine(session, from: from, to: to);
 
   Future<List<Visit>> ofWorkOrder(Session session, UuidValue workOrderId) => Visits.ofWorkOrder(session, workOrderId);
+
+  /// Checklists respondidos nas visitas da OS.
+  Future<List<VisitChecklist>> checklistsOfWorkOrder(Session session, UuidValue workOrderId) =>
+      ChecklistResponses.ofWorkOrder(session, workOrderId);
 
   Future<Visit> get(Session session, UuidValue id) => Visits.get(session, id);
 

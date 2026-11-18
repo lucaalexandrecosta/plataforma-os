@@ -7,6 +7,7 @@ import 'package:serverpod_client/serverpod_client.dart' show UuidValue;
 import 'session/session.dart';
 import 'ui/login_page.dart';
 import 'ui/visits/agenda_page.dart';
+import 'ui/visits/checklist_page.dart';
 import 'ui/visits/visit_page.dart';
 
 /// Rotas do app. O estado da sessão decide para onde ir: fora → `/entrar`;
@@ -43,6 +44,13 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: 'visita/:id',
             builder: (context, state) => VisitPage(id: UuidValue.withValidation(state.pathParameters['id']!)),
+            routes: [
+              GoRoute(
+                path: 'checklist',
+                builder: (context, state) =>
+                    ChecklistPage(visitId: UuidValue.withValidation(state.pathParameters['id']!)),
+              ),
+            ],
           ),
         ],
       ),

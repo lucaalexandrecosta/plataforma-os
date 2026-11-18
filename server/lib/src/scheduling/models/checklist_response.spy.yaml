@@ -1,0 +1,14 @@
+# Respostas de um checklist numa visita (app.checklist_responses), ligadas à
+# versão do modelo. status: draft ou submitted.
+class: ChecklistResponse
+fields:
+  id: UuidValue
+  workOrderId: UuidValue
+  visitId: UuidValue
+  checklistTemplateId: UuidValue
+  templateVersion: int
+  status: String
+  answers: List<ChecklistAnswer>
+  submittedAt: DateTime?
+  submittedByName: String?
+  version: int

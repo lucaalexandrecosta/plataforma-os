@@ -28,6 +28,7 @@ class WorkOrderDetailPage extends ConsumerStatefulWidget {
 class _WorkOrderDetailPageState extends ConsumerState<WorkOrderDetailPage> {
   late Future<WorkOrderDetail> _detail;
   late Future<List<Visit>> _visits;
+  late Future<List<VisitChecklist>> _checklists;
   var _busy = false;
 
   @override
@@ -40,6 +41,7 @@ class _WorkOrderDetailPageState extends ConsumerState<WorkOrderDetailPage> {
     final g = ref.read(gatewayProvider);
     _detail = g.workOrder(widget.id);
     _visits = g.visitsOfWorkOrder(widget.id);
+    _checklists = g.checklistsOfWorkOrder(widget.id);
   }
 
   @override
@@ -247,6 +249,7 @@ class _WorkOrderDetailPageState extends ConsumerState<WorkOrderDetailPage> {
                     _Section(title: 'Dados', children: _fields(context, wo)),
                     const SizedBox(height: 16),
                     _Section(title: 'Visitas', children: [_visitList()]),
+                    _checklistList(),
                   ],
                 );
                 final history = _Section(title: 'Histórico', children: _history(context, detail.history));
@@ -277,6 +280,30 @@ class _WorkOrderDetailPageState extends ConsumerState<WorkOrderDetailPage> {
         children: [
           for (final v in snap.data!) VisitTile(visit: v, showWorkOrder: false, onChanged: _reload),
         ],
+      );
+    },
+  );
+
+  /// Respostas dos checklists das visitas (some quando não há nenhuma).
+  Widget _checklistList() => FutureBuilder<List<VisitChecklist>>(
+    future: _checklists,
+    builder: (context, snap) {
+      if (snap.hasError) {
+        return Padding(padding: const EdgeInsets.only(top: 16), child: Text(errorMessage(snap.error!)));
+      }
+      final list = snap.data;
+      if (list == null || list.isEmpty) return const SizedBox.shrink();
+      return Padding(
+        padding: const EdgeInsets.only(top: 16),
+        child: _Section(
+          title: 'Checklist',
+          children: [
+            for (final (i, c) in list.indexed) ...[
+              if (i > 0) const Divider(height: 24),
+              ChecklistAnswers(checklist: c),
+            ],
+          ],
+        ),
       );
     },
   );
@@ -347,6 +374,52 @@ class _WorkOrderDetailPageState extends ConsumerState<WorkOrderDetailPage> {
         ),
       ),
   ];
+}
+
+/// Respostas de um checklist de visita, na ordem dos itens do modelo.
+class ChecklistAnswers extends StatelessWidget {
+  const ChecklistAnswers({super.key, required this.checklist});
+
+  final VisitChecklist checklist;
+
+  static const _values = {'yes': 'Sim', 'no': 'Não', 'na': 'Não se aplica', 'ok': 'OK', 'nok': 'Não OK'};
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final r = checklist.response;
+    final answers = {for (final a in r?.answers ?? const <ChecklistAnswer>[]) a.itemKey: a};
+    return Column(
+      key: Key('checklist-${checklist.visitId}'),
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Text(
+          '${checklist.template.name} (v${checklist.template.templateVersion}) · visita ${checklist.visitNumber}',
+          style: theme.textTheme.titleSmall,
+        ),
+        Text(
+          [
+            label(checklistResponseStatusLabels, r?.status),
+            if (r?.submittedAt != null) formatDateTime(r!.submittedAt),
+            if (r?.submittedByName != null) r!.submittedByName!,
+          ].join(' · '),
+          style: theme.textTheme.bodySmall?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+        ),
+        const SizedBox(height: 4),
+        for (final item in checklist.template.items)
+          FieldRow(item.label, switch (answers[item.key]) {
+            null => null,
+            final a => [
+              switch (item.type) {
+                'number' => [a.value, ?item.unit].join(' '),
+                _ => _values[a.value] ?? a.value,
+              },
+              ?a.note,
+            ].join(' · '),
+          }),
+      ],
+    );
+  }
 }
 
 class _Section extends StatelessWidget {

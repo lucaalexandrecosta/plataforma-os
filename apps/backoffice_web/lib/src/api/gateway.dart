@@ -124,6 +124,9 @@ abstract interface class Gateway {
   /// Visitas que começam em [from, to) (até 62 dias).
   Future<List<Visit>> agenda(DateTime from, DateTime to, {UuidValue? technicianId, bool includeCancelled});
   Future<List<Visit>> visitsOfWorkOrder(UuidValue workOrderId);
+
+  /// Checklists respondidos nas visitas da OS.
+  Future<List<VisitChecklist>> checklistsOfWorkOrder(UuidValue workOrderId);
   Future<Visit> scheduleVisit(UuidValue workOrderId, VisitInput input);
   Future<Visit> rescheduleVisit(Visit visit, VisitInput input);
   Future<Visit> cancelVisit(Visit visit, String reason);
