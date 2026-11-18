@@ -1,0 +1,40 @@
+# Ambiente de testes/homologação em Docker (infra/staging). Sem segredos aqui:
+# o compose passa endereço público, banco e segredos por variáveis
+# SERVERPOD_* e SERVERPOD_PASSWORD_<nome>; as chaves geradas no primeiro boot
+# ficam em config/passwords.yaml dentro do volume "segredos".
+apiServer:
+  port: 8080
+  publicHost: localhost
+  publicPort: 8080
+  publicScheme: http
+
+insightsServer:
+  port: 8081
+  publicHost: localhost
+  publicPort: 8081
+  publicScheme: http
+
+webServer:
+  port: 8082
+  publicHost: localhost
+  publicPort: 8082
+  publicScheme: http
+
+database:
+  host: postgres
+  port: 5432
+  name: plataforma_os
+  user: app_api
+  requireSsl: false
+  searchPaths: app, public
+
+redis:
+  enabled: false
+  host: localhost
+  port: 6379
+
+maxRequestSize: 1048576
+
+sessionLogs:
+  persistentEnabled: false
+  consoleEnabled: true

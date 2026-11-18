@@ -136,6 +136,7 @@ Caminhos sugeridos: **gestão** — este README → 01 → 11 → 10. **Backend*
 | `packages/depreciation`: motor de depreciação (gerencial e conferência do fiscal), portado do Painel de Depreciação | [packages/depreciation](packages/depreciation) | 21 testes: memória F670 real do Senior campo a campo e paridade com o painel em 200 bens |
 | Servidor Serverpod 4.1.1: interceptor de tenant, tokens ES256, login por e-mail e senha com escolha do tenant, `me.get`/`me.tenants` | [server](server/README.md) | 11 testes unitários + 13 de ponta a ponta no PostgreSQL 18 com o schema completo, incluindo o login real pelo Keycloak; custo do escopo por tenant +0,96 ms (p50) ([relatório do spike S1](docs/spikes/S1-S2-serverpod-rls.md)) |
 | Ambiente local (PostgreSQL 18, Valkey, S3 local com RustFS, Mailpit) e CI | [infra/local](infra/local/README.md), [.github/workflows/ci.yml](.github/workflows/ci.yml) | Compose testado no Docker Desktop; CI ainda não executado (o repositório não tem Git nem remoto) |
+| Ambiente de testes em Docker (servidor, backoffice, banco, arquivos e e-mail atrás de um endereço https; ngrok ou Oracle Always Free) | [infra/staging](infra/staging/README.md) | Job `staging` do CI: imagens e subida do zero |
 
 Ainda não criados: apps Flutter (`apps/*`), `packages/ui_kit`, `packages/sync_engine`, IaC (`infra/modules`, `infra/envs`).
 

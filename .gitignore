@@ -19,6 +19,7 @@ node_modules/
 .env
 *.local.yaml
 infra/local/.data/
+infra/staging/.env
 
 # Sistema
 .DS_Store

@@ -96,7 +96,11 @@ abstract final class Email {
       _sender = SmtpEmailSender(
         host: host,
         port: int.tryParse(pod.getPassword('smtpPort') ?? '') ?? 587,
-        username: pod.getPassword('smtpUsername'),
+        // Vazio = sem autenticação (ex.: o Mailpit do infra/staging).
+        username: switch (pod.getPassword('smtpUsername')) {
+          final u? when u.isNotEmpty => u,
+          _ => null,
+        },
         password: pod.getPassword('smtpPassword'),
         allowInsecure: pod.getPassword('smtpAllowInsecure') == 'true',
         from: from,

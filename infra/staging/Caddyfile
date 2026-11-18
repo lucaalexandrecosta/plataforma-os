@@ -1,0 +1,34 @@
+# Um endereço só para tudo (o túnel ou o domínio apontam para cá):
+#   /api/*       servidor Serverpod (o prefixo sai antes de repassar)
+#   /arquivos/*  object storage (URLs pré-assinadas; o caminho e o Host seguem
+#                intactos, senão a assinatura não confere)
+#   /mail/*      Mailpit (códigos de acesso e convites), com senha
+#   o resto      backoffice (Flutter Web)
+#
+# SITE_ADDRESS=":80" atrás de um túnel (ngrok/Cloudflare), ou o domínio
+# (ex.: minhaos.duckdns.org) num servidor com IP público: aí o Caddy obtém e
+# renova o certificado HTTPS sozinho.
+{$SITE_ADDRESS::80} {
+	encode zstd gzip
+
+	handle_path /api/* {
+		reverse_proxy server:8080
+	}
+
+	handle /arquivos/* {
+		reverse_proxy s3:9000
+	}
+
+	handle /mail* {
+		reverse_proxy mailpit:8025
+	}
+
+	handle {
+		root * /srv/backoffice
+		try_files {path} /index.html
+		file_server
+	}
+
+	header /flutter_service_worker.js Cache-Control "no-cache"
+	header /index.html Cache-Control "no-cache"
+}

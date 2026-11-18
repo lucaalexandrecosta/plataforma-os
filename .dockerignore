@@ -1,0 +1,9 @@
+# Contexto do build da imagem do infra/staging (Dockerfile na pasta infra/staging).
+**/.dart_tool/
+**/build/
+**/node_modules/
+**/.pglite/
+.git/
+server/config/passwords.yaml
+infra/staging/.env
+**/*.log
