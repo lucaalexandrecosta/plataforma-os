@@ -21,6 +21,8 @@ import 'package:plataforma_os_server/src/generated/assets/models/asset_page.dart
 import 'package:plataforma_os_server/src/generated/assets/models/asset_withdraw_input.dart' as _ilt8ymra;
 import 'package:plataforma_os_server/src/generated/assets/models/qr_tag.dart' as _idzaz83i;
 import 'package:plataforma_os_server/src/generated/assets/models/qr_tag_batch.dart' as _i07n19u6;
+import 'package:plataforma_os_server/src/generated/catalog/models/checklist_template.dart' as _inu2ctxp;
+import 'package:plataforma_os_server/src/generated/catalog/models/checklist_template_input.dart' as _ifjv7krc;
 import 'package:plataforma_os_server/src/generated/catalog/models/product_input.dart' as _iku7g2we;
 import 'package:plataforma_os_server/src/generated/catalog/models/product_summary.dart' as _ico54ik3;
 import 'package:plataforma_os_server/src/generated/customers/models/customer.dart' as _iejihgcl;
@@ -203,6 +205,8 @@ class TestEndpoints {
 
   late final _QrTagsEndpoint qrTags;
 
+  late final _ChecklistsEndpoint checklists;
+
   late final _ProductsEndpoint products;
 
   late final _CustomersEndpoint customers;
@@ -243,6 +247,10 @@ class _InternalTestEndpoints extends TestEndpoints implements _ist.InternalTestE
       serializationManager,
     );
     qrTags = _QrTagsEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    checklists = _ChecklistsEndpoint(
       endpoints,
       serializationManager,
     );
@@ -812,6 +820,241 @@ class _QrTagsEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<_idzaz83i.QrTag>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
+class _ChecklistsEndpoint {
+  _ChecklistsEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _is.EndpointDispatch _endpointDispatch;
+
+  final _is.SerializationManager _serializationManager;
+
+  _ida.Future<List<_inu2ctxp.ChecklistTemplate>> list(
+    _ist.TestSessionBuilder sessionBuilder, {
+    bool? includeArchived,
+  }) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'checklists',
+        method: 'list',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'checklists',
+          methodName: 'list',
+          parameters: _ist.testObjectToJson({'includeArchived': includeArchived}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_inu2ctxp.ChecklistTemplate>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_inu2ctxp.ChecklistTemplate> get(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue id,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'checklists',
+        method: 'get',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'checklists',
+          methodName: 'get',
+          parameters: _ist.testObjectToJson({'id': id}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_inu2ctxp.ChecklistTemplate>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_inu2ctxp.ChecklistTemplate> create(
+    _ist.TestSessionBuilder sessionBuilder,
+    _ifjv7krc.ChecklistTemplateInput input,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'checklists',
+        method: 'create',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'checklists',
+          methodName: 'create',
+          parameters: _ist.testObjectToJson({'input': input}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_inu2ctxp.ChecklistTemplate>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_inu2ctxp.ChecklistTemplate> update(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue id,
+    int expectedVersion,
+    _ifjv7krc.ChecklistTemplateInput input,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'checklists',
+        method: 'update',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'checklists',
+          methodName: 'update',
+          parameters: _ist.testObjectToJson({
+            'id': id,
+            'expectedVersion': expectedVersion,
+            'input': input,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_inu2ctxp.ChecklistTemplate>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_inu2ctxp.ChecklistTemplate> publish(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue id,
+    int expectedVersion,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'checklists',
+        method: 'publish',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'checklists',
+          methodName: 'publish',
+          parameters: _ist.testObjectToJson({
+            'id': id,
+            'expectedVersion': expectedVersion,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_inu2ctxp.ChecklistTemplate>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_inu2ctxp.ChecklistTemplate> newVersion(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue id,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'checklists',
+        method: 'newVersion',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'checklists',
+          methodName: 'newVersion',
+          parameters: _ist.testObjectToJson({'id': id}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_inu2ctxp.ChecklistTemplate>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_inu2ctxp.ChecklistTemplate> archive(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue id,
+    int expectedVersion,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'checklists',
+        method: 'archive',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'checklists',
+          methodName: 'archive',
+          parameters: _ist.testObjectToJson({
+            'id': id,
+            'expectedVersion': expectedVersion,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_inu2ctxp.ChecklistTemplate>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

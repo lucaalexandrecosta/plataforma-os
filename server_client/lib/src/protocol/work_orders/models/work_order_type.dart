@@ -22,6 +22,8 @@ abstract class WorkOrderType implements _isc.SerializableModel, _isc.ProtocolSer
     required this.requiresAsset,
     required this.isActive,
     required this.version,
+    this.defaultChecklistTemplateId,
+    this.defaultChecklistName,
   });
 
   factory WorkOrderType({
@@ -33,6 +35,8 @@ abstract class WorkOrderType implements _isc.SerializableModel, _isc.ProtocolSer
     required bool requiresAsset,
     required bool isActive,
     required int version,
+    _isc.UuidValue? defaultChecklistTemplateId,
+    String? defaultChecklistName,
   }) = _WorkOrderTypeImpl;
 
   factory WorkOrderType.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -45,6 +49,10 @@ abstract class WorkOrderType implements _isc.SerializableModel, _isc.ProtocolSer
       requiresAsset: _isc.BoolJsonExtension.fromJson(jsonSerialization['requiresAsset']),
       isActive: _isc.BoolJsonExtension.fromJson(jsonSerialization['isActive']),
       version: jsonSerialization['version'] as int,
+      defaultChecklistTemplateId: jsonSerialization['defaultChecklistTemplateId'] == null
+          ? null
+          : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['defaultChecklistTemplateId']),
+      defaultChecklistName: jsonSerialization['defaultChecklistName'] as String?,
     );
   }
 
@@ -64,6 +72,10 @@ abstract class WorkOrderType implements _isc.SerializableModel, _isc.ProtocolSer
 
   int version;
 
+  _isc.UuidValue? defaultChecklistTemplateId;
+
+  String? defaultChecklistName;
+
   /// Returns a shallow copy of this [WorkOrderType]
   /// with some or all fields replaced by the given arguments.
   @_isc.useResult
@@ -76,6 +88,8 @@ abstract class WorkOrderType implements _isc.SerializableModel, _isc.ProtocolSer
     bool? requiresAsset,
     bool? isActive,
     int? version,
+    _isc.UuidValue? defaultChecklistTemplateId = const _isc.$UndefinedUuidValue(),
+    String? defaultChecklistName,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -89,6 +103,8 @@ abstract class WorkOrderType implements _isc.SerializableModel, _isc.ProtocolSer
       'requiresAsset': requiresAsset,
       'isActive': isActive,
       'version': version,
+      if (defaultChecklistTemplateId != null) 'defaultChecklistTemplateId': defaultChecklistTemplateId?.toJson(),
+      if (defaultChecklistName != null) 'defaultChecklistName': defaultChecklistName,
     };
   }
 
@@ -104,6 +120,8 @@ abstract class WorkOrderType implements _isc.SerializableModel, _isc.ProtocolSer
       'requiresAsset': requiresAsset,
       'isActive': isActive,
       'version': version,
+      if (defaultChecklistTemplateId != null) 'defaultChecklistTemplateId': defaultChecklistTemplateId?.toJson(),
+      if (defaultChecklistName != null) 'defaultChecklistName': defaultChecklistName,
     };
   }
 
@@ -112,6 +130,8 @@ abstract class WorkOrderType implements _isc.SerializableModel, _isc.ProtocolSer
     return _isc.SerializationManager.encode(this);
   }
 }
+
+class _Undefined {}
 
 class _WorkOrderTypeImpl extends WorkOrderType {
   _WorkOrderTypeImpl({
@@ -123,6 +143,8 @@ class _WorkOrderTypeImpl extends WorkOrderType {
     required bool requiresAsset,
     required bool isActive,
     required int version,
+    _isc.UuidValue? defaultChecklistTemplateId,
+    String? defaultChecklistName,
   }) : super._(
          id: id,
          code: code,
@@ -132,6 +154,8 @@ class _WorkOrderTypeImpl extends WorkOrderType {
          requiresAsset: requiresAsset,
          isActive: isActive,
          version: version,
+         defaultChecklistTemplateId: defaultChecklistTemplateId,
+         defaultChecklistName: defaultChecklistName,
        );
 
   /// Returns a shallow copy of this [WorkOrderType]
@@ -147,6 +171,8 @@ class _WorkOrderTypeImpl extends WorkOrderType {
     bool? requiresAsset,
     bool? isActive,
     int? version,
+    _isc.UuidValue? defaultChecklistTemplateId = const _isc.$UndefinedUuidValue(),
+    Object? defaultChecklistName = _Undefined,
   }) {
     return WorkOrderType(
       id: id ?? this.id,
@@ -157,6 +183,10 @@ class _WorkOrderTypeImpl extends WorkOrderType {
       requiresAsset: requiresAsset ?? this.requiresAsset,
       isActive: isActive ?? this.isActive,
       version: version ?? this.version,
+      defaultChecklistTemplateId: defaultChecklistTemplateId is _isc.UndefinedSentinel
+          ? this.defaultChecklistTemplateId
+          : defaultChecklistTemplateId,
+      defaultChecklistName: defaultChecklistName is String? ? defaultChecklistName : this.defaultChecklistName,
     );
   }
 }

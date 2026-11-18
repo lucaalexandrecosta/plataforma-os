@@ -14,6 +14,7 @@
 import 'package:plataforma_os_client/src/protocol/assets/models/asset_assignment.dart' as _ilmvd2lt;
 import 'package:plataforma_os_client/src/protocol/assets/models/qr_tag.dart' as _ix23buzf;
 import 'package:plataforma_os_client/src/protocol/assets/models/qr_tag_batch.dart' as _ic9pb02v;
+import 'package:plataforma_os_client/src/protocol/catalog/models/checklist_template.dart' as _i4koy3wu;
 import 'package:plataforma_os_client/src/protocol/catalog/models/product_summary.dart' as _ihgw7zuo;
 import 'package:plataforma_os_client/src/protocol/customers/models/customer_contact.dart' as _iicdz276;
 import 'package:plataforma_os_client/src/protocol/customers/models/customer_import_row.dart' as _i2vmk5z7;
@@ -39,6 +40,9 @@ import 'assets/models/asset_page.dart' as _is3mug9m;
 import 'assets/models/asset_withdraw_input.dart' as _i7jdajp7;
 import 'assets/models/qr_tag.dart' as _i760nubs;
 import 'assets/models/qr_tag_batch.dart' as _ikikcay0;
+import 'catalog/models/checklist_item.dart' as _ijcctm6o;
+import 'catalog/models/checklist_template.dart' as _iuduit2e;
+import 'catalog/models/checklist_template_input.dart' as _i8afkmo3;
 import 'catalog/models/product_input.dart' as _iuumnsch;
 import 'catalog/models/product_summary.dart' as _i4geouqi;
 import 'customers/models/customer.dart' as _in2ysqih;
@@ -105,6 +109,9 @@ export 'assets/models/asset_page.dart';
 export 'assets/models/asset_withdraw_input.dart';
 export 'assets/models/qr_tag.dart';
 export 'assets/models/qr_tag_batch.dart';
+export 'catalog/models/checklist_item.dart';
+export 'catalog/models/checklist_template.dart';
+export 'catalog/models/checklist_template_input.dart';
 export 'catalog/models/product_input.dart';
 export 'catalog/models/product_summary.dart';
 export 'customers/models/customer.dart';
@@ -184,6 +191,9 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<_i7jdajp7.AssetWithdrawInput>,
       _isc.getType<_i760nubs.QrTag>,
       _isc.getType<_ikikcay0.QrTagBatch>,
+      _isc.getType<_ijcctm6o.ChecklistItem>,
+      _isc.getType<_iuduit2e.ChecklistTemplate>,
+      _isc.getType<_i8afkmo3.ChecklistTemplateInput>,
       _isc.getType<_iuumnsch.ProductInput>,
       _isc.getType<_i4geouqi.ProductSummary>,
       _isc.getType<_in2ysqih.Customer>,
@@ -250,6 +260,9 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<_i7jdajp7.AssetWithdrawInput?>,
       _isc.getType<_i760nubs.QrTag?>,
       _isc.getType<_ikikcay0.QrTagBatch?>,
+      _isc.getType<_ijcctm6o.ChecklistItem?>,
+      _isc.getType<_iuduit2e.ChecklistTemplate?>,
+      _isc.getType<_i8afkmo3.ChecklistTemplateInput?>,
       _isc.getType<_iuumnsch.ProductInput?>,
       _isc.getType<_i4geouqi.ProductSummary?>,
       _isc.getType<_in2ysqih.Customer?>,
@@ -309,9 +322,11 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<_iduxn53h.WorkOrderType?>,
       _isc.getType<_iolj0kda.WorkOrderTypeInput?>,
       _isc.getType<List<_ib3mptol.Asset>>,
+      _isc.getType<List<String>>,
+      _isc.getType<List<String>?>,
+      _isc.getType<List<_ijcctm6o.ChecklistItem>>,
       _isc.getType<List<_iyqwgync.CustomerImportError>>,
       _isc.getType<List<_in2ysqih.Customer>>,
-      _isc.getType<List<String>>,
       _isc.getType<List<_irfplgys.DepreciationLine>>,
       _isc.getType<List<_ikti05ap.DepreciationPositionItem>>,
       _isc.getType<List<_iajvmd8d.DepreciationGroupTotal>>,
@@ -326,6 +341,7 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _isc.getType<List<_ilmvd2lt.AssetAssignment>>,
       _isc.getType<List<_ic9pb02v.QrTagBatch>>,
       _isc.getType<List<_ix23buzf.QrTag>>,
+      _isc.getType<List<_i4koy3wu.ChecklistTemplate>>,
       _isc.getType<List<_ihgw7zuo.ProductSummary>>,
       _isc.getType<List<_iq0mn52n.CustomerSite>>,
       _isc.getType<List<_iicdz276.CustomerContact>>,
@@ -356,6 +372,9 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       'AssetWithdrawInput',
       'QrTag',
       'QrTagBatch',
+      'ChecklistItem',
+      'ChecklistTemplate',
+      'ChecklistTemplateInput',
       'ProductInput',
       'ProductSummary',
       'Customer',
@@ -463,6 +482,15 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     }
     if (t == _ikikcay0.QrTagBatch) {
       return _ikikcay0.QrTagBatch.fromJson(data) as T;
+    }
+    if (t == _ijcctm6o.ChecklistItem) {
+      return _ijcctm6o.ChecklistItem.fromJson(data) as T;
+    }
+    if (t == _iuduit2e.ChecklistTemplate) {
+      return _iuduit2e.ChecklistTemplate.fromJson(data) as T;
+    }
+    if (t == _i8afkmo3.ChecklistTemplateInput) {
+      return _i8afkmo3.ChecklistTemplateInput.fromJson(data) as T;
     }
     if (t == _iuumnsch.ProductInput) {
       return _iuumnsch.ProductInput.fromJson(data) as T;
@@ -662,6 +690,15 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     if (t == _isc.getType<_ikikcay0.QrTagBatch?>()) {
       return (data != null ? _ikikcay0.QrTagBatch.fromJson(data) : null) as T;
     }
+    if (t == _isc.getType<_ijcctm6o.ChecklistItem?>()) {
+      return (data != null ? _ijcctm6o.ChecklistItem.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_iuduit2e.ChecklistTemplate?>()) {
+      return (data != null ? _iuduit2e.ChecklistTemplate.fromJson(data) : null) as T;
+    }
+    if (t == _isc.getType<_i8afkmo3.ChecklistTemplateInput?>()) {
+      return (data != null ? _i8afkmo3.ChecklistTemplateInput.fromJson(data) : null) as T;
+    }
     if (t == _isc.getType<_iuumnsch.ProductInput?>()) {
       return (data != null ? _iuumnsch.ProductInput.fromJson(data) : null) as T;
     }
@@ -839,14 +876,20 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     if (t == List<_ib3mptol.Asset>) {
       return (data as List).map((e) => deserialize<_ib3mptol.Asset>(e)).toList() as T;
     }
+    if (t == List<String>) {
+      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
+    }
+    if (t == _isc.getType<List<String>?>()) {
+      return (data != null ? (data as List).map((e) => deserialize<String>(e)).toList() : null) as T;
+    }
+    if (t == List<_ijcctm6o.ChecklistItem>) {
+      return (data as List).map((e) => deserialize<_ijcctm6o.ChecklistItem>(e)).toList() as T;
+    }
     if (t == List<_iyqwgync.CustomerImportError>) {
       return (data as List).map((e) => deserialize<_iyqwgync.CustomerImportError>(e)).toList() as T;
     }
     if (t == List<_in2ysqih.Customer>) {
       return (data as List).map((e) => deserialize<_in2ysqih.Customer>(e)).toList() as T;
-    }
-    if (t == List<String>) {
-      return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
     if (t == List<_irfplgys.DepreciationLine>) {
       return (data as List).map((e) => deserialize<_irfplgys.DepreciationLine>(e)).toList() as T;
@@ -892,6 +935,9 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     }
     if (t == List<_ix23buzf.QrTag>) {
       return (data as List).map((e) => deserialize<_ix23buzf.QrTag>(e)).toList() as T;
+    }
+    if (t == List<_i4koy3wu.ChecklistTemplate>) {
+      return (data as List).map((e) => deserialize<_i4koy3wu.ChecklistTemplate>(e)).toList() as T;
     }
     if (t == List<_ihgw7zuo.ProductSummary>) {
       return (data as List).map((e) => deserialize<_ihgw7zuo.ProductSummary>(e)).toList() as T;
@@ -964,6 +1010,9 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
       _i7jdajp7.AssetWithdrawInput => 'AssetWithdrawInput',
       _i760nubs.QrTag => 'QrTag',
       _ikikcay0.QrTagBatch => 'QrTagBatch',
+      _ijcctm6o.ChecklistItem => 'ChecklistItem',
+      _iuduit2e.ChecklistTemplate => 'ChecklistTemplate',
+      _i8afkmo3.ChecklistTemplateInput => 'ChecklistTemplateInput',
       _iuumnsch.ProductInput => 'ProductInput',
       _i4geouqi.ProductSummary => 'ProductSummary',
       _in2ysqih.Customer => 'Customer',
@@ -1052,6 +1101,12 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
         return 'QrTag';
       case _ikikcay0.QrTagBatch():
         return 'QrTagBatch';
+      case _ijcctm6o.ChecklistItem():
+        return 'ChecklistItem';
+      case _iuduit2e.ChecklistTemplate():
+        return 'ChecklistTemplate';
+      case _i8afkmo3.ChecklistTemplateInput():
+        return 'ChecklistTemplateInput';
       case _iuumnsch.ProductInput():
         return 'ProductInput';
       case _i4geouqi.ProductSummary():
@@ -1209,6 +1264,15 @@ class Protocol extends _isc.SerializationManager implements _isc.ProtocolDeseria
     }
     if (dataClassName == 'QrTagBatch') {
       return deserialize<_ikikcay0.QrTagBatch>(data['data']);
+    }
+    if (dataClassName == 'ChecklistItem') {
+      return deserialize<_ijcctm6o.ChecklistItem>(data['data']);
+    }
+    if (dataClassName == 'ChecklistTemplate') {
+      return deserialize<_iuduit2e.ChecklistTemplate>(data['data']);
+    }
+    if (dataClassName == 'ChecklistTemplateInput') {
+      return deserialize<_i8afkmo3.ChecklistTemplateInput>(data['data']);
     }
     if (dataClassName == 'ProductInput') {
       return deserialize<_iuumnsch.ProductInput>(data['data']);

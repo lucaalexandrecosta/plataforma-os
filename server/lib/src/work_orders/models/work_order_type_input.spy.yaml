@@ -7,3 +7,5 @@ fields:
   defaultPriority: String
   requiresAsset: bool
   isActive: bool
+  # Checklist publicado (opcional).
+  defaultChecklistTemplateId: UuidValue?

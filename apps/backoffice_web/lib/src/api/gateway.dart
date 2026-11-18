@@ -96,7 +96,18 @@ abstract interface class Gateway {
     int offset,
   });
   Future<WorkOrderDetail> workOrder(UuidValue id);
-  Future<List<WorkOrderType>> workOrderTypes();
+  Future<List<WorkOrderType>> workOrderTypes({bool includeInactive = false});
+  Future<WorkOrderType> createWorkOrderType(WorkOrderTypeInput input);
+  Future<WorkOrderType> updateWorkOrderType(WorkOrderType type, WorkOrderTypeInput input);
+
+  // checklists
+  Future<List<ChecklistTemplate>> checklists({bool includeArchived = false});
+  Future<ChecklistTemplate> checklist(UuidValue id);
+  Future<ChecklistTemplate> createChecklist(ChecklistTemplateInput input);
+  Future<ChecklistTemplate> updateChecklist(ChecklistTemplate template, ChecklistTemplateInput input);
+  Future<ChecklistTemplate> publishChecklist(ChecklistTemplate template);
+  Future<ChecklistTemplate> newChecklistVersion(ChecklistTemplate template);
+  Future<ChecklistTemplate> archiveChecklist(ChecklistTemplate template);
   Future<WorkOrderDetail> openWorkOrder(WorkOrderInput input);
   Future<WorkOrder> startWorkOrder(WorkOrder wo);
   Future<WorkOrder> holdWorkOrder(WorkOrder wo, String holdReason, String? note);

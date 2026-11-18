@@ -1,0 +1,7 @@
+# Entrada de checklists.create/update (só rascunhos).
+class: ChecklistTemplateInput
+fields:
+  code: String
+  name: String
+  description: String?
+  items: List<ChecklistItem>

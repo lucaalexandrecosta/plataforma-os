@@ -790,7 +790,134 @@ class FakeGateway implements Gateway {
   }
 
   @override
-  Future<List<WorkOrderType>> workOrderTypes() async => [corrective];
+  Future<List<WorkOrderType>> workOrderTypes({bool includeInactive = false}) async {
+    _maybeFail('workOrderTypes');
+    return [
+      for (final t in typeList)
+        if (includeInactive || t.isActive) t,
+    ];
+  }
+
+  late final typeList = <WorkOrderType>[corrective];
+
+  WorkOrderType _typeFrom(WorkOrderTypeInput input, {required String id, required int version}) {
+    final checklist = checklistList.where((c) => c.id == input.defaultChecklistTemplateId).firstOrNull;
+    return WorkOrderType.fromJson({
+      ...input.toJson(),
+      'id': id,
+      'code': input.code.trim().toUpperCase(),
+      'version': version,
+      'defaultChecklistName': checklist?.name,
+    });
+  }
+
+  @override
+  Future<WorkOrderType> createWorkOrderType(WorkOrderTypeInput input) async {
+    _maybeFail('createWorkOrderType');
+    final t = _typeFrom(
+      input,
+      id: '00000000-0000-4000-8000-0000000009${(typeList.length + 1).toString().padLeft(2, '0')}',
+      version: 1,
+    );
+    typeList.add(t);
+    return t;
+  }
+
+  @override
+  Future<WorkOrderType> updateWorkOrderType(WorkOrderType type, WorkOrderTypeInput input) async {
+    _maybeFail('updateWorkOrderType');
+    final t = _typeFrom(input, id: type.id.uuid, version: type.version + 1);
+    typeList[typeList.indexWhere((x) => x.id == t.id)] = t;
+    return t;
+  }
+
+  // checklists
+  final checklistList = <ChecklistTemplate>[];
+
+  ChecklistTemplate _replaceChecklist(ChecklistTemplate t) {
+    final next = t.copyWith(version: t.version + 1);
+    checklistList[checklistList.indexWhere((x) => x.id == t.id)] = next;
+    return next;
+  }
+
+  @override
+  Future<List<ChecklistTemplate>> checklists({bool includeArchived = false}) async {
+    _maybeFail('checklists');
+    return [
+      for (final c in checklistList)
+        if (includeArchived || c.status != 'archived') c,
+    ];
+  }
+
+  @override
+  Future<ChecklistTemplate> checklist(UuidValue id) async {
+    _maybeFail('checklist');
+    return checklistList.singleWhere((c) => c.id == id);
+  }
+
+  @override
+  Future<ChecklistTemplate> createChecklist(ChecklistTemplateInput input) async {
+    _maybeFail('createChecklist');
+    final t = ChecklistTemplate(
+      id: UuidValue.fromString(
+        '00000000-0000-4000-8000-00000000c${(checklistList.length + 1).toString().padLeft(3, '0')}',
+      ),
+      code: input.code.trim().toUpperCase(),
+      name: input.name.trim(),
+      description: input.description,
+      templateVersion: 1,
+      status: 'draft',
+      items: [for (final (i, item) in input.items.indexed) item.copyWith(key: item.key ?? 'item_${i + 1}')],
+      isActive: true,
+      version: 1,
+    );
+    checklistList.add(t);
+    return t;
+  }
+
+  @override
+  Future<ChecklistTemplate> updateChecklist(ChecklistTemplate template, ChecklistTemplateInput input) async {
+    _maybeFail('updateChecklist');
+    return _replaceChecklist(
+      template.copyWith(
+        code: input.code.trim().toUpperCase(),
+        name: input.name.trim(),
+        description: input.description,
+        items: [for (final (i, item) in input.items.indexed) item.copyWith(key: item.key ?? 'item_${i + 1}')],
+      ),
+    );
+  }
+
+  @override
+  Future<ChecklistTemplate> publishChecklist(ChecklistTemplate template) async {
+    _maybeFail('publishChecklist');
+    for (final c in [...checklistList]) {
+      if (c.code == template.code && c.status == 'published') _replaceChecklist(c.copyWith(status: 'archived'));
+    }
+    return _replaceChecklist(template.copyWith(status: 'published', publishedAt: DateTime.utc(2026, 11, 18)));
+  }
+
+  @override
+  Future<ChecklistTemplate> newChecklistVersion(ChecklistTemplate template) async {
+    _maybeFail('newChecklistVersion');
+    final t = template.copyWith(
+      id: UuidValue.fromString(
+        '00000000-0000-4000-8000-00000000c${(checklistList.length + 1).toString().padLeft(3, '0')}',
+      ),
+      templateVersion: template.templateVersion + 1,
+      status: 'draft',
+      publishedAt: null,
+      version: 1,
+    );
+    checklistList.add(t);
+    return t;
+  }
+
+  @override
+  Future<ChecklistTemplate> archiveChecklist(ChecklistTemplate template) async {
+    _maybeFail('archiveChecklist');
+    return _replaceChecklist(template.copyWith(status: 'archived'));
+  }
 
   WorkOrderInput? lastInput;
 

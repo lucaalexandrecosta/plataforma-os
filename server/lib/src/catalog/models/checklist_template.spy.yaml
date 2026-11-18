@@ -1,0 +1,15 @@
+# Modelo de checklist versionado (app.checklist_templates). A versão
+# publicada não muda: alterar = nova versão (rascunho) a partir dela.
+class: ChecklistTemplate
+fields:
+  id: UuidValue
+  code: String
+  name: String
+  description: String?
+  templateVersion: int
+  # draft | published | archived
+  status: String
+  items: List<ChecklistItem>
+  publishedAt: DateTime?
+  isActive: bool
+  version: int

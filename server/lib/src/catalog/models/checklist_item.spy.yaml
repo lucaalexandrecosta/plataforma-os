@@ -1,0 +1,13 @@
+# Item de um modelo de checklist (guardado em checklist_templates.items).
+class: ChecklistItem
+fields:
+  # Chave estável da resposta (gerada a partir do texto quando vazia).
+  key: String?
+  label: String
+  # yes_no | ok_nok | number | text | choice
+  type: String
+  required: bool
+  # Opções do tipo choice.
+  options: List<String>?
+  # Unidade do tipo number (°C, bar, A...).
+  unit: String?

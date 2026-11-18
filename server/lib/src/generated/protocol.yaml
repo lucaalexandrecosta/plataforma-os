@@ -15,6 +15,14 @@ qrTags:
   - bind:
   - unbind:
   - revoke:
+checklists:
+  - list:
+  - get:
+  - create:
+  - update:
+  - publish:
+  - newVersion:
+  - archive:
 products:
   - list:
   - create:

@@ -5,13 +5,15 @@ import 'package:plataforma_os_client/plataforma_os_client.dart';
 import 'package:serverpod_client/serverpod_client.dart' show UuidValue;
 
 import '../../api/gateway.dart';
+import '../../labels.dart';
 import '../../session/session.dart';
 import '../common/errors.dart';
 import '../common/format.dart';
 import '../common/paged_table.dart';
 
-/// Cadastros de apoio: filiais e centros de custo (`settings.manage`) e
-/// equipamentos (`catalog.manage` ou `assets.manage`).
+/// Cadastros de apoio: filiais e centros de custo (`settings.manage`),
+/// equipamentos (`catalog.manage` ou `assets.manage`) e tipos de OS
+/// (`catalog.manage`).
 class MasterDataPage extends ConsumerWidget {
   const MasterDataPage({super.key});
 
@@ -25,6 +27,7 @@ class MasterDataPage extends ConsumerWidget {
       if (settings) (label: 'Filiais', body: const _BranchesTab()),
       if (settings) (label: 'Centros de custo', body: const _CostCentersTab()),
       if (catalog) (label: 'Equipamentos', body: const _ProductsTab()),
+      if (session.can('catalog.manage')) (label: 'Tipos de OS', body: const _WorkOrderTypesTab()),
     ];
     if (tabs.isEmpty) return const Center(child: Text('Você não tem acesso aos cadastros.'));
     return DefaultTabController(
@@ -584,6 +587,191 @@ class _ProductDialogState extends ConsumerState<ProductDialog> with _SaveForm<Pr
           controller: _description,
           maxLines: 3,
           decoration: _deco('Descrição', 'description', fieldErrors),
+        ),
+      ],
+    );
+  }
+}
+
+// ------------------------------------------------------------------ tipos de OS
+
+class _WorkOrderTypesTab extends ConsumerStatefulWidget {
+  const _WorkOrderTypesTab();
+
+  @override
+  ConsumerState<_WorkOrderTypesTab> createState() => _WorkOrderTypesTabState();
+}
+
+class _WorkOrderTypesTabState extends ConsumerState<_WorkOrderTypesTab> {
+  late Future<List<WorkOrderType>> _list;
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  void _load() {
+    _list = ref.read(gatewayProvider).workOrderTypes(includeInactive: true);
+  }
+
+  Future<void> _edit([WorkOrderType? type]) async {
+    final checklists = await ref.read(gatewayProvider).checklists();
+    if (!mounted) return;
+    final saved = await showDialog<WorkOrderType>(
+      context: context,
+      builder: (_) => WorkOrderTypeDialog(
+        type: type,
+        checklists: [
+          for (final c in checklists)
+            if (c.status == 'published') c,
+        ],
+      ),
+    );
+    if (saved != null && mounted) setState(_load);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return _ListTab<WorkOrderType>(
+      future: _list,
+      onRetry: () => setState(_load),
+      newKey: 'wot-new',
+      newLabel: 'Novo tipo de OS',
+      onNew: _edit,
+      empty: 'Nenhum tipo de OS cadastrado.',
+      columns: const ['Código', 'Nome', 'Categoria', 'Prioridade', 'Checklist', 'Situação'],
+      cells: (t) => [
+        t.code,
+        t.name,
+        workOrderCategoryLabels[t.category] ?? t.category,
+        priorityLabels[t.defaultPriority] ?? t.defaultPriority,
+        t.defaultChecklistName,
+        t.isActive ? 'Ativo' : 'Inativo',
+      ],
+      id: (t) => t.id,
+      onTap: _edit,
+    );
+  }
+}
+
+class WorkOrderTypeDialog extends ConsumerStatefulWidget {
+  const WorkOrderTypeDialog({super.key, this.type, required this.checklists});
+
+  final WorkOrderType? type;
+
+  /// Checklists publicados.
+  final List<ChecklistTemplate> checklists;
+
+  @override
+  ConsumerState<WorkOrderTypeDialog> createState() => _WorkOrderTypeDialogState();
+}
+
+class _WorkOrderTypeDialogState extends ConsumerState<WorkOrderTypeDialog>
+    with _SaveForm<WorkOrderTypeDialog, WorkOrderType> {
+  late final _code = TextEditingController(text: widget.type?.code);
+  late final _name = TextEditingController(text: widget.type?.name);
+  late var _category = widget.type?.category ?? 'corrective';
+  late var _priority = widget.type?.defaultPriority ?? 'normal';
+  late var _requiresAsset = widget.type?.requiresAsset ?? true;
+  late var _active = widget.type?.isActive ?? true;
+  late UuidValue? _checklistId = widget.type?.defaultChecklistTemplateId;
+
+  @override
+  void dispose() {
+    _code.dispose();
+    _name.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final input = WorkOrderTypeInput(
+      code: _code.text.trim(),
+      name: _name.text.trim(),
+      category: _category,
+      defaultPriority: _priority,
+      requiresAsset: _requiresAsset,
+      isActive: _active,
+      defaultChecklistTemplateId: _checklistId,
+    );
+    final current = widget.type;
+    save((g) => current == null ? g.createWorkOrderType(input) : g.updateWorkOrderType(current, input));
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final current = widget.type;
+    // O tipo pode apontar para uma versão já arquivada: mostra pelo nome.
+    final options = [
+      ...widget.checklists,
+      if (_checklistId != null && !widget.checklists.any((c) => c.id == _checklistId))
+        ChecklistTemplate(
+          id: _checklistId!,
+          code: '',
+          name: current?.defaultChecklistName ?? 'Checklist atual',
+          templateVersion: 0,
+          status: 'archived',
+          items: const [],
+          isActive: true,
+          version: 0,
+        ),
+    ];
+    return dialog(
+      title: current == null ? 'Novo tipo de OS' : 'Editar tipo de OS',
+      saveKey: 'wot-save',
+      onSave: busy ? null : _submit,
+      fields: [
+        TextFormField(
+          key: const Key('wot-code'),
+          controller: _code,
+          decoration: _deco('Código', 'code', fieldErrors, hint: 'PREV'),
+          validator: (v) => _required(v, 'Informe o código.'),
+        ),
+        TextFormField(
+          key: const Key('wot-name'),
+          controller: _name,
+          decoration: _deco('Nome', 'name', fieldErrors, hint: 'Preventiva'),
+          validator: (v) => _required(v, 'Informe o nome.'),
+        ),
+        DropdownButtonFormField<String>(
+          key: const Key('wot-category'),
+          initialValue: _category,
+          decoration: _deco('Categoria', 'category', fieldErrors),
+          items: [
+            for (final e in workOrderCategoryLabels.entries) DropdownMenuItem(value: e.key, child: Text(e.value)),
+          ],
+          onChanged: (v) => setState(() => _category = v!),
+        ),
+        DropdownButtonFormField<String>(
+          key: const Key('wot-priority'),
+          initialValue: _priority,
+          decoration: _deco('Prioridade padrão', 'defaultPriority', fieldErrors),
+          items: [for (final e in priorityLabels.entries) DropdownMenuItem(value: e.key, child: Text(e.value))],
+          onChanged: (v) => setState(() => _priority = v!),
+        ),
+        DropdownButtonFormField<UuidValue?>(
+          key: const Key('wot-checklist'),
+          initialValue: _checklistId,
+          isExpanded: true,
+          decoration: _deco('Checklist das visitas', 'defaultChecklistTemplateId', fieldErrors),
+          items: [
+            const DropdownMenuItem(value: null, child: Text('Sem checklist')),
+            for (final c in options)
+              DropdownMenuItem(value: c.id, child: Text(c.code.isEmpty ? c.name : '${c.name} (${c.code})')),
+          ],
+          onChanged: (v) => setState(() => _checklistId = v),
+        ),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Exige bem na abertura'),
+          value: _requiresAsset,
+          onChanged: (v) => setState(() => _requiresAsset = v),
+        ),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Ativo'),
+          value: _active,
+          onChanged: (v) => setState(() => _active = v),
         ),
       ],
     );

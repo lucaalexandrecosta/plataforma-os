@@ -317,7 +317,43 @@ class ServerGateway implements Gateway {
   Future<WorkOrderDetail> workOrder(UuidValue id) => _guard(() => _tenant.workOrders.get(id));
 
   @override
-  Future<List<WorkOrderType>> workOrderTypes() => _guard(() => _tenant.workOrders.types());
+  Future<List<WorkOrderType>> workOrderTypes({bool includeInactive = false}) =>
+      _guard(() => _tenant.workOrders.types(includeInactive: includeInactive ? true : null));
+
+  @override
+  Future<WorkOrderType> createWorkOrderType(WorkOrderTypeInput input) =>
+      _guard(() => _tenant.workOrders.createType(input));
+
+  @override
+  Future<WorkOrderType> updateWorkOrderType(WorkOrderType type, WorkOrderTypeInput input) =>
+      _guard(() => _tenant.workOrders.updateType(type.id, type.version, input));
+
+  @override
+  Future<List<ChecklistTemplate>> checklists({bool includeArchived = false}) =>
+      _guard(() => _tenant.checklists.list(includeArchived: includeArchived ? true : null));
+
+  @override
+  Future<ChecklistTemplate> checklist(UuidValue id) => _guard(() => _tenant.checklists.get(id));
+
+  @override
+  Future<ChecklistTemplate> createChecklist(ChecklistTemplateInput input) =>
+      _guard(() => _tenant.checklists.create(input));
+
+  @override
+  Future<ChecklistTemplate> updateChecklist(ChecklistTemplate template, ChecklistTemplateInput input) =>
+      _guard(() => _tenant.checklists.update(template.id, template.version, input));
+
+  @override
+  Future<ChecklistTemplate> publishChecklist(ChecklistTemplate template) =>
+      _guard(() => _tenant.checklists.publish(template.id, template.version));
+
+  @override
+  Future<ChecklistTemplate> newChecklistVersion(ChecklistTemplate template) =>
+      _guard(() => _tenant.checklists.newVersion(template.id));
+
+  @override
+  Future<ChecklistTemplate> archiveChecklist(ChecklistTemplate template) =>
+      _guard(() => _tenant.checklists.archive(template.id, template.version));
 
   @override
   Future<WorkOrderDetail> openWorkOrder(WorkOrderInput input) => _guard(() => _tenant.workOrders.open(input));

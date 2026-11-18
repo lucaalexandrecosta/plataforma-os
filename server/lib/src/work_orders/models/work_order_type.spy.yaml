@@ -12,3 +12,6 @@ fields:
   requiresAsset: bool
   isActive: bool
   version: int
+  # Checklist padrão das visitas (vale a versão publicada mais nova do código).
+  defaultChecklistTemplateId: UuidValue?
+  defaultChecklistName: String?
