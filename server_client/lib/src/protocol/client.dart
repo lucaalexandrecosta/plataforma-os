@@ -600,7 +600,8 @@ class EndpointRefreshJwtTokens extends _iacc.EndpointRefreshJwtTokens {
 ///
 /// Erros: `FORBIDDEN` (sem permissão), `VALIDATION_FAILED`, `NOT_FOUND`,
 /// `ALREADY_MEMBER`, `LAST_TENANT_ADMIN`, `CANNOT_CHANGE_OWN_ACCESS`,
-/// `INVALID_STATUS`.
+/// `INVALID_STATUS`, `NOT_INVITED`, `INVITE_EMAIL_FAILED` (convite salvo, e-mail
+/// não saiu).
 /// {@category Endpoint}
 class EndpointUsers extends EndpointStaff {
   EndpointUsers(_isc.EndpointCaller caller) : super(caller);
@@ -637,6 +638,14 @@ class EndpointUsers extends EndpointStaff {
       'roles': roles,
     },
   );
+
+  /// Manda o e-mail de convite de novo (só para quem ainda não entrou).
+  _ida.Future<_i8ihd43z.TenantUser> resendInvite(_isc.UuidValue membershipId) =>
+      caller.callServerEndpoint<_i8ihd43z.TenantUser>(
+        'users',
+        'resendInvite',
+        {'membershipId': membershipId},
+      );
 
   /// Troca os perfis (a lista substitui a anterior).
   _ida.Future<_i8ihd43z.TenantUser> setRoles(

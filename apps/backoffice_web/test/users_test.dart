@@ -42,6 +42,29 @@ void main() {
     expect(find.text('Convidado (falta o primeiro acesso)'), findsOneWidget);
   });
 
+  testWidgets('convite: reenviar o e-mail; e-mail que falha deixa o convite salvo', (tester) async {
+    final gateway = FakeGateway()..inviteEmailFails = true;
+    await openUsers(tester, gateway);
+    await tapKey(tester, 'user-invite');
+    await tester.enterText(find.byKey(const Key('invite-name')), 'Carla Técnica');
+    await tester.enterText(find.byKey(const Key('invite-email')), 'carla@frio-sul.test');
+    await tapKey(tester, 'role-technician');
+    await tapKey(tester, 'invite-save');
+    expect(find.textContaining('o e-mail não saiu'), findsOneWidget);
+    expect(find.byKey(const Key('invite-save')), findsNothing);
+    expect(cell('Carla Técnica'), findsOneWidget);
+
+    await tester.tap(cell('Carla Técnica'));
+    await tester.pumpAndSettle();
+    await tapKey(tester, 'user-resend-invite');
+    expect(gateway.resentInvites, ['carla@frio-sul.test']);
+
+    // Quem já entrou não tem convite pendente.
+    await tester.tap(find.text('Bruno Despacho'));
+    await tester.pumpAndSettle();
+    expect(find.byKey(const Key('user-resend-invite')), findsNothing);
+  });
+
   testWidgets('trocar perfis, suspender, reativar e remover com confirmação', (tester) async {
     final gateway = FakeGateway();
     await openUsers(tester, gateway);

@@ -51,6 +51,7 @@ users:
   - roles:
   - list:
   - invite:
+  - resendInvite:
   - setRoles:
   - suspend:
   - reactivate:

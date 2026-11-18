@@ -189,11 +189,17 @@ class _InviteUserDialogState extends ConsumerState<InviteUserDialog> {
       await ref.read(gatewayProvider).inviteUser(_email.text, _name.text, _roles.toList()..sort());
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Convite registrado. ${_name.text.trim()} cria a senha no primeiro acesso.')),
+        SnackBar(content: Text('Convite enviado por e-mail. ${_name.text.trim()} cria a senha no primeiro acesso.')),
       );
       Navigator.of(context).pop(true);
     } on GatewayException catch (e) {
       if (!mounted) return;
+      if (e.code == 'INVITE_EMAIL_FAILED') {
+        // O convite ficou salvo; só o e-mail não saiu.
+        reportError(context, ref, e);
+        Navigator.of(context).pop(true);
+        return;
+      }
       setState(() {
         _fieldErrors = e.fieldErrors;
         _rolesError = e.fieldErrors['roles'];
@@ -322,6 +328,7 @@ class _UserDialogState extends ConsumerState<UserDialog> {
     final session = ref.watch(sessionProvider);
     final self = session is SignedIn && session.me.userId == u.userId;
     final suspended = u.status == MembershipStatus.suspended;
+    final invited = u.status == MembershipStatus.invited;
     return AlertDialog(
       title: Text(u.fullName),
       content: SizedBox(
@@ -358,6 +365,12 @@ class _UserDialogState extends ConsumerState<UserDialog> {
             onPressed: _busy ? null : _remove,
             child: const Text('Remover acesso'),
           ),
+          if (invited)
+            TextButton(
+              key: const Key('user-resend-invite'),
+              onPressed: _busy ? null : () => _run((g) => g.resendInvite(u), 'Convite reenviado para ${u.email}.'),
+              child: const Text('Reenviar convite'),
+            ),
           if (suspended)
             TextButton(
               key: const Key('user-reactivate'),

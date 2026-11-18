@@ -9,7 +9,8 @@ import '../internal/application/user_admin.dart';
 ///
 /// Erros: `FORBIDDEN` (sem permissão), `VALIDATION_FAILED`, `NOT_FOUND`,
 /// `ALREADY_MEMBER`, `LAST_TENANT_ADMIN`, `CANNOT_CHANGE_OWN_ACCESS`,
-/// `INVALID_STATUS`.
+/// `INVALID_STATUS`, `NOT_INVITED`, `INVITE_EMAIL_FAILED` (convite salvo, e-mail
+/// não saiu).
 class UsersEndpoint extends StaffEndpoint {
   /// Perfis que podem ser atribuídos.
   Future<List<AssignableRole>> roles(Session session) => UserAdmin.roles(session);
@@ -21,6 +22,10 @@ class UsersEndpoint extends StaffEndpoint {
   /// escolher a empresa, o convite vira acesso ativo.
   Future<TenantUser> invite(Session session, String email, String fullName, List<String> roles) =>
       UserAdmin.invite(session, email: email, fullName: fullName, roles: roles);
+
+  /// Manda o e-mail de convite de novo (só para quem ainda não entrou).
+  Future<TenantUser> resendInvite(Session session, UuidValue membershipId) =>
+      UserAdmin.resendInvite(session, membershipId: membershipId);
 
   /// Troca os perfis (a lista substitui a anterior).
   Future<TenantUser> setRoles(Session session, UuidValue membershipId, List<String> roles) =>

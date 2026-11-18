@@ -215,13 +215,31 @@ class FakeGateway implements Gateway {
       hasLogin: false,
     );
     userList.add(u);
+    if (inviteEmailFails) {
+      throw const GatewayException(
+        'O convite foi salvo, mas o e-mail não saiu. Tente "Reenviar convite" daqui a pouco.',
+        code: 'INVITE_EMAIL_FAILED',
+      );
+    }
     return u;
   }
+
+  /// O convite é salvo, mas o e-mail falha (INVITE_EMAIL_FAILED).
+  var inviteEmailFails = false;
 
   @override
   Future<TenantUser> setUserRoles(TenantUser user, List<String> roles) async {
     _maybeFail('setUserRoles');
     return _replaceUser(user.copyWith(roles: roles));
+  }
+
+  final resentInvites = <String>[];
+
+  @override
+  Future<TenantUser> resendInvite(TenantUser user) async {
+    _maybeFail('resendInvite');
+    resentInvites.add(user.email ?? '');
+    return user;
   }
 
   @override

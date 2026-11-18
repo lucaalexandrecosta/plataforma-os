@@ -1148,6 +1148,24 @@ class Endpoints extends _is.EndpointDispatch {
                 params['roles'],
               ),
         ),
+        'resendInvite': _is.MethodConnector(
+          name: 'resendInvite',
+          params: {
+            'membershipId': _is.ParameterDescription(
+              name: 'membershipId',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['users'] as _if041dc0.UsersEndpoint).resendInvite(
+                session,
+                params['membershipId'],
+              ),
+        ),
         'setRoles': _is.MethodConnector(
           name: 'setRoles',
           params: {

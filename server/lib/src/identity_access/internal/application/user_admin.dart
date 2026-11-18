@@ -1,6 +1,8 @@
 import 'package:serverpod/serverpod.dart';
 
 import '../../../generated/protocol.dart';
+import '../../../platform/email/email.dart';
+import '../../../platform/email/templates.dart';
 import '../../../platform/errors/api_errors.dart';
 import 'authorization.dart';
 
@@ -86,7 +88,53 @@ abstract final class UserAdmin {
       await _replaceRoles(session, tx, membershipId, roles);
       return membershipId;
     });
+    await _sendInvite(session, membershipId);
     return _one(session, membershipId);
+  }
+
+  /// Manda o e-mail de convite de novo (só para quem ainda não entrou).
+  static Future<TenantUser> resendInvite(Session session, {required UuidValue membershipId}) async {
+    await Authorization.require(session, permission);
+    final user = await _one(session, membershipId);
+    if (user.status != MembershipStatus.invited) {
+      throw ApiErrors.businessRule(session, 'NOT_INVITED', 'Esta pessoa já entrou; não há convite pendente.');
+    }
+    await _sendInvite(session, membershipId);
+    return user;
+  }
+
+  /// E-mail de convite, depois do COMMIT. Se o envio falhar, o convite fica
+  /// salvo e a API avisa para reenviar.
+  static Future<void> _sendInvite(Session session, UuidValue membershipId) async {
+    final rows = await session.db.unsafeQuery(
+      'SELECT u.email, u.full_name, u.idp_subject IS NOT NULL, t.display_name, '
+      '       (SELECT i.full_name FROM app.users i WHERE i.id = app.current_user_id()) '
+      '  FROM app.tenant_memberships m '
+      '  JOIN app.users u ON u.id = m.user_id '
+      '  JOIN app.tenants t ON t.id = m.tenant_id '
+      ' WHERE m.tenant_id = app.current_tenant_id() AND m.id = @id::uuid',
+      parameters: QueryParameters.named({'id': membershipId.uuid}),
+    );
+    if (rows.isEmpty) throw ApiErrors.notFound(session);
+    final r = rows.first;
+    final message = EmailTemplates.invite(
+      to: r[0] as String,
+      fullName: r[1] as String,
+      hasLogin: r[2] as bool,
+      tenantName: r[3] as String,
+      invitedBy: r[4] as String?,
+      url: Email.backofficeUrl,
+    );
+    try {
+      await Email.send(session, message);
+    } on Object catch (e, st) {
+      session.log('Convite salvo, mas o e-mail não saiu', level: LogLevel.warning, exception: e, stackTrace: st);
+      throw ApiErrors.businessRule(
+        session,
+        'INVITE_EMAIL_FAILED',
+        'O convite foi salvo, mas o e-mail não saiu. Tente "Reenviar convite" daqui a pouco.',
+      );
+    }
   }
 
   static Future<TenantUser> setRoles(

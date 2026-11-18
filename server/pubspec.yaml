@@ -18,6 +18,7 @@ dependencies:
   plataforma_os_core: any
   plataforma_os_depreciation: any
   decimal: ^3.2.1
+  mailer: ^7.3.0
 
 dev_dependencies:
   lints: ^6.0.0

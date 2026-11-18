@@ -2,6 +2,9 @@ import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_idp_server/core.dart';
 import 'package:serverpod_auth_idp_server/providers/email.dart';
 
+import '../../../platform/email/email.dart';
+import '../../../platform/email/templates.dart';
+
 /// Login próprio da plataforma (decisão de 15/11/2026, sem Keycloak):
 /// e-mail e senha pelo módulo `serverpod_auth_idp`, com sessão de login em
 /// JWT. A sessão de login só identifica a pessoa; o acesso aos dados vem do
@@ -32,7 +35,7 @@ abstract final class LoginConfig {
         passwordValidationFunction: isStrongEnough,
         sendRegistrationVerificationCode:
             (session, {required email, required accountRequestId, required verificationCode, required transaction}) =>
-                _deliverCode(pod, session, purpose: 'primeiro acesso', email: email, code: verificationCode),
+                _deliverCode(session, email: email, code: verificationCode, passwordReset: false),
         sendPasswordResetVerificationCode:
             (
               session, {
@@ -40,7 +43,7 @@ abstract final class LoginConfig {
               required passwordResetRequestId,
               required verificationCode,
               required transaction,
-            }) => _deliverCode(pod, session, purpose: 'troca de senha', email: email, code: verificationCode),
+            }) => _deliverCode(session, email: email, code: verificationCode, passwordReset: true),
       ),
     ];
   }
@@ -49,20 +52,13 @@ abstract final class LoginConfig {
   static bool isStrongEnough(String password) =>
       password.length >= 8 && password.contains(RegExp('[A-Za-z]')) && password.contains(RegExp('[0-9]'));
 
-  /// Entrega do código. O envio por e-mail entra com o módulo de notificações
-  /// (outbox + SES); até lá, em desenvolvimento e teste o código vai para o
-  /// log, e fora deles o cadastro falha em vez de engolir o código.
-  static void _deliverCode(
-    Serverpod pod,
+  /// Entrega do código por e-mail (veja `Email`: SMTP configurado ou, em
+  /// desenvolvimento e teste, o log). Sem envio configurado, o pedido falha
+  /// em vez de engolir o código.
+  static Future<void> _deliverCode(
     Session session, {
-    required String purpose,
     required String email,
     required String code,
-  }) {
-    if (pod.runMode == ServerpodRunMode.development || pod.runMode == ServerpodRunMode.test) {
-      session.log('Código de $purpose para $email: $code', level: LogLevel.info);
-      return;
-    }
-    throw StateError('Envio de e-mail ainda não configurado: o código de $purpose não pode ser entregue.');
-  }
+    required bool passwordReset,
+  }) => Email.send(session, EmailTemplates.verificationCode(to: email, code: code, passwordReset: passwordReset));
 }

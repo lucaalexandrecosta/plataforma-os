@@ -31,6 +31,7 @@ abstract interface class Gateway {
   Future<List<TenantUser>> users();
   Future<TenantUser> inviteUser(String email, String fullName, List<String> roles);
   Future<TenantUser> setUserRoles(TenantUser user, List<String> roles);
+  Future<TenantUser> resendInvite(TenantUser user);
   Future<TenantUser> suspendUser(TenantUser user);
   Future<TenantUser> reactivateUser(TenantUser user);
   Future<TenantUser> removeUser(TenantUser user);
