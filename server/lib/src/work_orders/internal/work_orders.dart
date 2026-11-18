@@ -1,6 +1,7 @@
 import 'package:serverpod/serverpod.dart';
 
 import '../../assets/assets.dart';
+import '../../catalog/catalog.dart';
 import '../../generated/protocol.dart';
 import '../../identity_access/identity_access.dart';
 import '../../platform/context/request_context.dart';
@@ -535,13 +536,15 @@ abstract final class WorkOrders {
 
   static Future<WorkOrderType> createType(Session session, WorkOrderTypeInput input) async {
     await Authorization.require(session, 'catalog.manage');
-    final params = _validateType(session, input);
+    final params = await _validateType(session, input);
     final id = const Uuid().v7obj();
     await _writeType(
       session,
       () => session.db.unsafeExecute(
-        'INSERT INTO app.work_order_types (id, tenant_id, code, name, category, default_priority, requires_asset, is_active) '
-        'VALUES (@id::uuid, app.current_tenant_id(), @code, @name, @category, @priority, @requiresAsset, @isActive)',
+        'INSERT INTO app.work_order_types (id, tenant_id, code, name, category, default_priority, requires_asset, is_active, '
+        '                                 default_checklist_template_id) '
+        'VALUES (@id::uuid, app.current_tenant_id(), @code, @name, @category, @priority, @requiresAsset, @isActive, '
+        '        @checklistId::uuid)',
         parameters: QueryParameters.named({'id': id.uuid, ...params}),
       ),
     );
@@ -555,7 +558,7 @@ abstract final class WorkOrders {
     WorkOrderTypeInput input,
   ) async {
     await Authorization.require(session, 'catalog.manage');
-    final params = _validateType(session, input);
+    final params = await _validateType(session, input);
     final rows = await session.db.unsafeQuery(
       'SELECT version FROM app.work_order_types WHERE id = @id::uuid',
       parameters: QueryParameters.named({'id': id.uuid}),
@@ -565,7 +568,8 @@ abstract final class WorkOrders {
       session,
       () => session.db.unsafeExecute(
         'UPDATE app.work_order_types SET code = @code, name = @name, category = @category, '
-        '       default_priority = @priority, requires_asset = @requiresAsset, is_active = @isActive '
+        '       default_priority = @priority, requires_asset = @requiresAsset, is_active = @isActive, '
+        '       default_checklist_template_id = @checklistId::uuid '
         ' WHERE id = @id::uuid AND version = @version',
         parameters: QueryParameters.named({'id': id.uuid, 'version': expectedVersion, ...params}),
       ),
@@ -576,7 +580,10 @@ abstract final class WorkOrders {
 
   // ------------------------------------------------------------------ internos
 
-  static const _typeColumns = 'id, code, name, category, default_priority, requires_asset, is_active, version';
+  static const _typeColumns =
+      'id, code, name, category, default_priority, requires_asset, is_active, version, default_checklist_template_id, '
+      '(SELECT ct.name FROM app.checklist_templates ct WHERE ct.tenant_id = work_order_types.tenant_id '
+      '   AND ct.id = work_order_types.default_checklist_template_id) AS default_checklist_name';
   static const _categories = {
     'corrective',
     'preventive',
@@ -691,7 +698,7 @@ abstract final class WorkOrders {
     return rows.isEmpty ? null : _mapType(rows.first);
   }
 
-  static Map<String, Object?> _validateType(Session session, WorkOrderTypeInput input) {
+  static Future<Map<String, Object?>> _validateType(Session session, WorkOrderTypeInput input) async {
     final code = cleanText(input.code)?.toUpperCase();
     final name = cleanText(input.name);
     final errors = [
@@ -702,8 +709,22 @@ abstract final class WorkOrders {
       if (!priorities.contains(input.defaultPriority))
         FieldError(path: 'defaultPriority', code: 'INVALID', message: 'Prioridade inválida.'),
     ];
+    final checklistId = input.defaultChecklistTemplateId;
+    if (checklistId != null) {
+      final checklist = await ChecklistTemplates.find(session, checklistId);
+      if (checklist == null || checklist.status != 'published') {
+        errors.add(
+          FieldError(
+            path: 'defaultChecklistTemplateId',
+            code: 'NOT_PUBLISHED',
+            message: 'Escolha um checklist publicado.',
+          ),
+        );
+      }
+    }
     if (errors.isNotEmpty) throw ApiErrors.validation(session, errors);
     return {
+      'checklistId': checklistId?.uuid,
       'code': code,
       'name': name,
       'category': input.category,
@@ -744,6 +765,8 @@ abstract final class WorkOrders {
     requiresAsset: r[5] as bool,
     isActive: r[6] as bool,
     version: r[7] as int,
+    defaultChecklistTemplateId: sqlUuidOrNull(r[8]),
+    defaultChecklistName: r[9] as String?,
   );
 
   static WorkOrder _map(List<Object?> r) => WorkOrder(

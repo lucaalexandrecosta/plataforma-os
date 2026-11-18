@@ -13,6 +13,7 @@
 import 'package:plataforma_os_server/src/generated/assets/models/asset_input.dart' as _i58orcz5;
 import 'package:plataforma_os_server/src/generated/assets/models/asset_install_input.dart' as _iggraypf;
 import 'package:plataforma_os_server/src/generated/assets/models/asset_withdraw_input.dart' as _ilt8ymra;
+import 'package:plataforma_os_server/src/generated/catalog/models/checklist_template_input.dart' as _ifjv7krc;
 import 'package:plataforma_os_server/src/generated/catalog/models/product_input.dart' as _iku7g2we;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_contact_input.dart' as _i0rc22zw;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_import_row.dart' as _is65d1g1;
@@ -35,6 +36,7 @@ import 'package:serverpod_auth_core_server/serverpod_auth_core_server.dart' as _
 import 'package:serverpod_auth_idp_server/serverpod_auth_idp_server.dart' as _iais;
 import '../assets/endpoints/assets_endpoint.dart' as _i8oyhoxt;
 import '../assets/endpoints/qr_tags_endpoint.dart' as _ijcbp4ea;
+import '../catalog/endpoints/checklists_endpoint.dart' as _iaiagiyl;
 import '../catalog/endpoints/products_endpoint.dart' as _i87w2mxb;
 import '../customers/endpoints/customers_endpoint.dart' as _i2n45wl3;
 import '../identity_access/endpoints/auth_endpoint.dart' as _i077kp7v;
@@ -64,6 +66,12 @@ class Endpoints extends _is.EndpointDispatch {
         ..initialize(
           server,
           'qrTags',
+          null,
+        ),
+      'checklists': _iaiagiyl.ChecklistsEndpoint()
+        ..initialize(
+          server,
+          'checklists',
           null,
         ),
       'products': _i87w2mxb.ProductsEndpoint()
@@ -516,6 +524,162 @@ class Endpoints extends _is.EndpointDispatch {
                 params['tagId'],
                 params['reason'],
                 note: params['note'],
+              ),
+        ),
+      },
+    );
+    connectors['checklists'] = _is.EndpointConnector(
+      name: 'checklists',
+      endpoint: endpoints['checklists']!,
+      methodConnectors: {
+        'list': _is.MethodConnector(
+          name: 'list',
+          params: {
+            'includeArchived': _is.ParameterDescription(
+              name: 'includeArchived',
+              type: _is.getType<bool?>(),
+              nullable: true,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['checklists'] as _iaiagiyl.ChecklistsEndpoint).list(
+                session,
+                includeArchived: params['includeArchived'],
+              ),
+        ),
+        'get': _is.MethodConnector(
+          name: 'get',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['checklists'] as _iaiagiyl.ChecklistsEndpoint).get(
+                session,
+                params['id'],
+              ),
+        ),
+        'create': _is.MethodConnector(
+          name: 'create',
+          params: {
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_ifjv7krc.ChecklistTemplateInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['checklists'] as _iaiagiyl.ChecklistsEndpoint).create(
+                session,
+                params['input'],
+              ),
+        ),
+        'update': _is.MethodConnector(
+          name: 'update',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+            'input': _is.ParameterDescription(
+              name: 'input',
+              type: _is.getType<_ifjv7krc.ChecklistTemplateInput>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['checklists'] as _iaiagiyl.ChecklistsEndpoint).update(
+                session,
+                params['id'],
+                params['expectedVersion'],
+                params['input'],
+              ),
+        ),
+        'publish': _is.MethodConnector(
+          name: 'publish',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['checklists'] as _iaiagiyl.ChecklistsEndpoint).publish(
+                session,
+                params['id'],
+                params['expectedVersion'],
+              ),
+        ),
+        'newVersion': _is.MethodConnector(
+          name: 'newVersion',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['checklists'] as _iaiagiyl.ChecklistsEndpoint).newVersion(
+                session,
+                params['id'],
+              ),
+        ),
+        'archive': _is.MethodConnector(
+          name: 'archive',
+          params: {
+            'id': _is.ParameterDescription(
+              name: 'id',
+              type: _is.getType<_is.UuidValue>(),
+              nullable: false,
+            ),
+            'expectedVersion': _is.ParameterDescription(
+              name: 'expectedVersion',
+              type: _is.getType<int>(),
+              nullable: false,
+            ),
+          },
+          call:
+              (
+                _is.Session session,
+                Map<String, dynamic> params,
+              ) async => (endpoints['checklists'] as _iaiagiyl.ChecklistsEndpoint).archive(
+                session,
+                params['id'],
+                params['expectedVersion'],
               ),
         ),
       },

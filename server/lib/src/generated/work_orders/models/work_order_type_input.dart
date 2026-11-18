@@ -20,6 +20,7 @@ abstract class WorkOrderTypeInput implements _is.SerializableModel, _is.Protocol
     required this.defaultPriority,
     required this.requiresAsset,
     required this.isActive,
+    this.defaultChecklistTemplateId,
   });
 
   factory WorkOrderTypeInput({
@@ -29,6 +30,7 @@ abstract class WorkOrderTypeInput implements _is.SerializableModel, _is.Protocol
     required String defaultPriority,
     required bool requiresAsset,
     required bool isActive,
+    _is.UuidValue? defaultChecklistTemplateId,
   }) = _WorkOrderTypeInputImpl;
 
   factory WorkOrderTypeInput.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -39,6 +41,9 @@ abstract class WorkOrderTypeInput implements _is.SerializableModel, _is.Protocol
       defaultPriority: jsonSerialization['defaultPriority'] as String,
       requiresAsset: _is.BoolJsonExtension.fromJson(jsonSerialization['requiresAsset']),
       isActive: _is.BoolJsonExtension.fromJson(jsonSerialization['isActive']),
+      defaultChecklistTemplateId: jsonSerialization['defaultChecklistTemplateId'] == null
+          ? null
+          : _is.UuidValueJsonExtension.fromJson(jsonSerialization['defaultChecklistTemplateId']),
     );
   }
 
@@ -54,6 +59,8 @@ abstract class WorkOrderTypeInput implements _is.SerializableModel, _is.Protocol
 
   bool isActive;
 
+  _is.UuidValue? defaultChecklistTemplateId;
+
   /// Returns a shallow copy of this [WorkOrderTypeInput]
   /// with some or all fields replaced by the given arguments.
   @_is.useResult
@@ -64,6 +71,7 @@ abstract class WorkOrderTypeInput implements _is.SerializableModel, _is.Protocol
     String? defaultPriority,
     bool? requiresAsset,
     bool? isActive,
+    _is.UuidValue? defaultChecklistTemplateId = const _is.$UndefinedUuidValue(),
   });
   @override
   Map<String, dynamic> toJson() {
@@ -75,6 +83,7 @@ abstract class WorkOrderTypeInput implements _is.SerializableModel, _is.Protocol
       'defaultPriority': defaultPriority,
       'requiresAsset': requiresAsset,
       'isActive': isActive,
+      if (defaultChecklistTemplateId != null) 'defaultChecklistTemplateId': defaultChecklistTemplateId?.toJson(),
     };
   }
 
@@ -88,6 +97,7 @@ abstract class WorkOrderTypeInput implements _is.SerializableModel, _is.Protocol
       'defaultPriority': defaultPriority,
       'requiresAsset': requiresAsset,
       'isActive': isActive,
+      if (defaultChecklistTemplateId != null) 'defaultChecklistTemplateId': defaultChecklistTemplateId?.toJson(),
     };
   }
 
@@ -105,6 +115,7 @@ class _WorkOrderTypeInputImpl extends WorkOrderTypeInput {
     required String defaultPriority,
     required bool requiresAsset,
     required bool isActive,
+    _is.UuidValue? defaultChecklistTemplateId,
   }) : super._(
          code: code,
          name: name,
@@ -112,6 +123,7 @@ class _WorkOrderTypeInputImpl extends WorkOrderTypeInput {
          defaultPriority: defaultPriority,
          requiresAsset: requiresAsset,
          isActive: isActive,
+         defaultChecklistTemplateId: defaultChecklistTemplateId,
        );
 
   /// Returns a shallow copy of this [WorkOrderTypeInput]
@@ -125,6 +137,7 @@ class _WorkOrderTypeInputImpl extends WorkOrderTypeInput {
     String? defaultPriority,
     bool? requiresAsset,
     bool? isActive,
+    _is.UuidValue? defaultChecklistTemplateId = const _is.$UndefinedUuidValue(),
   }) {
     return WorkOrderTypeInput(
       code: code ?? this.code,
@@ -133,6 +146,9 @@ class _WorkOrderTypeInputImpl extends WorkOrderTypeInput {
       defaultPriority: defaultPriority ?? this.defaultPriority,
       requiresAsset: requiresAsset ?? this.requiresAsset,
       isActive: isActive ?? this.isActive,
+      defaultChecklistTemplateId: defaultChecklistTemplateId is _is.UndefinedSentinel
+          ? this.defaultChecklistTemplateId
+          : defaultChecklistTemplateId,
     );
   }
 }

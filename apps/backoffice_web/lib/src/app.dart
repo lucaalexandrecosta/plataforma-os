@@ -9,6 +9,8 @@ import 'ui/agenda/agenda_page.dart';
 import 'ui/agenda/technicians_page.dart';
 import 'ui/assets/asset_detail_page.dart';
 import 'ui/assets/assets_page.dart';
+import 'ui/checklists/checklist_editor_page.dart';
+import 'ui/checklists/checklists_page.dart';
 import 'ui/customers/customer_detail_page.dart';
 import 'ui/customers/customers_page.dart';
 import 'ui/depreciation/depreciation_page.dart';
@@ -70,6 +72,15 @@ final routerProvider = Provider<GoRouter>((ref) {
           GoRoute(path: '/agenda', builder: (context, state) => const AgendaPage()),
           GoRoute(path: '/tecnicos', builder: (context, state) => const TechniciansPage()),
           GoRoute(path: '/cadastros', builder: (context, state) => const MasterDataPage()),
+          GoRoute(path: '/checklists', builder: (context, state) => const ChecklistsPage()),
+          GoRoute(path: '/checklists/novo', builder: (context, state) => const ChecklistEditorPage()),
+          GoRoute(
+            path: '/checklists/:id',
+            builder: (context, state) => ChecklistEditorPage(
+              key: ValueKey(state.pathParameters['id']),
+              id: UuidValue.withValidation(state.pathParameters['id']!),
+            ),
+          ),
           GoRoute(path: '/etiquetas', builder: (context, state) => const QrTagsPage()),
           GoRoute(path: '/usuarios', builder: (context, state) => const UsersPage()),
           GoRoute(path: '/depreciacao', builder: (context, state) => const DepreciationPage()),

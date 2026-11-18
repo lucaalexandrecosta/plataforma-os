@@ -20,6 +20,8 @@ import 'package:plataforma_os_client/src/protocol/assets/models/asset_page.dart'
 import 'package:plataforma_os_client/src/protocol/assets/models/asset_withdraw_input.dart' as _i7pva5pt;
 import 'package:plataforma_os_client/src/protocol/assets/models/qr_tag.dart' as _ix23buzf;
 import 'package:plataforma_os_client/src/protocol/assets/models/qr_tag_batch.dart' as _ic9pb02v;
+import 'package:plataforma_os_client/src/protocol/catalog/models/checklist_template.dart' as _i4koy3wu;
+import 'package:plataforma_os_client/src/protocol/catalog/models/checklist_template_input.dart' as _i08aig2p;
 import 'package:plataforma_os_client/src/protocol/catalog/models/product_input.dart' as _i2gecgw3;
 import 'package:plataforma_os_client/src/protocol/catalog/models/product_summary.dart' as _ihgw7zuo;
 import 'package:plataforma_os_client/src/protocol/customers/models/customer.dart' as _isrde2pn;
@@ -249,6 +251,86 @@ class EndpointQrTags extends EndpointStaff {
       'tagId': tagId,
       'reason': reason,
       'note': note,
+    },
+  );
+}
+
+/// `checklists.*` — modelos de checklist. Leitura para quem trabalha com OS;
+/// alteração com `catalog.manage`. Erros: `VALIDATION_FAILED`, `NOT_FOUND`,
+/// `VERSION_MISMATCH`, `NOT_DRAFT`, `EMPTY_CHECKLIST`, `DRAFT_EXISTS`.
+/// {@category Endpoint}
+class EndpointChecklists extends EndpointStaff {
+  EndpointChecklists(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'checklists';
+
+  /// Rascunhos e publicados (e arquivados com [includeArchived]), por nome e
+  /// versão mais nova primeiro.
+  _ida.Future<List<_i4koy3wu.ChecklistTemplate>> list({bool? includeArchived}) =>
+      caller.callServerEndpoint<List<_i4koy3wu.ChecklistTemplate>>(
+        'checklists',
+        'list',
+        {'includeArchived': includeArchived},
+      );
+
+  _ida.Future<_i4koy3wu.ChecklistTemplate> get(_isc.UuidValue id) =>
+      caller.callServerEndpoint<_i4koy3wu.ChecklistTemplate>(
+        'checklists',
+        'get',
+        {'id': id},
+      );
+
+  _ida.Future<_i4koy3wu.ChecklistTemplate> create(_i08aig2p.ChecklistTemplateInput input) =>
+      caller.callServerEndpoint<_i4koy3wu.ChecklistTemplate>(
+        'checklists',
+        'create',
+        {'input': input},
+      );
+
+  _ida.Future<_i4koy3wu.ChecklistTemplate> update(
+    _isc.UuidValue id,
+    int expectedVersion,
+    _i08aig2p.ChecklistTemplateInput input,
+  ) => caller.callServerEndpoint<_i4koy3wu.ChecklistTemplate>(
+    'checklists',
+    'update',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+      'input': input,
+    },
+  );
+
+  _ida.Future<_i4koy3wu.ChecklistTemplate> publish(
+    _isc.UuidValue id,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_i4koy3wu.ChecklistTemplate>(
+    'checklists',
+    'publish',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+    },
+  );
+
+  /// Novo rascunho a partir de uma versão publicada.
+  _ida.Future<_i4koy3wu.ChecklistTemplate> newVersion(_isc.UuidValue id) =>
+      caller.callServerEndpoint<_i4koy3wu.ChecklistTemplate>(
+        'checklists',
+        'newVersion',
+        {'id': id},
+      );
+
+  _ida.Future<_i4koy3wu.ChecklistTemplate> archive(
+    _isc.UuidValue id,
+    int expectedVersion,
+  ) => caller.callServerEndpoint<_i4koy3wu.ChecklistTemplate>(
+    'checklists',
+    'archive',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
     },
   );
 }
@@ -1344,6 +1426,7 @@ class Client extends _isc.ServerpodClientShared {
        ) {
     assets = EndpointAssets(this);
     qrTags = EndpointQrTags(this);
+    checklists = EndpointChecklists(this);
     products = EndpointProducts(this);
     customers = EndpointCustomers(this);
     auth = EndpointAuth(this);
@@ -1364,6 +1447,8 @@ class Client extends _isc.ServerpodClientShared {
   late final EndpointAssets assets;
 
   late final EndpointQrTags qrTags;
+
+  late final EndpointChecklists checklists;
 
   late final EndpointProducts products;
 
@@ -1399,6 +1484,7 @@ class Client extends _isc.ServerpodClientShared {
   Map<String, _isc.EndpointRef> get endpointRefLookup => {
     'assets': assets,
     'qrTags': qrTags,
+    'checklists': checklists,
     'products': products,
     'customers': customers,
     'auth': auth,

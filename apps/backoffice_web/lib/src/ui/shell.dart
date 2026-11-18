@@ -44,6 +44,13 @@ class AppShell extends ConsumerWidget {
       needs: 'settings.manage|catalog.manage|assets.manage',
     ),
     (
+      path: '/checklists',
+      label: 'Checklists',
+      icon: Icons.checklist_outlined,
+      selected: Icons.checklist,
+      needs: 'catalog.manage',
+    ),
+    (
       path: '/etiquetas',
       label: 'Etiquetas QR',
       icon: Icons.qr_code_2_outlined,

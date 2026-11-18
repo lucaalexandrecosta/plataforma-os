@@ -155,3 +155,24 @@ const contactRoleLabels = {'customer_contact': 'Contato', 'customer_admin': 'Res
 const contactChannelLabels = {'whatsapp': 'WhatsApp', 'sms': 'SMS', 'email': 'E-mail'};
 
 const contactStatusLabels = {'active': 'Ativo', 'pending_approval': 'Aguardando aprovação', 'blocked': 'Bloqueado'};
+
+const checklistItemTypeLabels = {
+  'yes_no': 'Sim / Não',
+  'ok_nok': 'Conforme / Não conforme',
+  'number': 'Número',
+  'text': 'Texto',
+  'choice': 'Escolha',
+};
+
+const checklistStatusLabels = {'draft': 'Rascunho', 'published': 'Publicado', 'archived': 'Arquivado'};
+
+const workOrderCategoryLabels = {
+  'corrective': 'Corretiva',
+  'preventive': 'Preventiva',
+  'installation': 'Instalação',
+  'removal': 'Retirada',
+  'inspection': 'Inspeção',
+  'refurbishment': 'Recondicionamento',
+  'teardown': 'Desmontagem',
+  'other': 'Outra',
+};
