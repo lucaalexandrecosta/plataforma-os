@@ -26,6 +26,9 @@ customers:
   - sites:
   - createSite:
   - updateSite:
+  - contacts:
+  - createContact:
+  - updateContact:
 auth:
   - selectTenant:
   - myTenants:

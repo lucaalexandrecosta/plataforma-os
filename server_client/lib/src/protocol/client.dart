@@ -23,6 +23,8 @@ import 'package:plataforma_os_client/src/protocol/assets/models/qr_tag_batch.dar
 import 'package:plataforma_os_client/src/protocol/catalog/models/product_input.dart' as _i2gecgw3;
 import 'package:plataforma_os_client/src/protocol/catalog/models/product_summary.dart' as _ihgw7zuo;
 import 'package:plataforma_os_client/src/protocol/customers/models/customer.dart' as _isrde2pn;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_contact.dart' as _iicdz276;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_contact_input.dart' as _ixru6art;
 import 'package:plataforma_os_client/src/protocol/customers/models/customer_input.dart' as _il30a9yx;
 import 'package:plataforma_os_client/src/protocol/customers/models/customer_page.dart' as _igrzlp6q;
 import 'package:plataforma_os_client/src/protocol/customers/models/customer_site.dart' as _iq0mn52n;
@@ -273,7 +275,7 @@ class EndpointProducts extends EndpointStaff {
       );
 }
 
-/// `customers.*` — clientes e unidades. Leitura para quem mexe com OS ou
+/// `customers.*` — clientes, unidades e contatos. Leitura para quem mexe com OS ou
 /// bens; alteração com `customers.manage`. Erros: `FORBIDDEN`,
 /// `VALIDATION_FAILED`, `NOT_FOUND`, `VERSION_MISMATCH`, `ERP_MASTER_READ_ONLY`.
 /// {@category Endpoint}
@@ -354,6 +356,40 @@ class EndpointCustomers extends EndpointStaff {
   ) => caller.callServerEndpoint<_iq0mn52n.CustomerSite>(
     'customers',
     'updateSite',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+      'input': input,
+    },
+  );
+
+  /// Contatos do cliente (ativos e inativos).
+  _ida.Future<List<_iicdz276.CustomerContact>> contacts(_isc.UuidValue customerId) =>
+      caller.callServerEndpoint<List<_iicdz276.CustomerContact>>(
+        'customers',
+        'contacts',
+        {'customerId': customerId},
+      );
+
+  _ida.Future<_iicdz276.CustomerContact> createContact(
+    _isc.UuidValue customerId,
+    _ixru6art.CustomerContactInput input,
+  ) => caller.callServerEndpoint<_iicdz276.CustomerContact>(
+    'customers',
+    'createContact',
+    {
+      'customerId': customerId,
+      'input': input,
+    },
+  );
+
+  _ida.Future<_iicdz276.CustomerContact> updateContact(
+    _isc.UuidValue id,
+    int expectedVersion,
+    _ixru6art.CustomerContactInput input,
+  ) => caller.callServerEndpoint<_iicdz276.CustomerContact>(
+    'customers',
+    'updateContact',
     {
       'id': id,
       'expectedVersion': expectedVersion,

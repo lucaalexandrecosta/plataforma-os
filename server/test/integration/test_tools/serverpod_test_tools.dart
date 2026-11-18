@@ -24,6 +24,8 @@ import 'package:plataforma_os_server/src/generated/assets/models/qr_tag_batch.da
 import 'package:plataforma_os_server/src/generated/catalog/models/product_input.dart' as _iku7g2we;
 import 'package:plataforma_os_server/src/generated/catalog/models/product_summary.dart' as _ico54ik3;
 import 'package:plataforma_os_server/src/generated/customers/models/customer.dart' as _iejihgcl;
+import 'package:plataforma_os_server/src/generated/customers/models/customer_contact.dart' as _in02tur2;
+import 'package:plataforma_os_server/src/generated/customers/models/customer_contact_input.dart' as _i0rc22zw;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_input.dart' as _iw3fixvn;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_page.dart' as _ivfmmfkq;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_site.dart' as _ing115qe;
@@ -1124,6 +1126,106 @@ class _CustomersEndpoint {
                   _localCallContext.arguments,
                 )
                 as _ida.Future<_ing115qe.CustomerSite>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<List<_in02tur2.CustomerContact>> contacts(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue customerId,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'customers',
+        method: 'contacts',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'customers',
+          methodName: 'contacts',
+          parameters: _ist.testObjectToJson({'customerId': customerId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<List<_in02tur2.CustomerContact>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_in02tur2.CustomerContact> createContact(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue customerId,
+    _i0rc22zw.CustomerContactInput input,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'customers',
+        method: 'createContact',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'customers',
+          methodName: 'createContact',
+          parameters: _ist.testObjectToJson({
+            'customerId': customerId,
+            'input': input,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_in02tur2.CustomerContact>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _ida.Future<_in02tur2.CustomerContact> updateContact(
+    _ist.TestSessionBuilder sessionBuilder,
+    _is.UuidValue id,
+    int expectedVersion,
+    _i0rc22zw.CustomerContactInput input,
+  ) async {
+    return _ist.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession = (sessionBuilder as _ist.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'customers',
+        method: 'updateContact',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'customers',
+          methodName: 'updateContact',
+          parameters: _ist.testObjectToJson({
+            'id': id,
+            'expectedVersion': expectedVersion,
+            'input': input,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue =
+            await (_localCallContext.method.call(
+                  _localUniqueSession,
+                  _localCallContext.arguments,
+                )
+                as _ida.Future<_in02tur2.CustomerContact>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

@@ -81,3 +81,12 @@ String? formatDocument(String? digits) => digits == null
 
 /// 90000000 → 90000-000.
 String formatCep(String digits) => digits.length != 8 ? digits : '${digits.substring(0, 5)}-${digits.substring(5)}';
+
+/// +5551999998888 → (51) 99999-8888; +555133334444 → (51) 3333-4444. Outros
+/// países ficam como vieram.
+String formatPhone(String e164) {
+  if (!e164.startsWith('+55') || (e164.length != 13 && e164.length != 14)) return e164;
+  final d = e164.substring(3);
+  final split = d.length - 4;
+  return '(${d.substring(0, 2)}) ${d.substring(2, split)}-${d.substring(split)}';
+}

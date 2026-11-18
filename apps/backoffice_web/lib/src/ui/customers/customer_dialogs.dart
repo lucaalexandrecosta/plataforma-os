@@ -5,8 +5,10 @@ import 'package:plataforma_os_client/plataforma_os_client.dart';
 import 'package:serverpod_client/serverpod_client.dart' show UuidValue;
 
 import '../../api/gateway.dart';
+import '../../labels.dart';
 import '../../session/session.dart';
 import '../common/errors.dart';
+import '../common/format.dart';
 
 String? _clean(TextEditingController c) => c.text.trim().isEmpty ? null : c.text.trim();
 
@@ -348,6 +350,155 @@ class _CustomerSiteDialogState extends ConsumerState<CustomerSiteDialog>
         SwitchListTile(
           contentPadding: EdgeInsets.zero,
           title: const Text('Ativa'),
+          value: _active,
+          onChanged: (v) => setState(() => _active = v),
+        ),
+      ],
+    );
+  }
+}
+
+/// Contato do cliente: quem abre chamados e recebe avisos. Telefone ou
+/// e-mail é obrigatório; o servidor normaliza o telefone para +55.
+class CustomerContactDialog extends ConsumerStatefulWidget {
+  const CustomerContactDialog({super.key, required this.customerId, required this.sites, this.contact});
+
+  final UuidValue customerId;
+  final List<CustomerSite> sites;
+  final CustomerContact? contact;
+
+  @override
+  ConsumerState<CustomerContactDialog> createState() => _CustomerContactDialogState();
+}
+
+class _CustomerContactDialogState extends ConsumerState<CustomerContactDialog>
+    with _SaveForm<CustomerContactDialog, CustomerContact> {
+  late final _name = TextEditingController(text: widget.contact?.name);
+  late final _job = TextEditingController(text: widget.contact?.jobTitle);
+  late final _email = TextEditingController(text: widget.contact?.email);
+  late final _phone = TextEditingController(
+    text: widget.contact?.phone == null ? null : formatPhone(widget.contact!.phone!),
+  );
+  late UuidValue? _siteId = widget.contact?.customerSiteId;
+  late var _role = widget.contact?.contactRole ?? 'customer_contact';
+  late String? _channel = widget.contact?.preferredChannel;
+  late var _canOpen = widget.contact?.canOpenRequests ?? true;
+  late var _active = widget.contact?.isActive ?? true;
+
+  @override
+  void dispose() {
+    for (final c in [_name, _job, _email, _phone]) {
+      c.dispose();
+    }
+    super.dispose();
+  }
+
+  String? _reach(String? _) =>
+      _email.text.trim().isEmpty && _phone.text.trim().isEmpty ? 'Informe telefone ou e-mail.' : null;
+
+  void _submit() {
+    final input = CustomerContactInput(
+      customerSiteId: _siteId,
+      name: _name.text.trim(),
+      email: _clean(_email),
+      phone: _clean(_phone),
+      jobTitle: _clean(_job),
+      contactRole: _role,
+      canOpenRequests: _canOpen,
+      preferredChannel: _channel,
+      isActive: _active,
+    );
+    final current = widget.contact;
+    save(
+      (g) =>
+          current == null ? g.createCustomerContact(widget.customerId, input) : g.updateCustomerContact(current, input),
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final sites = [
+      for (final s in widget.sites)
+        if (s.isActive || s.id == _siteId) s,
+    ];
+    return dialog(
+      title: widget.contact == null ? 'Novo contato' : 'Editar contato',
+      saveKey: 'contact-save',
+      onSave: _submit,
+      fields: [
+        _pair(
+          TextFormField(
+            key: const Key('contact-name'),
+            controller: _name,
+            decoration: deco('Nome', 'name'),
+            validator: (v) => _required(v, 'Informe o nome.'),
+          ),
+          TextFormField(
+            controller: _job,
+            decoration: deco('Cargo', 'jobTitle', hint: 'Gerente da loja'),
+          ),
+        ),
+        _pair(
+          TextFormField(
+            key: const Key('contact-phone'),
+            controller: _phone,
+            keyboardType: TextInputType.phone,
+            decoration: deco('Telefone / WhatsApp', 'phone', hint: '(51) 99999-8888'),
+            validator: _reach,
+          ),
+          TextFormField(
+            key: const Key('contact-email'),
+            controller: _email,
+            keyboardType: TextInputType.emailAddress,
+            decoration: deco('E-mail', 'email'),
+            validator: _reach,
+          ),
+        ),
+        _pair(
+          DropdownButtonFormField<UuidValue?>(
+            key: const Key('contact-site'),
+            initialValue: _siteId,
+            isExpanded: true,
+            decoration: deco('Unidade', 'customerSiteId'),
+            items: [
+              const DropdownMenuItem(value: null, child: Text('Todas as unidades')),
+              for (final s in sites) DropdownMenuItem(value: s.id, child: Text(s.name)),
+            ],
+            onChanged: (v) => setState(() => _siteId = v),
+          ),
+          DropdownButtonFormField<String?>(
+            key: const Key('contact-channel'),
+            initialValue: _channel,
+            isExpanded: true,
+            decoration: deco('Canal preferido', 'preferredChannel'),
+            items: [
+              const DropdownMenuItem(value: null, child: Text('—')),
+              for (final e in contactChannelLabels.entries) DropdownMenuItem(value: e.key, child: Text(e.value)),
+            ],
+            onChanged: (v) => setState(() => _channel = v),
+          ),
+        ),
+        DropdownButtonFormField<String>(
+          key: const Key('contact-role'),
+          initialValue: _role,
+          isExpanded: true,
+          decoration: deco('Papel', 'contactRole'),
+          items: [
+            for (final e in contactRoleLabels.entries) DropdownMenuItem(value: e.key, child: Text(e.value)),
+          ],
+          onChanged: (v) => setState(() => _role = v!),
+        ),
+        SwitchListTile(
+          key: const Key('contact-can-open'),
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Pode abrir chamados'),
+          value: _canOpen,
+          onChanged: (v) => setState(() => _canOpen = v),
+        ),
+        SwitchListTile(
+          key: const Key('contact-active'),
+          contentPadding: EdgeInsets.zero,
+          title: const Text('Ativo'),
           value: _active,
           onChanged: (v) => setState(() => _active = v),
         ),

@@ -7,7 +7,8 @@ import '../../platform/errors/api_errors.dart';
 
 /// Clientes e unidades do tenant (onde ficam os bens em comodato e para quem
 /// se abre OS). Leitura para quem trabalha com OS ou bens; alteração com
-/// `customers.manage`. Contatos e importação por planilha vêm depois.
+/// `customers.manage`. Contatos em customer_contacts.dart; importação por
+/// planilha vem depois.
 abstract final class Customers {
   static const managePermission = 'customers.manage';
   static const _readPermissions = {managePermission, 'work_orders.read', 'assets.manage', 'visits.schedule'};

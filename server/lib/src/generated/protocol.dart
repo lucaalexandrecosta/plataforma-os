@@ -15,6 +15,7 @@ import 'package:plataforma_os_server/src/generated/assets/models/asset_assignmen
 import 'package:plataforma_os_server/src/generated/assets/models/qr_tag.dart' as _idzaz83i;
 import 'package:plataforma_os_server/src/generated/assets/models/qr_tag_batch.dart' as _i07n19u6;
 import 'package:plataforma_os_server/src/generated/catalog/models/product_summary.dart' as _ico54ik3;
+import 'package:plataforma_os_server/src/generated/customers/models/customer_contact.dart' as _in02tur2;
 import 'package:plataforma_os_server/src/generated/customers/models/customer_site.dart' as _ing115qe;
 import 'package:plataforma_os_server/src/generated/identity_access/models/assignable_role.dart' as _iur1xixc;
 import 'package:plataforma_os_server/src/generated/identity_access/models/tenant_user.dart' as _iqhozu6i;
@@ -41,6 +42,8 @@ import 'assets/models/qr_tag_batch.dart' as _ikikcay0;
 import 'catalog/models/product_input.dart' as _iuumnsch;
 import 'catalog/models/product_summary.dart' as _i4geouqi;
 import 'customers/models/customer.dart' as _in2ysqih;
+import 'customers/models/customer_contact.dart' as _iyonel9d;
+import 'customers/models/customer_contact_input.dart' as _i8ppoe04;
 import 'customers/models/customer_input.dart' as _i54pcl9h;
 import 'customers/models/customer_page.dart' as _iu4jficl;
 import 'customers/models/customer_site.dart' as _ihhtee09;
@@ -102,6 +105,8 @@ export 'assets/models/qr_tag_batch.dart';
 export 'catalog/models/product_input.dart';
 export 'catalog/models/product_summary.dart';
 export 'customers/models/customer.dart';
+export 'customers/models/customer_contact.dart';
+export 'customers/models/customer_contact_input.dart';
 export 'customers/models/customer_input.dart';
 export 'customers/models/customer_page.dart';
 export 'customers/models/customer_site.dart';
@@ -175,6 +180,8 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<_iuumnsch.ProductInput>,
       _is.getType<_i4geouqi.ProductSummary>,
       _is.getType<_in2ysqih.Customer>,
+      _is.getType<_iyonel9d.CustomerContact>,
+      _is.getType<_i8ppoe04.CustomerContactInput>,
       _is.getType<_i54pcl9h.CustomerInput>,
       _is.getType<_iu4jficl.CustomerPage>,
       _is.getType<_ihhtee09.CustomerSite>,
@@ -236,6 +243,8 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<_iuumnsch.ProductInput?>,
       _is.getType<_i4geouqi.ProductSummary?>,
       _is.getType<_in2ysqih.Customer?>,
+      _is.getType<_iyonel9d.CustomerContact?>,
+      _is.getType<_i8ppoe04.CustomerContactInput?>,
       _is.getType<_i54pcl9h.CustomerInput?>,
       _is.getType<_iu4jficl.CustomerPage?>,
       _is.getType<_ihhtee09.CustomerSite?>,
@@ -305,6 +314,7 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _is.getType<List<_idzaz83i.QrTag>>,
       _is.getType<List<_ico54ik3.ProductSummary>>,
       _is.getType<List<_ing115qe.CustomerSite>>,
+      _is.getType<List<_in02tur2.CustomerContact>>,
       _is.getType<List<_inphvrgt.TenantSummary>>,
       _is.getType<List<_iur1xixc.AssignableRole>>,
       _is.getType<List<_iqhozu6i.TenantUser>>,
@@ -335,6 +345,8 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       'ProductInput',
       'ProductSummary',
       'Customer',
+      'CustomerContact',
+      'CustomerContactInput',
       'CustomerInput',
       'CustomerPage',
       'CustomerSite',
@@ -648,6 +660,12 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == _in2ysqih.Customer) {
       return _in2ysqih.Customer.fromJson(data) as T;
     }
+    if (t == _iyonel9d.CustomerContact) {
+      return _iyonel9d.CustomerContact.fromJson(data) as T;
+    }
+    if (t == _i8ppoe04.CustomerContactInput) {
+      return _i8ppoe04.CustomerContactInput.fromJson(data) as T;
+    }
     if (t == _i54pcl9h.CustomerInput) {
       return _i54pcl9h.CustomerInput.fromJson(data) as T;
     }
@@ -830,6 +848,12 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     }
     if (t == _is.getType<_in2ysqih.Customer?>()) {
       return (data != null ? _in2ysqih.Customer.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_iyonel9d.CustomerContact?>()) {
+      return (data != null ? _iyonel9d.CustomerContact.fromJson(data) : null) as T;
+    }
+    if (t == _is.getType<_i8ppoe04.CustomerContactInput?>()) {
+      return (data != null ? _i8ppoe04.CustomerContactInput.fromJson(data) : null) as T;
     }
     if (t == _is.getType<_i54pcl9h.CustomerInput?>()) {
       return (data != null ? _i54pcl9h.CustomerInput.fromJson(data) : null) as T;
@@ -1041,6 +1065,9 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     if (t == List<_ing115qe.CustomerSite>) {
       return (data as List).map((e) => deserialize<_ing115qe.CustomerSite>(e)).toList() as T;
     }
+    if (t == List<_in02tur2.CustomerContact>) {
+      return (data as List).map((e) => deserialize<_in02tur2.CustomerContact>(e)).toList() as T;
+    }
     if (t == List<_inphvrgt.TenantSummary>) {
       return (data as List).map((e) => deserialize<_inphvrgt.TenantSummary>(e)).toList() as T;
     }
@@ -1103,6 +1130,8 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
       _iuumnsch.ProductInput => 'ProductInput',
       _i4geouqi.ProductSummary => 'ProductSummary',
       _in2ysqih.Customer => 'Customer',
+      _iyonel9d.CustomerContact => 'CustomerContact',
+      _i8ppoe04.CustomerContactInput => 'CustomerContactInput',
       _i54pcl9h.CustomerInput => 'CustomerInput',
       _iu4jficl.CustomerPage => 'CustomerPage',
       _ihhtee09.CustomerSite => 'CustomerSite',
@@ -1189,6 +1218,10 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
         return 'ProductSummary';
       case _in2ysqih.Customer():
         return 'Customer';
+      case _iyonel9d.CustomerContact():
+        return 'CustomerContact';
+      case _i8ppoe04.CustomerContactInput():
+        return 'CustomerContactInput';
       case _i54pcl9h.CustomerInput():
         return 'CustomerInput';
       case _iu4jficl.CustomerPage():
@@ -1343,6 +1376,12 @@ class Protocol extends _is.DatabaseSerializationManager implements _is.DatabaseP
     }
     if (dataClassName == 'Customer') {
       return deserialize<_in2ysqih.Customer>(data['data']);
+    }
+    if (dataClassName == 'CustomerContact') {
+      return deserialize<_iyonel9d.CustomerContact>(data['data']);
+    }
+    if (dataClassName == 'CustomerContactInput') {
+      return deserialize<_i8ppoe04.CustomerContactInput>(data['data']);
     }
     if (dataClassName == 'CustomerInput') {
       return deserialize<_i54pcl9h.CustomerInput>(data['data']);

@@ -218,6 +218,18 @@ class ServerGateway implements Gateway {
       _guard(() => _tenant.customers.updateSite(site.id, site.version, input));
 
   @override
+  Future<List<CustomerContact>> customerContacts(UuidValue customerId) =>
+      _guard(() => _tenant.customers.contacts(customerId));
+
+  @override
+  Future<CustomerContact> createCustomerContact(UuidValue customerId, CustomerContactInput input) =>
+      _guard(() => _tenant.customers.createContact(customerId, input));
+
+  @override
+  Future<CustomerContact> updateCustomerContact(CustomerContact contact, CustomerContactInput input) =>
+      _guard(() => _tenant.customers.updateContact(contact.id, contact.version, input));
+
+  @override
   Future<List<Branch>> branches({bool includeInactive = false}) =>
       _guard(() => _tenant.branches.list(includeInactive: includeInactive ? true : null));
 

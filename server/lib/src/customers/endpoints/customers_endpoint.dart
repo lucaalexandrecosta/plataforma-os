@@ -2,9 +2,10 @@ import 'package:serverpod/serverpod.dart';
 
 import '../../generated/protocol.dart';
 import '../../platform/endpoints/endpoint_bases.dart';
+import '../internal/customer_contacts.dart';
 import '../internal/customers.dart';
 
-/// `customers.*` — clientes e unidades. Leitura para quem mexe com OS ou
+/// `customers.*` — clientes, unidades e contatos. Leitura para quem mexe com OS ou
 /// bens; alteração com `customers.manage`. Erros: `FORBIDDEN`,
 /// `VALIDATION_FAILED`, `NOT_FOUND`, `VERSION_MISMATCH`, `ERP_MASTER_READ_ONLY`.
 class CustomersEndpoint extends StaffEndpoint {
@@ -38,4 +39,18 @@ class CustomersEndpoint extends StaffEndpoint {
 
   Future<CustomerSite> updateSite(Session session, UuidValue id, int expectedVersion, CustomerSiteInput input) =>
       Customers.updateSite(session, id, expectedVersion, input);
+
+  /// Contatos do cliente (ativos e inativos).
+  Future<List<CustomerContact>> contacts(Session session, UuidValue customerId) =>
+      CustomerContacts.list(session, customerId);
+
+  Future<CustomerContact> createContact(Session session, UuidValue customerId, CustomerContactInput input) =>
+      CustomerContacts.create(session, customerId, input);
+
+  Future<CustomerContact> updateContact(
+    Session session,
+    UuidValue id,
+    int expectedVersion,
+    CustomerContactInput input,
+  ) => CustomerContacts.update(session, id, expectedVersion, input);
 }

@@ -1,0 +1,23 @@
+# Contato do cliente (app.customer_contacts): quem abre chamados e recebe
+# avisos. Pode estar ligado a uma unidade.
+class: CustomerContact
+fields:
+  id: UuidValue
+  customerId: UuidValue
+  customerSiteId: UuidValue?
+  customerSiteName: String?
+  name: String
+  email: String?
+  # E.164 (+5551999998888).
+  phone: String?
+  jobTitle: String?
+  # customer_contact | customer_admin
+  contactRole: String
+  # active | pending_approval | blocked
+  status: String
+  canOpenRequests: bool
+  # whatsapp | sms | email
+  preferredChannel: String?
+  isActive: bool
+  source: String
+  version: int
