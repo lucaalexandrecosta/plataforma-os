@@ -24,6 +24,11 @@ fields:
   notes: String?
   # Código curto (XXXX-XXXX) da etiqueta vinculada, se houver.
   qrShortCode: String?
+  # Alocação vigente (bem instalado no cliente), se houver.
+  customerId: UuidValue?
+  customerName: String?
+  customerSiteId: UuidValue?
+  customerSiteName: String?
   isActive: bool
   # local ou erp (campos mestres do ERP são só leitura).
   source: String

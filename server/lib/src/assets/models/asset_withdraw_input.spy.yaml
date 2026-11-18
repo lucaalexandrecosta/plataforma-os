@@ -1,0 +1,8 @@
+# Entrada de assets.withdraw: encerra a alocação vigente e o bem volta ao
+# estoque.
+class: AssetWithdrawInput
+fields:
+  # withdrawal (retirada do cliente) ou return_to_stock (devolução).
+  reason: String
+  endedAt: DateTime?
+  notes: String?

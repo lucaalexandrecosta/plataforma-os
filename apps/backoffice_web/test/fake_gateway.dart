@@ -23,6 +23,7 @@ class FakeGateway implements Gateway {
     'qr_tags.unbind',
     'settings.manage',
     'catalog.manage',
+    'customers.manage',
   ];
 
   static final frioSul = TenantSummary(
@@ -360,6 +361,101 @@ class FakeGateway implements Gateway {
     return _replaceTag(tag.copyWith(status: 'revoked', revokedReason: reason));
   }
 
+  // clientes
+  final customerList = <Customer>[];
+  final siteList = <CustomerSite>[];
+
+  Customer _withSites(Customer c) =>
+      c.copyWith(siteCount: siteList.where((s) => s.customerId == c.id && s.isActive).length);
+
+  Customer _customerFrom(CustomerInput input, {required String id, required int version}) {
+    final doc = input.documentNumber;
+    return Customer.fromJson({
+      ...input.toJson(),
+      'id': id,
+      'documentType': doc == null ? 'none' : (input.personType == 'individual' ? 'cpf' : 'cnpj'),
+      'source': 'local',
+      'siteCount': 0,
+      'version': version,
+    });
+  }
+
+  @override
+  Future<CustomerPage> customers({String? search, bool includeInactive = false, int limit = 50, int offset = 0}) async {
+    _maybeFail('customers');
+    final term = search?.trim().toLowerCase() ?? '';
+    final items = [
+      for (final c in customerList)
+        if ((includeInactive || c.isActive) &&
+            (term.isEmpty || '${c.name} ${c.tradeName ?? ''} ${c.code ?? ''}'.toLowerCase().contains(term)))
+          _withSites(c),
+    ];
+    return CustomerPage(items: items.skip(offset).take(limit).toList(), total: items.length);
+  }
+
+  @override
+  Future<Customer> customer(UuidValue id) async {
+    _maybeFail('customer');
+    return _withSites(customerList.singleWhere((c) => c.id == id));
+  }
+
+  @override
+  Future<Customer> createCustomer(CustomerInput input) async {
+    _maybeFail('createCustomer');
+    final c = _customerFrom(
+      input,
+      id: '00000000-0000-4000-8000-0000000006${(customerList.length + 1).toString().padLeft(2, '0')}',
+      version: 1,
+    );
+    customerList.add(c);
+    return c;
+  }
+
+  @override
+  Future<Customer> updateCustomer(Customer customer, CustomerInput input) async {
+    _maybeFail('updateCustomer');
+    final c = _customerFrom(input, id: customer.id.uuid, version: customer.version + 1);
+    customerList[customerList.indexWhere((x) => x.id == c.id)] = c;
+    return c;
+  }
+
+  @override
+  Future<List<CustomerSite>> customerSites(UuidValue customerId) async {
+    _maybeFail('customerSites');
+    return [
+      for (final s in siteList)
+        if (s.customerId == customerId) s,
+    ];
+  }
+
+  @override
+  Future<CustomerSite> createCustomerSite(UuidValue customerId, CustomerSiteInput input) async {
+    _maybeFail('createCustomerSite');
+    final s = CustomerSite.fromJson({
+      ...input.toJson(),
+      'id': '00000000-0000-4000-8000-0000000007${(siteList.length + 1).toString().padLeft(2, '0')}',
+      'customerId': customerId.uuid,
+      'source': 'local',
+      'version': 1,
+    });
+    siteList.add(s);
+    return s;
+  }
+
+  @override
+  Future<CustomerSite> updateCustomerSite(CustomerSite site, CustomerSiteInput input) async {
+    _maybeFail('updateCustomerSite');
+    final s = CustomerSite.fromJson({
+      ...input.toJson(),
+      'id': site.id.uuid,
+      'customerId': site.customerId.uuid,
+      'source': site.source,
+      'version': site.version + 1,
+    });
+    siteList[siteList.indexWhere((x) => x.id == s.id)] = s;
+    return s;
+  }
+
   // cadastros
   @override
   Future<List<Branch>> branches({bool includeInactive = false}) async {
@@ -452,9 +548,70 @@ class FakeGateway implements Gateway {
   }
 
   @override
-  Future<AssetPage> assets({String? search, int limit = 50, int offset = 0}) async {
+  Future<AssetPage> assets({String? search, UuidValue? customerId, int limit = 50, int offset = 0}) async {
     _maybeFail('assets');
-    return AssetPage(items: [currentAsset], total: 1);
+    final items = [
+      if (customerId == null || currentAsset.customerId == customerId) currentAsset,
+    ];
+    return AssetPage(items: items, total: items.length);
+  }
+
+  final assignmentList = <AssetAssignment>[];
+  AssetInstallInput? lastInstall;
+
+  @override
+  Future<Asset> installAsset(Asset asset, AssetInstallInput input) async {
+    _maybeFail('installAsset');
+    lastInstall = input;
+    final site = siteList.singleWhere((s) => s.id == input.customerSiteId);
+    final customer = customerList.singleWhere((c) => c.id == site.customerId);
+    final now = DateTime(2026, 11, 17, 15);
+    final transfer = assignmentList.isNotEmpty && assignmentList.first.endedAt == null;
+    if (transfer) assignmentList[0] = assignmentList[0].copyWith(endedAt: now, endReason: 'transfer');
+    assignmentList.insert(
+      0,
+      AssetAssignment(
+        id: UuidValue.fromString(
+          '00000000-0000-4000-8000-0000000008${(assignmentList.length + 1).toString().padLeft(2, '0')}',
+        ),
+        customerId: customer.id,
+        customerName: customer.tradeName ?? customer.name,
+        customerSiteId: site.id,
+        customerSiteName: site.name,
+        ownershipType: asset.ownershipType,
+        startedAt: now,
+        startReason: transfer ? 'transfer' : 'installation',
+        sourceDocumentType: input.sourceDocumentType,
+        sourceDocumentNumber: input.sourceDocumentNumber,
+        notes: input.notes,
+      ),
+    );
+    return currentAsset = asset.copyWith(
+      status: 'installed',
+      customerId: customer.id,
+      customerName: customer.tradeName ?? customer.name,
+      customerSiteId: site.id,
+      customerSiteName: site.name,
+      version: asset.version + 1,
+    );
+  }
+
+  @override
+  Future<Asset> withdrawAsset(Asset asset, AssetWithdrawInput input) async {
+    _maybeFail('withdrawAsset');
+    assignmentList[0] = assignmentList[0].copyWith(endedAt: DateTime(2026, 11, 17, 16), endReason: input.reason);
+    final json = asset.toJson()
+      ..remove('customerId')
+      ..remove('customerName')
+      ..remove('customerSiteId')
+      ..remove('customerSiteName');
+    return currentAsset = Asset.fromJson({...json, 'status': 'in_stock', 'version': asset.version + 1});
+  }
+
+  @override
+  Future<List<AssetAssignment>> assetAssignments(UuidValue assetId) async {
+    _maybeFail('assetAssignments');
+    return [...assignmentList];
   }
 
   @override

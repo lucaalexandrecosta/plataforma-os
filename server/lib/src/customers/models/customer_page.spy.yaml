@@ -1,0 +1,5 @@
+# Página de customers.list (por nome, cursor por offset).
+class: CustomerPage
+fields:
+  items: List<Customer>
+  total: int

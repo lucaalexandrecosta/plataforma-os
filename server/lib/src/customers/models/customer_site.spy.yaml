@@ -1,0 +1,24 @@
+# Unidade/local de atendimento do cliente (app.customer_sites).
+class: CustomerSite
+fields:
+  id: UuidValue
+  customerId: UuidValue
+  code: String?
+  name: String
+  street: String?
+  streetNumber: String?
+  complement: String?
+  district: String?
+  city: String?
+  state: String?
+  # Só dígitos (CEP).
+  postalCode: String?
+  # WGS 84, graus decimais.
+  latitude: double?
+  longitude: double?
+  phone: String?
+  # Como chegar, horário, com quem falar.
+  accessNotes: String?
+  isActive: bool
+  source: String
+  version: int

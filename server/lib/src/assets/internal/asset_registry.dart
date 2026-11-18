@@ -10,7 +10,7 @@ import '../../tenancy/tenancy.dart';
 
 /// Cadastro de bens. Leitura com `assets.manage` ou `work_orders.read`;
 /// alteração com `assets.manage`. Status e alocação em cliente mudam pelas
-/// movimentações (próxima etapa), não por aqui.
+/// movimentações ([AssetMovements]), não por aqui.
 abstract final class AssetRegistry {
   static const managePermission = 'assets.manage';
   static const _readPermissions = {'assets.manage', 'work_orders.read'};
@@ -19,15 +19,19 @@ abstract final class AssetRegistry {
   static const _select =
       'SELECT a.id, a.product_id, p.name, a.serial_number, a.asset_tag, a.status, a.ownership_type, a.branch_id, '
       '       a.cost_center_id, a.location_note, a.warranty_until, a.acquisition_date, a.acquisition_cost, '
-      '       a.supplier_name, a.acquisition_document, a.notes, a.is_active, a.source, a.version, q.short_code '
+      '       a.supplier_name, a.acquisition_document, a.notes, a.is_active, a.source, a.version, q.short_code, '
+      '       a.current_customer_id, coalesce(cu.trade_name, cu.name), a.current_customer_site_id, cs.name '
       '  FROM app.assets a JOIN app.products p ON p.tenant_id = a.tenant_id AND p.id = a.product_id '
-      "  LEFT JOIN app.qr_tags q ON q.tenant_id = a.tenant_id AND q.asset_id = a.id AND q.status = 'bound' ";
+      "  LEFT JOIN app.qr_tags q ON q.tenant_id = a.tenant_id AND q.asset_id = a.id AND q.status = 'bound' "
+      '  LEFT JOIN app.customers cu ON cu.tenant_id = a.tenant_id AND cu.id = a.current_customer_id '
+      '  LEFT JOIN app.customer_sites cs ON cs.tenant_id = a.tenant_id AND cs.id = a.current_customer_site_id ';
 
   static Future<AssetPage> list(
     Session session, {
     String? search,
     UuidValue? branchId,
     UuidValue? costCenterId,
+    UuidValue? customerId,
     bool includeInactive = false,
     int limit = 50,
     int offset = 0,
@@ -38,12 +42,14 @@ abstract final class AssetRegistry {
         ' WHERE (@all OR a.is_active) '
         '   AND (@branchId::uuid IS NULL OR a.branch_id = @branchId::uuid) '
         '   AND (@costCenterId::uuid IS NULL OR a.cost_center_id = @costCenterId::uuid) '
+        '   AND (@customerId::uuid IS NULL OR a.current_customer_id = @customerId::uuid) '
         "   AND (@term::text IS NULL OR a.asset_tag ILIKE '%' || @term || '%' OR a.serial_number ILIKE '%' || @term || '%' "
         "        OR p.name ILIKE '%' || @term || '%' OR q.short_code = upper(replace(@term, '-', ''))) ";
     final params = {
       'all': includeInactive,
       'branchId': branchId?.uuid,
       'costCenterId': costCenterId?.uuid,
+      'customerId': customerId?.uuid,
       'term': term,
     };
     final rows = await session.db.unsafeQuery(
@@ -129,6 +135,9 @@ abstract final class AssetRegistry {
   }
 
   // ------------------------------------------------------------------ internos
+
+  /// Bem do tenant ativo, sem checar permissão. `null` = inexistente.
+  static Future<Asset?> find(Session session, UuidValue id) => _find(session, id);
 
   static Future<Asset?> _find(Session session, UuidValue id) async {
     final rows = await session.db.unsafeQuery(
@@ -229,6 +238,10 @@ abstract final class AssetRegistry {
     source: r[17] as String,
     version: r[18] as int,
     qrShortCode: r[19] == null ? null : QrCodes.formatShortCode(r[19] as String),
+    customerId: sqlUuidOrNull(r[20]),
+    customerName: r[21] as String?,
+    customerSiteId: sqlUuidOrNull(r[22]),
+    customerSiteName: r[23] as String?,
   );
 }
 

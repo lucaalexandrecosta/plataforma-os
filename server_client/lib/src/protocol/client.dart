@@ -13,12 +13,20 @@
 import 'dart:async' as _ida;
 import 'package:http/http.dart' as _i85jenna;
 import 'package:plataforma_os_client/src/protocol/assets/models/asset.dart' as _i1flw1j6;
+import 'package:plataforma_os_client/src/protocol/assets/models/asset_assignment.dart' as _ilmvd2lt;
 import 'package:plataforma_os_client/src/protocol/assets/models/asset_input.dart' as _i3bfa7rs;
+import 'package:plataforma_os_client/src/protocol/assets/models/asset_install_input.dart' as _ixzdbb4e;
 import 'package:plataforma_os_client/src/protocol/assets/models/asset_page.dart' as _ih5rjonj;
+import 'package:plataforma_os_client/src/protocol/assets/models/asset_withdraw_input.dart' as _i7pva5pt;
 import 'package:plataforma_os_client/src/protocol/assets/models/qr_tag.dart' as _ix23buzf;
 import 'package:plataforma_os_client/src/protocol/assets/models/qr_tag_batch.dart' as _ic9pb02v;
 import 'package:plataforma_os_client/src/protocol/catalog/models/product_input.dart' as _i2gecgw3;
 import 'package:plataforma_os_client/src/protocol/catalog/models/product_summary.dart' as _ihgw7zuo;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer.dart' as _isrde2pn;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_input.dart' as _il30a9yx;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_page.dart' as _igrzlp6q;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_site.dart' as _iq0mn52n;
+import 'package:plataforma_os_client/src/protocol/customers/models/customer_site_input.dart' as _i10zqbaj;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/assignable_role.dart' as _i2g1699a;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/me_info.dart' as _i8cz5om6;
 import 'package:plataforma_os_client/src/protocol/identity_access/models/tenant_token.dart' as _ii663qav;
@@ -55,8 +63,10 @@ import 'package:serverpod_auth_idp_client/serverpod_auth_idp_client.dart' as _ia
 import 'package:serverpod_client/serverpod_client.dart' as _isc;
 import 'protocol.dart' as _il2as5qe;
 
-/// `assets.*` — cadastro de bens. Erros: `FORBIDDEN`, `VALIDATION_FAILED`,
-/// `NOT_FOUND`, `VERSION_MISMATCH`, `ERP_MASTER_READ_ONLY`.
+/// `assets.*` — cadastro e movimentação de bens. Erros: `FORBIDDEN`,
+/// `VALIDATION_FAILED`, `NOT_FOUND`, `VERSION_MISMATCH`, `ERP_MASTER_READ_ONLY`,
+/// `ASSET_RETIRED`, `ASSET_INACTIVE`, `ALREADY_AT_SITE`, `NOT_INSTALLED`,
+/// `MOVEMENT_APPROVAL_UNSUPPORTED`.
 /// {@category Endpoint}
 class EndpointAssets extends EndpointStaff {
   EndpointAssets(_isc.EndpointCaller caller) : super(caller);
@@ -69,6 +79,7 @@ class EndpointAssets extends EndpointStaff {
     String? search,
     _isc.UuidValue? branchId,
     _isc.UuidValue? costCenterId,
+    _isc.UuidValue? customerId,
     bool? includeInactive,
     int? limit,
     int? offset,
@@ -79,6 +90,7 @@ class EndpointAssets extends EndpointStaff {
       'search': search,
       'branchId': branchId,
       'costCenterId': costCenterId,
+      'customerId': customerId,
       'includeInactive': includeInactive,
       'limit': limit,
       'offset': offset,
@@ -110,6 +122,45 @@ class EndpointAssets extends EndpointStaff {
       'input': input,
     },
   );
+
+  /// Instala o bem na unidade do cliente (comodato, locação ou do cliente).
+  /// Se já estiver em outra unidade, encerra lá e vira transferência.
+  _ida.Future<_i1flw1j6.Asset> install(
+    _isc.UuidValue id,
+    int expectedVersion,
+    _ixzdbb4e.AssetInstallInput input,
+  ) => caller.callServerEndpoint<_i1flw1j6.Asset>(
+    'assets',
+    'install',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+      'input': input,
+    },
+  );
+
+  /// Encerra a alocação vigente; o bem volta ao estoque.
+  _ida.Future<_i1flw1j6.Asset> withdraw(
+    _isc.UuidValue id,
+    int expectedVersion,
+    _i7pva5pt.AssetWithdrawInput input,
+  ) => caller.callServerEndpoint<_i1flw1j6.Asset>(
+    'assets',
+    'withdraw',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+      'input': input,
+    },
+  );
+
+  /// Histórico de alocações do bem, a mais recente primeiro.
+  _ida.Future<List<_ilmvd2lt.AssetAssignment>> assignments(_isc.UuidValue id) =>
+      caller.callServerEndpoint<List<_ilmvd2lt.AssetAssignment>>(
+        'assets',
+        'assignments',
+        {'id': id},
+      );
 }
 
 /// `qrTags.*` — etiquetas QR (permissão `qr_tags.manage`; desfazer vínculo
@@ -220,6 +271,95 @@ class EndpointProducts extends EndpointStaff {
         'create',
         {'input': input},
       );
+}
+
+/// `customers.*` — clientes e unidades. Leitura para quem mexe com OS ou
+/// bens; alteração com `customers.manage`. Erros: `FORBIDDEN`,
+/// `VALIDATION_FAILED`, `NOT_FOUND`, `VERSION_MISMATCH`, `ERP_MASTER_READ_ONLY`.
+/// {@category Endpoint}
+class EndpointCustomers extends EndpointStaff {
+  EndpointCustomers(_isc.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'customers';
+
+  /// [search] procura no nome, nome fantasia, código e documento.
+  _ida.Future<_igrzlp6q.CustomerPage> list({
+    String? search,
+    bool? includeInactive,
+    int? limit,
+    int? offset,
+  }) => caller.callServerEndpoint<_igrzlp6q.CustomerPage>(
+    'customers',
+    'list',
+    {
+      'search': search,
+      'includeInactive': includeInactive,
+      'limit': limit,
+      'offset': offset,
+    },
+  );
+
+  _ida.Future<_isrde2pn.Customer> get(_isc.UuidValue id) => caller.callServerEndpoint<_isrde2pn.Customer>(
+    'customers',
+    'get',
+    {'id': id},
+  );
+
+  _ida.Future<_isrde2pn.Customer> create(_il30a9yx.CustomerInput input) =>
+      caller.callServerEndpoint<_isrde2pn.Customer>(
+        'customers',
+        'create',
+        {'input': input},
+      );
+
+  _ida.Future<_isrde2pn.Customer> update(
+    _isc.UuidValue id,
+    int expectedVersion,
+    _il30a9yx.CustomerInput input,
+  ) => caller.callServerEndpoint<_isrde2pn.Customer>(
+    'customers',
+    'update',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+      'input': input,
+    },
+  );
+
+  /// Unidades do cliente (ativas e inativas).
+  _ida.Future<List<_iq0mn52n.CustomerSite>> sites(_isc.UuidValue customerId) =>
+      caller.callServerEndpoint<List<_iq0mn52n.CustomerSite>>(
+        'customers',
+        'sites',
+        {'customerId': customerId},
+      );
+
+  _ida.Future<_iq0mn52n.CustomerSite> createSite(
+    _isc.UuidValue customerId,
+    _i10zqbaj.CustomerSiteInput input,
+  ) => caller.callServerEndpoint<_iq0mn52n.CustomerSite>(
+    'customers',
+    'createSite',
+    {
+      'customerId': customerId,
+      'input': input,
+    },
+  );
+
+  _ida.Future<_iq0mn52n.CustomerSite> updateSite(
+    _isc.UuidValue id,
+    int expectedVersion,
+    _i10zqbaj.CustomerSiteInput input,
+  ) => caller.callServerEndpoint<_iq0mn52n.CustomerSite>(
+    'customers',
+    'updateSite',
+    {
+      'id': id,
+      'expectedVersion': expectedVersion,
+      'input': input,
+    },
+  );
 }
 
 /// `auth.*` — escolha do tenant depois do login por e-mail e senha.
@@ -1144,6 +1284,7 @@ class Client extends _isc.ServerpodClientShared {
     assets = EndpointAssets(this);
     qrTags = EndpointQrTags(this);
     products = EndpointProducts(this);
+    customers = EndpointCustomers(this);
     auth = EndpointAuth(this);
     emailIdp = EndpointEmailIdp(this);
     me = EndpointMe(this);
@@ -1164,6 +1305,8 @@ class Client extends _isc.ServerpodClientShared {
   late final EndpointQrTags qrTags;
 
   late final EndpointProducts products;
+
+  late final EndpointCustomers customers;
 
   late final EndpointAuth auth;
 
@@ -1196,6 +1339,7 @@ class Client extends _isc.ServerpodClientShared {
     'assets': assets,
     'qrTags': qrTags,
     'products': products,
+    'customers': customers,
     'auth': auth,
     'emailIdp': emailIdp,
     'me': me,

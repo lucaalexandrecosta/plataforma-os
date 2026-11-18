@@ -31,6 +31,10 @@ abstract class Asset implements _isc.SerializableModel, _isc.ProtocolSerializati
     this.acquisitionDocument,
     this.notes,
     this.qrShortCode,
+    this.customerId,
+    this.customerName,
+    this.customerSiteId,
+    this.customerSiteName,
     required this.isActive,
     required this.source,
     required this.version,
@@ -54,6 +58,10 @@ abstract class Asset implements _isc.SerializableModel, _isc.ProtocolSerializati
     String? acquisitionDocument,
     String? notes,
     String? qrShortCode,
+    _isc.UuidValue? customerId,
+    String? customerName,
+    _isc.UuidValue? customerSiteId,
+    String? customerSiteName,
     required bool isActive,
     required String source,
     required int version,
@@ -86,6 +94,14 @@ abstract class Asset implements _isc.SerializableModel, _isc.ProtocolSerializati
       acquisitionDocument: jsonSerialization['acquisitionDocument'] as String?,
       notes: jsonSerialization['notes'] as String?,
       qrShortCode: jsonSerialization['qrShortCode'] as String?,
+      customerId: jsonSerialization['customerId'] == null
+          ? null
+          : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['customerId']),
+      customerName: jsonSerialization['customerName'] as String?,
+      customerSiteId: jsonSerialization['customerSiteId'] == null
+          ? null
+          : _isc.UuidValueJsonExtension.fromJson(jsonSerialization['customerSiteId']),
+      customerSiteName: jsonSerialization['customerSiteName'] as String?,
       isActive: _isc.BoolJsonExtension.fromJson(jsonSerialization['isActive']),
       source: jsonSerialization['source'] as String,
       version: jsonSerialization['version'] as int,
@@ -126,6 +142,14 @@ abstract class Asset implements _isc.SerializableModel, _isc.ProtocolSerializati
 
   String? qrShortCode;
 
+  _isc.UuidValue? customerId;
+
+  String? customerName;
+
+  _isc.UuidValue? customerSiteId;
+
+  String? customerSiteName;
+
   bool isActive;
 
   String source;
@@ -153,6 +177,10 @@ abstract class Asset implements _isc.SerializableModel, _isc.ProtocolSerializati
     String? acquisitionDocument,
     String? notes,
     String? qrShortCode,
+    _isc.UuidValue? customerId = const _isc.$UndefinedUuidValue(),
+    String? customerName,
+    _isc.UuidValue? customerSiteId = const _isc.$UndefinedUuidValue(),
+    String? customerSiteName,
     bool? isActive,
     String? source,
     int? version,
@@ -178,6 +206,10 @@ abstract class Asset implements _isc.SerializableModel, _isc.ProtocolSerializati
       if (acquisitionDocument != null) 'acquisitionDocument': acquisitionDocument,
       if (notes != null) 'notes': notes,
       if (qrShortCode != null) 'qrShortCode': qrShortCode,
+      if (customerId != null) 'customerId': customerId?.toJson(),
+      if (customerName != null) 'customerName': customerName,
+      if (customerSiteId != null) 'customerSiteId': customerSiteId?.toJson(),
+      if (customerSiteName != null) 'customerSiteName': customerSiteName,
       'isActive': isActive,
       'source': source,
       'version': version,
@@ -205,6 +237,10 @@ abstract class Asset implements _isc.SerializableModel, _isc.ProtocolSerializati
       if (acquisitionDocument != null) 'acquisitionDocument': acquisitionDocument,
       if (notes != null) 'notes': notes,
       if (qrShortCode != null) 'qrShortCode': qrShortCode,
+      if (customerId != null) 'customerId': customerId?.toJson(),
+      if (customerName != null) 'customerName': customerName,
+      if (customerSiteId != null) 'customerSiteId': customerSiteId?.toJson(),
+      if (customerSiteName != null) 'customerSiteName': customerSiteName,
       'isActive': isActive,
       'source': source,
       'version': version,
@@ -238,6 +274,10 @@ class _AssetImpl extends Asset {
     String? acquisitionDocument,
     String? notes,
     String? qrShortCode,
+    _isc.UuidValue? customerId,
+    String? customerName,
+    _isc.UuidValue? customerSiteId,
+    String? customerSiteName,
     required bool isActive,
     required String source,
     required int version,
@@ -259,6 +299,10 @@ class _AssetImpl extends Asset {
          acquisitionDocument: acquisitionDocument,
          notes: notes,
          qrShortCode: qrShortCode,
+         customerId: customerId,
+         customerName: customerName,
+         customerSiteId: customerSiteId,
+         customerSiteName: customerSiteName,
          isActive: isActive,
          source: source,
          version: version,
@@ -286,6 +330,10 @@ class _AssetImpl extends Asset {
     Object? acquisitionDocument = _Undefined,
     Object? notes = _Undefined,
     Object? qrShortCode = _Undefined,
+    _isc.UuidValue? customerId = const _isc.$UndefinedUuidValue(),
+    Object? customerName = _Undefined,
+    _isc.UuidValue? customerSiteId = const _isc.$UndefinedUuidValue(),
+    Object? customerSiteName = _Undefined,
     bool? isActive,
     String? source,
     int? version,
@@ -308,6 +356,10 @@ class _AssetImpl extends Asset {
       acquisitionDocument: acquisitionDocument is String? ? acquisitionDocument : this.acquisitionDocument,
       notes: notes is String? ? notes : this.notes,
       qrShortCode: qrShortCode is String? ? qrShortCode : this.qrShortCode,
+      customerId: customerId is _isc.UndefinedSentinel ? this.customerId : customerId,
+      customerName: customerName is String? ? customerName : this.customerName,
+      customerSiteId: customerSiteId is _isc.UndefinedSentinel ? this.customerSiteId : customerSiteId,
+      customerSiteName: customerSiteName is String? ? customerSiteName : this.customerSiteName,
       isActive: isActive ?? this.isActive,
       source: source ?? this.source,
       version: version ?? this.version,

@@ -7,6 +7,7 @@ import 'package:serverpod_client/serverpod_client.dart' show UuidValue;
 import '../../api/gateway.dart';
 import '../../session/session.dart';
 import '../common/errors.dart';
+import '../common/format.dart';
 import '../common/paged_table.dart';
 
 /// Cadastros de apoio: filiais e centros de custo (`settings.manage`) e
@@ -173,12 +174,6 @@ class _BranchesTabState extends ConsumerState<_BranchesTab> {
     );
   }
 }
-
-/// 12345678000190 → 12.345.678/0001-90.
-String formatCnpj(String digits) => digits.length != 14
-    ? digits
-    : '${digits.substring(0, 2)}.${digits.substring(2, 5)}.${digits.substring(5, 8)}/'
-          '${digits.substring(8, 12)}-${digits.substring(12)}';
 
 String? _clean(TextEditingController c) => c.text.trim().isEmpty ? null : c.text.trim();
 

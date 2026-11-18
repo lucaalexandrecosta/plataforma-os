@@ -49,6 +49,15 @@ abstract interface class Gateway {
   Future<QrTag> unbindQrTag(QrTag tag);
   Future<QrTag> revokeQrTag(QrTag tag, String reason, {String? note});
 
+  // ----------------------------------------------------------- clientes
+  Future<CustomerPage> customers({String? search, bool includeInactive, int limit, int offset});
+  Future<Customer> customer(UuidValue id);
+  Future<Customer> createCustomer(CustomerInput input);
+  Future<Customer> updateCustomer(Customer customer, CustomerInput input);
+  Future<List<CustomerSite>> customerSites(UuidValue customerId);
+  Future<CustomerSite> createCustomerSite(UuidValue customerId, CustomerSiteInput input);
+  Future<CustomerSite> updateCustomerSite(CustomerSite site, CustomerSiteInput input);
+
   // ----------------------------------------------------------- cadastros
   Future<List<Branch>> branches({bool includeInactive});
   Future<Branch> createBranch(BranchInput input);
@@ -60,10 +69,17 @@ abstract interface class Gateway {
   /// Equipamentos ativos; [search] procura no código e no nome.
   Future<List<ProductSummary>> products({String? search});
   Future<ProductSummary> createProduct(ProductInput input);
-  Future<AssetPage> assets({String? search, int limit, int offset});
+  Future<AssetPage> assets({String? search, UuidValue? customerId, int limit, int offset});
   Future<Asset> asset(UuidValue id);
   Future<Asset> createAsset(AssetInput input);
   Future<Asset> updateAsset(Asset asset, AssetInput input);
+
+  /// Instala na unidade do cliente (ou transfere, se já estiver em outra).
+  Future<Asset> installAsset(Asset asset, AssetInstallInput input);
+
+  /// Retira do cliente; o bem volta ao estoque.
+  Future<Asset> withdrawAsset(Asset asset, AssetWithdrawInput input);
+  Future<List<AssetAssignment>> assetAssignments(UuidValue assetId);
 
   // ----------------------------------------------------------- OS
   Future<WorkOrderPage> workOrders({

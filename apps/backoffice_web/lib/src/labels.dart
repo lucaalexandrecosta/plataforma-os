@@ -130,3 +130,22 @@ const qrRevokeReasonLabels = {
   'security': 'Segurança',
   'other': 'Outro',
 };
+
+const assignmentStartLabels = {'installation': 'Instalação', 'delivery': 'Entrega', 'transfer': 'Transferência'};
+
+const assignmentEndLabels = {
+  'transfer': 'Transferido',
+  'withdrawal': 'Retirado do cliente',
+  'return_to_stock': 'Devolvido ao estoque',
+  'retirement': 'Baixado',
+  'customer_purchase': 'Vendido ao cliente',
+  'correction': 'Correção',
+};
+
+const movementDocumentLabels = {
+  'shipment_invoice': 'NF de remessa',
+  'loan_contract': 'Contrato de comodato',
+  'rental_contract': 'Contrato de locação',
+  'work_order': 'OS de instalação',
+  'other': 'Outro',
+};

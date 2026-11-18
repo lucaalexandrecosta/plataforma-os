@@ -200,7 +200,13 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('R\$ 1.234,56'), findsOneWidget);
     expect(find.text('Próprio (comodato)'), findsOneWidget);
-    expect(find.text('OS 2026-000001 · Corretiva'), findsOneWidget);
     expect(find.byKey(const Key('asset-open-wo')), findsOneWidget);
+    // A ficha cresceu (histórico de alocação): a lista de OS fica mais abaixo.
+    await tester.scrollUntilVisible(
+      find.text('OS 2026-000001 · Corretiva'),
+      300,
+      scrollable: find.byType(Scrollable).last,
+    );
+    expect(find.text('OS 2026-000001 · Corretiva'), findsOneWidget);
   });
 }

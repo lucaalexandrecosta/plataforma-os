@@ -1,0 +1,20 @@
+# Alocação do bem num cliente (app.asset_assignments): vigente quando
+# endedAt é nulo. Histórico de assets.assignments.
+class: AssetAssignment
+fields:
+  id: UuidValue
+  customerId: UuidValue
+  customerName: String
+  customerSiteId: UuidValue
+  customerSiteName: String
+  ownershipType: String
+  startedAt: DateTime
+  endedAt: DateTime?
+  # installation, delivery ou transfer.
+  startReason: String
+  # transfer, withdrawal ou return_to_stock.
+  endReason: String?
+  # shipment_invoice, loan_contract, rental_contract, work_order ou other.
+  sourceDocumentType: String?
+  sourceDocumentNumber: String?
+  notes: String?

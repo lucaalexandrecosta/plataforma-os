@@ -60,3 +60,24 @@ int? parseMoney(String text) {
 
 /// Centavos → "1.234,56" (sem R\$), para campos de edição.
 String moneyField(int? cents) => cents == null ? '' : formatMoney(cents).replaceFirst('R\$ ', '');
+
+/// 12345678000190 → 12.345.678/0001-90.
+String formatCnpj(String digits) => digits.length != 14
+    ? digits
+    : '${digits.substring(0, 2)}.${digits.substring(2, 5)}.${digits.substring(5, 8)}/'
+          '${digits.substring(8, 12)}-${digits.substring(12)}';
+
+/// 12345678909 → 123.456.789-09.
+String formatCpf(String digits) => digits.length != 11
+    ? digits
+    : '${digits.substring(0, 3)}.${digits.substring(3, 6)}.${digits.substring(6, 9)}-${digits.substring(9)}';
+
+/// CNPJ ou CPF pelo tamanho; nulo vira nulo.
+String? formatDocument(String? digits) => digits == null
+    ? null
+    : digits.length == 14
+    ? formatCnpj(digits)
+    : formatCpf(digits);
+
+/// 90000000 → 90000-000.
+String formatCep(String digits) => digits.length != 8 ? digits : '${digits.substring(0, 5)}-${digits.substring(5)}';

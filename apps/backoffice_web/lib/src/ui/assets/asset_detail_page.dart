@@ -13,6 +13,7 @@ import '../depreciation/asset_depreciation_card.dart';
 import '../qr_tags/asset_tag_actions.dart';
 import '../work_orders/open_work_order_dialog.dart';
 import 'asset_dialog.dart';
+import 'asset_movement_dialogs.dart';
 
 /// Ficha do bem: dados, aquisição e as OS do bem, com "Abrir OS".
 class AssetDetailPage extends ConsumerStatefulWidget {
@@ -29,6 +30,7 @@ typedef _AssetView = ({Asset asset, Map<UuidValue, Branch> branches, Map<UuidVal
 class _AssetDetailPageState extends ConsumerState<AssetDetailPage> {
   late Future<_AssetView> _view;
   late Future<WorkOrderPage> _orders;
+  late Future<List<AssetAssignment>> _history;
 
   @override
   void initState() {
@@ -57,6 +59,7 @@ class _AssetDetailPageState extends ConsumerState<AssetDetailPage> {
       );
     }();
     _orders = g.workOrders(assetId: widget.id, limit: 20);
+    _history = g.assetAssignments(widget.id);
   }
 
   Future<void> _openWorkOrder(Asset asset) async {
@@ -65,6 +68,11 @@ class _AssetDetailPageState extends ConsumerState<AssetDetailPage> {
       builder: (_) => OpenWorkOrderDialog(asset: asset),
     );
     if (created != null && mounted) context.go('/os/${created.workOrder.id}');
+  }
+
+  Future<void> _move(Widget dialog) async {
+    final saved = await showDialog<Asset>(context: context, builder: (_) => dialog);
+    if (saved != null && mounted) setState(_load);
   }
 
   Future<void> _edit(Asset asset) async {
@@ -116,6 +124,20 @@ class _AssetDetailPageState extends ConsumerState<AssetDetailPage> {
                     icon: const Icon(Icons.edit_outlined),
                     label: const Text('Editar'),
                   ),
+                if (canManage && asset.isActive && asset.status != 'retired')
+                  OutlinedButton.icon(
+                    key: const Key('asset-install'),
+                    onPressed: () => _move(InstallAssetDialog(asset: asset)),
+                    icon: const Icon(Icons.local_shipping_outlined),
+                    label: Text(asset.customerSiteId == null ? 'Instalar no cliente' : 'Transferir'),
+                  ),
+                if (canManage && asset.customerSiteId != null)
+                  OutlinedButton.icon(
+                    key: const Key('asset-withdraw'),
+                    onPressed: () => _move(WithdrawAssetDialog(asset: asset)),
+                    icon: const Icon(Icons.undo),
+                    label: const Text('Retirar'),
+                  ),
                 if (canCreate && asset.status != 'retired' && asset.isActive)
                   FilledButton.icon(
                     key: const Key('asset-open-wo'),
@@ -134,6 +156,19 @@ class _AssetDetailPageState extends ConsumerState<AssetDetailPage> {
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
                     FieldRow('Situação', asset.isActive ? label(assetStatusLabels, asset.status) : 'Inativo'),
+                    FieldRow(
+                      'Cliente',
+                      asset.customerName == null ? 'No estoque' : '${asset.customerName} · ${asset.customerSiteName}',
+                    ),
+                    if (asset.customerId != null)
+                      Align(
+                        alignment: Alignment.centerLeft,
+                        child: TextButton(
+                          key: const Key('asset-open-customer'),
+                          onPressed: () => context.go('/clientes/${asset.customerId}'),
+                          child: const Text('Abrir ficha do cliente'),
+                        ),
+                      ),
                     FieldRow('Propriedade', label(ownershipLabels, asset.ownershipType)),
                     FieldRow('Número de série', asset.serialNumber),
                     FieldRow('Etiqueta QR', asset.qrShortCode),
@@ -162,6 +197,42 @@ class _AssetDetailPageState extends ConsumerState<AssetDetailPage> {
               const SizedBox(height: 16),
               AssetDepreciationCard(asset: asset),
             ],
+            const SizedBox(height: 16),
+            Text('Onde o bem esteve', style: theme.textTheme.titleMedium),
+            const SizedBox(height: 8),
+            FutureBuilder<List<AssetAssignment>>(
+              future: _history,
+              builder: (context, snap) {
+                if (snap.hasError) return Text(errorMessage(snap.error!));
+                if (!snap.hasData) return const LinearProgressIndicator();
+                if (snap.data!.isEmpty) return const Text('Nunca foi instalado em cliente.');
+                return Card(
+                  margin: EdgeInsets.zero,
+                  child: Column(
+                    children: [
+                      for (final h in snap.data!)
+                        ListTile(
+                          key: ValueKey(h.id),
+                          leading: Icon(h.endedAt == null ? Icons.place : Icons.history),
+                          title: Text('${h.customerName} · ${h.customerSiteName}'),
+                          subtitle: Text(
+                            [
+                              '${label(assignmentStartLabels, h.startReason)} em ${formatDateTime(h.startedAt)}',
+                              if (h.endedAt != null)
+                                '${label(assignmentEndLabels, h.endReason)} em ${formatDateTime(h.endedAt)}'
+                              else
+                                'Atual',
+                              if (h.sourceDocumentNumber != null)
+                                '${label(movementDocumentLabels, h.sourceDocumentType)} ${h.sourceDocumentNumber}',
+                              if (h.notes != null) h.notes!,
+                            ].join(' · '),
+                          ),
+                        ),
+                    ],
+                  ),
+                );
+              },
+            ),
             const SizedBox(height: 16),
             Text('Ordens de serviço do bem', style: theme.textTheme.titleMedium),
             const SizedBox(height: 8),

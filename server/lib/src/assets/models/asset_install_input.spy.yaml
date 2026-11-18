@@ -1,0 +1,10 @@
+# Entrada de assets.install: instala o bem na unidade do cliente (se já
+# estiver em outra, vira transferência).
+class: AssetInstallInput
+fields:
+  customerSiteId: UuidValue
+  # Quando aconteceu (até 60 dias para trás); nulo = agora.
+  startedAt: DateTime?
+  sourceDocumentType: String?
+  sourceDocumentNumber: String?
+  notes: String?
